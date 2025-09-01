@@ -1,65 +1,71 @@
-import { TrendingUp, TrendingDown, LineChart, Briefcase } from 'lucide-react';
-import { AIInsights } from '@/components/dashboard/ai-insights';
-import { CalendarView } from '@/components/dashboard/calendar-view';
-import { MetricCard } from '@/components/dashboard/metric-card';
+'use client';
 
-export default function Home() {
-  // Hardcoded data for demonstration
-  const revenue = 5420.50;
-  const expenses = 2150.25;
-  const profit = revenue - expenses;
-  const appointments = 5; // Total appointments for the day, for AI insights.
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Progress } from "@/components/ui/progress"; // Importamos el componente de progreso
+
+export default function SplashPage() {
+  const router = useRouter();
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    // Simula la carga durante 5 segundos
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + 1; // Ajusta la velocidad si es necesario
+      });
+    }, 45); // Se actualiza cada 45ms para llegar a 100 en ~5s
+
+    // Navega al login después de 5 segundos
+    const timer = setTimeout(() => {
+      router.replace('/login');
+    }, 5000);
+
+    // Limpieza al desmontar el componente
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timer);
+    };
+  }, [router]);
+
+  // **IMPORTANTE**: Coloca tu video o gif en la carpeta `public`
+  const mediaFile = '/splash-video.mp4'; // <- Cambia esto por el nombre de tu archivo
+  const isVideo = mediaFile.endsWith('.mp4');
 
   return (
-    <div className="min-h-screen bg-background text-foreground font-body">
-      <main className="p-4 sm:p-6 lg:p-8 space-y-8">
-        <header className="flex items-center gap-4">
-            <div className="bg-primary p-3 rounded-lg shadow-md">
-                <Briefcase className="h-8 w-8 text-primary-foreground" />
-            </div>
-            <h1 className="text-4xl font-bold font-headline">
-                BizView
-            </h1>
-        </header>
+      <div className="fixed inset-0 bg-background flex flex-col items-center justify-center gap-8">
+        {/*<div className="w-full max-w-md h-auto">*/}
+        <div className="w-full h-full">
+          {/* Espacio para tu video o GIF */}
+          {isVideo ? (
+              <video
+                  src={mediaFile}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  className="w-full h-full object-cover rounded-lg shadow-lg"
+              >
+                Tu navegador no soporta videos.
+              </video>
+          ) : (
+              <img
+                  src={mediaFile} // Si es un GIF
+                  alt="Cargando..."
+                  className="w-full h-full object-cover rounded-lg shadow-lg"
+              />
+          )}
+        </div>
 
-        <section>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            <MetricCard
-              title="Today's Revenue"
-              value={`$${revenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-              icon={TrendingUp}
-              description="+12.5% from yesterday"
-            />
-            <MetricCard
-              title="Today's Expenses"
-              value={`$${expenses.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-              icon={TrendingDown}
-              description="+8.2% from yesterday"
-            />
-            <MetricCard
-              title="Today's Profit"
-              value={`$${profit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
-              icon={LineChart}
-              description="Net profit after all costs"
-              className="md:col-span-2 lg:col-span-1"
-            />
-          </div>
-        </section>
-
-        <section className="grid gap-8 lg:grid-cols-5 lg:gap-6">
-            <div className="lg:col-span-2">
-                <AIInsights
-                    revenue={revenue}
-                    expenses={expenses}
-                    appointments={appointments}
-                />
-            </div>
-            <div className="lg:col-span-3">
-                <CalendarView />
-            </div>
-        </section>
-
-      </main>
-    </div>
+        {/* Barra de Progreso */}
+        <div className="w-full max-w-md">
+          <Progress value={progress} className="w-full" />
+          <p className="text-center mt-2 text-primary font-semibold">C A R G A N D O   M A L D O N A D O - S Y S T E M...</p>
+        </div>
+      </div>
   );
 }

@@ -1,4 +1,5 @@
 import type {NextConfig} from 'next';
+require('dotenv').config();
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -18,7 +19,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'picsum.photos',
+        hostname: 'maldonado.mega-spots-test.shop',
         port: '',
         pathname: '/**',
       },

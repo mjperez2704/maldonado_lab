@@ -1,28 +1,30 @@
-import type { Metadata } from 'next';
-import './globals.css';
-import { Toaster } from "@/components/ui/toaster"
+'use client';
 
-export const metadata: Metadata = {
-  title: 'BizView',
-  description: 'A basic ERP for small businesses with a dashboard for revenue, expenses, profit, and appointments.',
-};
+import './globals.css';
+import { Toaster } from "@/components/ui/toaster";
+import { LoaderProvider } from '@/hooks/useLoader';
 
 export default function RootLayout({
-  children,
-}: Readonly<{
+                                     children,
+                                   }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+      <html lang="es" suppressHydrationWarning>
       <head>
+        <title>Panel de Control - Maldonado Labs</title>
+        <meta name="description" content="Sistema de Gestión de Laboratorio" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
-      <body className="font-body antialiased">
+      <body className="font-body antialiased flex flex-col min-h-screen bg-background">
+      <LoaderProvider>
         {children}
-        <Toaster />
+      </LoaderProvider>
+      <Toaster />
       </body>
-    </html>
+      </html>
   );
 }
