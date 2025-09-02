@@ -126,7 +126,7 @@ export function AppSidebar() {
             {sortedMenuItems.map((item) => {
               const isActive = item.href === '/dashboard' 
                 ? pathname === item.href 
-                : pathname.startsWith(item.href) && item.href !== '/dashboard';
+                : item.href !== '#' && pathname.startsWith(item.href);
               
               return (
               <SidebarMenuItem key={item.label}>
