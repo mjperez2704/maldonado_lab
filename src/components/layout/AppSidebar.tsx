@@ -41,7 +41,6 @@ import {
   ShoppingCart,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from "react";
 
 const HandshakeIcon = () => (
     <svg
@@ -107,26 +106,6 @@ const sortedMenuItems = dashboardItem ? [dashboardItem, ...otherItems] : otherIt
 
 export function AppSidebar() {
     const pathname = usePathname();
-    const [isMounted, setIsMounted] = useState(false);
-
-    useEffect(() => {
-        setIsMounted(true);
-    }, []);
-
-    if (!isMounted) {
-        return (
-            <Sidebar>
-                <SidebarHeader>
-                    <div className="flex items-center justify-between p-2">
-                        <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-primary rounded-full" />
-                            <span className="font-bold text-lg">Laboratorio Maldonado</span>
-                        </div>
-                    </div>
-                </SidebarHeader>
-            </Sidebar>
-        )
-    }
     
     return (
       <Sidebar>
