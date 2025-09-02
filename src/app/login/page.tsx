@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -15,8 +16,8 @@ import { login } from '@/services/authService';
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [email, setEmail] = useState('super_admin@lab.com');
-  const [password, setPassword] = useState('password');
+  const [email, setEmail] = useState('admin@megaspots.com');
+  const [password, setPassword] = useState('supersecretpassword');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -72,7 +73,7 @@ export default function LoginPage() {
               <Info className="h-4 w-4" />
               <AlertTitle>Usuario de Prueba</AlertTitle>
               <AlertDescription>
-                Email: super_admin@lab.com <br/> Pass: password
+                Email: admin@megaspots.com <br/> Pass: supersecretpassword
               </AlertDescription>
             </Alert>
             <form onSubmit={handleLogin} className="space-y-4">
@@ -113,3 +114,4 @@ export default function LoginPage() {
       </div>
   );
 }
+
