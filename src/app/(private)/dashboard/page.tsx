@@ -37,7 +37,7 @@ import {
   PauseCircle,
   Home,
 } from "lucide-react";
-import DashboardClientComponent from "../dashboard-client";
+import DashboardClientComponent from "@/app/dashboard-client";
 import { getAntibiotics } from "@/services/antibioticService";
 import { getConvenios } from "@/services/convenioService";
 import { getCultures } from "@/services/cultureService";
