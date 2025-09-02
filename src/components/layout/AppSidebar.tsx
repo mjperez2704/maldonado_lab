@@ -66,7 +66,7 @@ const HandshakeIcon = () => (
 );
 
 const menuItems = [
-    { icon: LayoutGrid, label: 'Dashboard', href: '/' },
+    { icon: LayoutGrid, label: 'Dashboard', href: '/dashboard' },
     { icon: Pill, label: 'Antibióticos', href: '/antibioticos' },
     { icon: ListTree, label: 'Categorías', href: '/categorias' },
     { icon: ShoppingCart, label: 'Compras', href: '/compras' },
