@@ -1,0 +1,419 @@
+-- Base de datos: `megaspots_maldonado`
+-- Versión Definitiva Normalizada
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+-- =================================================================
+-- SECCIÓN: ADMINISTRACIÓN Y ACCESO
+-- =================================================================
+
+CREATE TABLE `roles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(50) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `permissions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL COMMENT 'Ej: create-patient, view-financials',
+  `description` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `role_permissions` (
+  `role_id` int(11) NOT NULL,
+  `permission_id` int(11) NOT NULL,
+  PRIMARY KEY (`role_id`, `permission_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `employee_id` int(11) DEFAULT NULL,
+  `username` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role_id` int(11) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `employee_id` (`employee_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `settings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `key` varchar(50) NOT NULL,
+  `value` longtext DEFAULT NULL,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `key` (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- =================================================================
+-- SECCIÓN: CATÁLOGOS DE CONTACTOS
+-- =================================================================
+
+CREATE TABLE `branches` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `employees` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `branch_id` int(11) DEFAULT NULL,
+  `position` varchar(100) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `patients` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `birthDate` date DEFAULT NULL,
+  `gender` enum('masculino','femenino','otro') DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `doctors` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `commission_rate` decimal(5,2) DEFAULT 0.00,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `enterprises` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `rfc` varchar(13) DEFAULT NULL,
+  `contact_name` varchar(255) DEFAULT NULL,
+  `contact_email` varchar(255) DEFAULT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `providers` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `phone` varchar(20) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `address` text DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- =================================================================
+-- SECCIÓN: CATÁLOGOS DE PRODUCTOS Y SERVICIOS
+-- =================================================================
+
+CREATE TABLE `categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `products` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `sku` varchar(100) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `type` enum('ANTIBIOTICO','CONSUMIBLE','PRUEBA_RAPIDA','OTRO') NOT NULL,
+  `unit` varchar(50) DEFAULT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `cost` decimal(10,2) DEFAULT NULL,
+  `stock` int(11) DEFAULT 0,
+  `stock_alert` int(11) DEFAULT 0,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `sku` (`sku`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `services` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `code` varchar(50) DEFAULT NULL,
+  `type` enum('ESTUDIO','CULTIVO','PAQUETE') NOT NULL,
+  `price` decimal(10,2) DEFAULT NULL,
+  `category_id` int(11) DEFAULT NULL,
+  `method` varchar(255) DEFAULT NULL,
+  `delivery_time` int(11) DEFAULT NULL,
+  `delivery_unit` enum('dias','horas') DEFAULT NULL,
+  `indications` text DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `package_items` (
+  `package_id` int(11) NOT NULL,
+  `item_type` enum('SERVICE','PRODUCT') NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`package_id`, `item_id`, `item_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `service_parameters` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `service_id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `unit` varchar(50) DEFAULT NULL,
+  `reference_value` text DEFAULT NULL,
+  `order` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `culture_options` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `options` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`options`)),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `convenios` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `enterprise_id` int(11) DEFAULT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `convenio_details` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `convenio_id` int(11) NOT NULL,
+  `item_type` enum('SERVICE','PRODUCT','CATEGORY') NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `discount_percentage` decimal(5,2) DEFAULT NULL,
+  `fixed_price` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `price_lists` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `price_list_items` (
+  `price_list_id` int(11) NOT NULL,
+  `item_type` enum('SERVICE','PRODUCT') NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`price_list_id`, `item_id`, `item_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- =================================================================
+-- SECCIÓN: FINANZAS Y OPERACIONES
+-- =================================================================
+
+CREATE TABLE `quotes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `created_by_id` int(11) NOT NULL,
+  `date` datetime NOT NULL,
+  `total` decimal(10,2) DEFAULT NULL,
+  `status` enum('pending','converted','rejected') NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `quote_details` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `quote_id` int(11) NOT NULL,
+  `item_type` enum('SERVICE','PRODUCT') NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `recibos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `patient_id` int(11) NOT NULL,
+  `doctor_id` int(11) DEFAULT NULL,
+  `branch_id` int(11) NOT NULL,
+  `created_by_id` int(11) NOT NULL,
+  `date` datetime NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  `discount` decimal(10,2) DEFAULT 0.00,
+  `total` decimal(10,2) NOT NULL,
+  `paid` decimal(10,2) NOT NULL,
+  `due` decimal(10,2) GENERATED ALWAYS AS (`total` - `paid`) STORED,
+  `status` enum('pending','in_process','completed','delivered','cancelled') NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `recibo_details` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `recibo_id` int(11) NOT NULL,
+  `item_type` enum('SERVICE','PRODUCT') NOT NULL,
+  `item_id` int(11) NOT NULL,
+  `price` decimal(10,2) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `recibo_results` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `recibo_detail_id` int(11) NOT NULL,
+  `parameter_id` int(11) NOT NULL,
+  `result` varchar(255) NOT NULL,
+  `validated_by_id` int(11) DEFAULT NULL,
+  `validated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `purchases` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `provider_id` int(11) NOT NULL,
+  `branch_id` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `total` decimal(10,2) NOT NULL,
+  `paid` decimal(10,2) NOT NULL,
+  `due` decimal(10,2) GENERATED ALWAYS AS (`total` - `paid`) STORED,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `purchase_details` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `purchase_id` int(11) NOT NULL,
+  `product_id` int(11) NOT NULL,
+  `quantity` int(11) NOT NULL,
+  `cost` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `expense_categories` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `expenses` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `branch_id` int(11) NOT NULL,
+  `category_id` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `notes` text DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `cash_cuts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `branch_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `start_time` datetime NOT NULL,
+  `end_time` datetime DEFAULT NULL,
+  `initial_balance` decimal(10,2) NOT NULL,
+  `final_balance` decimal(10,2) DEFAULT NULL,
+  `status` enum('open','closed') NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `invoices` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `recibo_id` int(11) NOT NULL,
+  `uuid` varchar(36) NOT NULL,
+  `total` decimal(10,2) NOT NULL,
+  `date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uuid` (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+CREATE TABLE `credit_notes` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `recibo_id` int(11) DEFAULT NULL,
+  `uuid` varchar(36) NOT NULL,
+  `total` decimal(10,2) NOT NULL,
+  `reason` text DEFAULT NULL,
+  `date` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uuid` (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+
+-- =================================================================
+-- SECCIÓN: DEFINICIÓN DE CLAVES FORÁNEAS
+-- =================================================================
+
+ALTER TABLE `role_permissions`
+  ADD CONSTRAINT `fk_rp_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_rp_permission` FOREIGN KEY (`permission_id`) REFERENCES `permissions` (`id`) ON DELETE CASCADE;
+
+ALTER TABLE `users`
+  ADD CONSTRAINT `fk_users_role` FOREIGN KEY (`role_id`) REFERENCES `roles` (`id`),
+  ADD CONSTRAINT `fk_users_employee` FOREIGN KEY (`employee_id`) REFERENCES `employees` (`id`) ON DELETE SET NULL;
+
+ALTER TABLE `employees`
+  ADD CONSTRAINT `fk_employees_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`);
+
+ALTER TABLE `services`
+  ADD CONSTRAINT `fk_services_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`);
+
+ALTER TABLE `package_items`
+  ADD CONSTRAINT `fk_pi_package` FOREIGN KEY (`package_id`) REFERENCES `services` (`id`) ON DELETE CASCADE;
+
+ALTER TABLE `service_parameters`
+  ADD CONSTRAINT `fk_sp_service` FOREIGN KEY (`service_id`) REFERENCES `services` (`id`) ON DELETE CASCADE;
+
+ALTER TABLE `convenios`
+  ADD CONSTRAINT `fk_convenios_enterprise` FOREIGN KEY (`enterprise_id`) REFERENCES `enterprises` (`id`) ON DELETE CASCADE;
+
+ALTER TABLE `convenio_details`
+  ADD CONSTRAINT `fk_cd_convenio` FOREIGN KEY (`convenio_id`) REFERENCES `convenios` (`id`) ON DELETE CASCADE;
+
+ALTER TABLE `quotes`
+  ADD CONSTRAINT `fk_quotes_patient` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`),
+  ADD CONSTRAINT `fk_quotes_user` FOREIGN KEY (`created_by_id`) REFERENCES `users` (`id`);
+
+ALTER TABLE `quote_details`
+  ADD CONSTRAINT `fk_qd_quote` FOREIGN KEY (`quote_id`) REFERENCES `quotes` (`id`) ON DELETE CASCADE;
+
+ALTER TABLE `recibos`
+  ADD CONSTRAINT `fk_recibos_patient` FOREIGN KEY (`patient_id`) REFERENCES `patients` (`id`),
+  ADD CONSTRAINT `fk_recibos_doctor` FOREIGN KEY (`doctor_id`) REFERENCES `doctors` (`id`),
+  ADD CONSTRAINT `fk_recibos_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`),
+  ADD CONSTRAINT `fk_recibos_user` FOREIGN KEY (`created_by_id`) REFERENCES `users` (`id`);
+
+ALTER TABLE `recibo_details`
+  ADD CONSTRAINT `fk_rd_recibo` FOREIGN KEY (`recibo_id`) REFERENCES `recibos` (`id`) ON DELETE CASCADE;
+
+ALTER TABLE `recibo_results`
+  ADD CONSTRAINT `fk_rr_recibo_detail` FOREIGN KEY (`recibo_detail_id`) REFERENCES `recibo_details` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_rr_parameter` FOREIGN KEY (`parameter_id`) REFERENCES `service_parameters` (`id`),
+  ADD CONSTRAINT `fk_rr_user` FOREIGN KEY (`validated_by_id`) REFERENCES `users` (`id`);
+
+ALTER TABLE `purchases`
+  ADD CONSTRAINT `fk_purchases_provider` FOREIGN KEY (`provider_id`) REFERENCES `providers` (`id`),
+  ADD CONSTRAINT `fk_purchases_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`);
+
+ALTER TABLE `purchase_details`
+  ADD CONSTRAINT `fk_pd_purchase` FOREIGN KEY (`purchase_id`) REFERENCES `purchases` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_pd_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`);
+
+ALTER TABLE `expenses`
+  ADD CONSTRAINT `fk_expenses_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`),
+  ADD CONSTRAINT `fk_expenses_category` FOREIGN KEY (`category_id`) REFERENCES `expense_categories` (`id`);
+
+ALTER TABLE `cash_cuts`
+  ADD CONSTRAINT `fk_cc_branch` FOREIGN KEY (`branch_id`) REFERENCES `branches` (`id`),
+  ADD CONSTRAINT `fk_cc_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
+
+ALTER TABLE `invoices`
+  ADD CONSTRAINT `fk_invoices_recibo` FOREIGN KEY (`recibo_id`) REFERENCES `recibos` (`id`);
+
+ALTER TABLE `credit_notes`
+  ADD CONSTRAINT `fk_cn_recibo` FOREIGN KEY (`recibo_id`) REFERENCES `recibos` (`id`);
+
+COMMIT;

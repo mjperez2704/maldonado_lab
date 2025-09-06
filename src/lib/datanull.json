@@ -19,5 +19,11 @@
   "quotes": [],
   "recibos": [],
   "settings": [],
-  "studies": []
+  "studies": [],
+  "roles": [
+    { "id": 1, "name": "Administrador de Sistema" },
+    { "id": 2, "name": "Recepcionista" },
+    { "id": 3, "name": "Químico Analista" }
+  ],
+  "permissions": []
 }

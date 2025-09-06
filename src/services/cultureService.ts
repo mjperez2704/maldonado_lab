@@ -1,5 +1,6 @@
 'use server';
 import { executeQuery } from '@/lib/db';
+import {connection} from "next/server";
 
 interface Consumption {
     productId: string;
@@ -19,7 +20,7 @@ export interface Culture {
 
 export async function getCultures(): Promise<Culture[]> {
     try {
-        const results = await executeQuery<any[]>('SELECT * FROM cultures');
+        const results = await executeQuery<any[]>('SELECT * FROM cultures', []);
         const plainResults = JSON.parse(JSON.stringify(results));
         return plainResults.map((row: any) => ({
             ...row,

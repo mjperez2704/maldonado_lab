@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from 'react';
@@ -22,6 +21,7 @@ import {
   ArrowUpDown
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+// La interfaz Patient ya es la correcta gracias a la corrección del servicio
 import { deletePatient, Patient } from '@/services/patientService';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -91,7 +91,7 @@ export default function PatientsTable({ initialPatients }: { initialPatients: Pa
                   <TableHead>Correo</TableHead>
                   <TableHead>Teléfono</TableHead>
                   <TableHead>Género</TableHead>
-                  <TableHead>Edad</TableHead>
+                  {/* Columna de Edad eliminada */}
                   <TableHead className="text-right">Acción</TableHead>
               </TableRow>
               </TableHeader>
@@ -106,7 +106,7 @@ export default function PatientsTable({ initialPatients }: { initialPatients: Pa
                   <TableCell>{item.email}</TableCell>
                   <TableCell>{item.phone}</TableCell>
                   <TableCell className="capitalize">{item.gender}</TableCell>
-                  <TableCell>{item.age} {item.ageUnit}</TableCell>
+                  {/* Celda de Edad eliminada */}
                   <TableCell>
                       <div className="flex items-center justify-end gap-2">
                       <Button variant="outline" size="icon" onClick={() => handleEdit(item.id)}>
@@ -141,5 +141,5 @@ export default function PatientsTable({ initialPatients }: { initialPatients: Pa
           </Pagination>
       </div>
     </div>
-  )
+  );
 }

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect } from 'react';
@@ -16,12 +15,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { useLoader } from '@/hooks/useLoader';
 
+// Esquema actualizado para usar 'commission_rate'
 const doctorSchema = z.object({
   name: z.string().min(1, { message: "El nombre es requerido." }),
   phone: z.string().optional(),
   email: z.string().email({ message: "Correo electrónico no válido." }).optional().or(z.literal('')),
   address: z.string().optional(),
-  commission: z.coerce.number().min(0, "La comisión no puede ser negativa.").max(100, "La comisión no puede ser mayor a 100."),
+  commission_rate: z.coerce.number().min(0, "La comisión no puede ser negativa.").max(100, "La comisión no puede ser mayor a 100."),
 });
 
 type DoctorFormValues = z.infer<typeof doctorSchema>;
@@ -40,7 +40,7 @@ export default function EditDoctorPage() {
             phone: '',
             email: '',
             address: '',
-            commission: 0,
+            commission_rate: 0, // Campo corregido
         }
     });
 
@@ -50,6 +50,7 @@ export default function EditDoctorPage() {
             getDoctorById(doctorId)
                 .then((doctorData) => {
                     if (doctorData) {
+                        // El form.reset ahora funciona porque los nombres de campo coinciden
                         form.reset({
                             ...doctorData,
                             phone: doctorData.phone || '',
@@ -67,11 +68,12 @@ export default function EditDoctorPage() {
                 })
                 .finally(() => loader.stop());
         }
-    }, [doctorId, router, form.reset, toast, loader.start, loader.stop]);
+    }, [doctorId, router, form, toast, loader]);
 
     const onSubmit = async (data: DoctorFormValues) => {
         loader.start("update");
         try {
+            // El objeto 'data' ya tiene la estructura correcta
             await updateDoctor(doctorId, data);
             toast({
                 title: "Éxito",
@@ -113,15 +115,16 @@ export default function EditDoctorPage() {
                             <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input placeholder="Nombre del doctor" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={form.control} name="phone" render={({ field }) => (
-                            <FormItem><FormLabel>Teléfono</FormLabel><FormControl><Input placeholder="Número de teléfono" {...field} disabled={loader.status !== 'idle'}/></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Teléfono</FormLabel><FormControl><Input placeholder="Número de teléfono" {...field} value={field.value || ''} disabled={loader.status !== 'idle'}/></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={form.control} name="email" render={({ field }) => (
-                            <FormItem><FormLabel>Correo electrónico</FormLabel><FormControl><Input type="email" placeholder="Correo electrónico" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Correo electrónico</FormLabel><FormControl><Input type="email" placeholder="Correo electrónico" {...field} value={field.value || ''} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={form.control} name="address" render={({ field }) => (
-                            <FormItem><FormLabel>Dirección</FormLabel><FormControl><Input placeholder="Dirección" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Dirección</FormLabel><FormControl><Input placeholder="Dirección" {...field} value={field.value || ''} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={form.control} name="commission" render={({ field }) => (
+                        {/* Campo del formulario corregido a 'commission_rate' */}
+                        <FormField control={form.control} name="commission_rate" render={({ field }) => (
                             <FormItem><FormLabel>Comisión</FormLabel>
                                 <div className="relative">
                                     <FormControl><Input type="number" placeholder="0" {...field} disabled={loader.status !== 'idle'} /></FormControl>
@@ -130,7 +133,7 @@ export default function EditDoctorPage() {
                             <FormMessage /></FormItem>
                         )}/>
                     </div>
-                    
+
                     <div className="flex justify-start">
                         <Button type="submit" disabled={loader.status !== 'idle'}>
                             <Check className="mr-2"/> {loader.status === 'update' ? 'Guardando...' : 'Guardar Cambios'}

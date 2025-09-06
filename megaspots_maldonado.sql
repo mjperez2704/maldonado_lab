@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost:3306
--- Tiempo de generación: 01-09-2025 a las 10:11:36
+-- Tiempo de generación: 02-09-2025 a las 19:30:55
 -- Versión del servidor: 10.6.23-MariaDB
 -- Versión de PHP: 8.3.23
 
@@ -168,6 +168,19 @@ CREATE TABLE `expenses` (
   `amount` decimal(10,2) NOT NULL,
   `paymentMethod` varchar(50) DEFAULT NULL,
   `notes` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `integrated_studies`
+--
+
+CREATE TABLE `integrated_studies` (
+  `packageId` int(11) NOT NULL,
+  `subStudyId` int(11) NOT NULL,
+  `order` int(11) DEFAULT NULL,
+  `price` float NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
@@ -349,36 +362,80 @@ CREATE TABLE `settings` (
 
 CREATE TABLE `studies` (
   `id` int(11) NOT NULL,
-  `area` varchar(100) DEFAULT NULL,
-  `code` varchar(50) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
+  `code` varchar(50) DEFAULT NULL,
   `method` varchar(255) DEFAULT NULL,
   `internalCost` decimal(10,2) DEFAULT NULL,
   `deliveryTime` int(11) DEFAULT NULL,
-  `deliveryUnit` enum('horas','dias') DEFAULT NULL,
-  `processTime` varchar(100) DEFAULT NULL,
-  `processDays` varchar(100) DEFAULT NULL,
-  `isOutsourced` tinyint(1) DEFAULT 0,
-  `outsourcedLabId` varchar(36) DEFAULT NULL,
-  `outsourcedCode` varchar(100) DEFAULT NULL,
-  `outsourcedCost` decimal(10,2) DEFAULT NULL,
-  `outsourcedDeliveryTime` varchar(100) DEFAULT NULL,
+  `deliveryUnit` enum('dias','horas') DEFAULT NULL,
   `legend` text DEFAULT NULL,
   `scientificDescription` text DEFAULT NULL,
+  `categoryId` int(11) DEFAULT NULL,
+  `isOutsourced` tinyint(1) DEFAULT 0,
+  `outsourcedLabId` int(11) DEFAULT NULL,
+  `outsourcedCost` decimal(10,2) DEFAULT NULL,
+  `showInRequest` tinyint(1) DEFAULT 1,
+  `canUploadDocuments` tinyint(1) DEFAULT 0,
+  `printWebSignature` tinyint(1) DEFAULT 0,
   `satServiceKey` varchar(50) DEFAULT NULL,
-  `satUnitKey` varchar(50) DEFAULT NULL,
-  `parameters` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`parameters`)),
-  `config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`config`)),
-  `hasSubStudies` tinyint(1) DEFAULT 0,
-  `isPackage` tinyint(1) DEFAULT 0,
-  `integratedStudies` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`integratedStudies`)),
-  `synonyms` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`synonyms`)),
-  `samples` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`samples`)),
-  `shortcut` varchar(50) DEFAULT NULL,
-  `category` varchar(100) DEFAULT NULL,
-  `sampleType` varchar(100) DEFAULT NULL,
-  `price` decimal(10,2) DEFAULT NULL,
+  `satUnitKey` varchar(50) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `studies_parameters`
+--
+
+CREATE TABLE `studies_parameters` (
+  `id` int(11) NOT NULL,
+  `parameter` varchar(255) DEFAULT NULL,
+  `factor_conv` varchar(255) DEFAULT NULL,
+  `value_ref` varchar(255) DEFAULT NULL,
+  `type_ref` varchar(255) DEFAULT NULL,
+  `studie_id` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `study_parameters`
+--
+
+CREATE TABLE `study_parameters` (
+  `id` int(11) NOT NULL,
+  `studyId` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `unit` varchar(50) DEFAULT NULL,
+  `referenceType` text DEFAULT NULL,
+  `order` int(11) DEFAULT NULL,
+  `factor_conv` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `study_samples`
+--
+
+CREATE TABLE `study_samples` (
+  `id` int(11) NOT NULL,
+  `studyId` int(11) NOT NULL,
+  `type` varchar(100) NOT NULL,
+  `container` varchar(100) DEFAULT NULL,
   `indications` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `study_synonyms`
+--
+
+CREATE TABLE `study_synonyms` (
+  `id` int(11) NOT NULL,
+  `studyId` int(11) NOT NULL,
+  `synonym` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
@@ -391,7 +448,8 @@ CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `password` varchar(100) NOT NULL
+  `password` varchar(100) NOT NULL,
+  `role_id` int(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
@@ -463,6 +521,13 @@ ALTER TABLE `expenses`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indices de la tabla `integrated_studies`
+--
+ALTER TABLE `integrated_studies`
+  ADD PRIMARY KEY (`packageId`,`subStudyId`),
+  ADD KEY `subStudyId` (`subStudyId`);
+
+--
 -- Indices de la tabla `operations`
 --
 ALTER TABLE `operations`
@@ -525,13 +590,43 @@ ALTER TABLE `settings`
 --
 ALTER TABLE `studies`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `code` (`code`);
+  ADD UNIQUE KEY `code` (`code`),
+  ADD KEY `categoryId` (`categoryId`),
+  ADD KEY `outsourcedLabId` (`outsourcedLabId`);
+
+--
+-- Indices de la tabla `studies_parameters`
+--
+ALTER TABLE `studies_parameters`
+  ADD UNIQUE KEY `id` (`id`);
+
+--
+-- Indices de la tabla `study_parameters`
+--
+ALTER TABLE `study_parameters`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `studyId` (`studyId`);
+
+--
+-- Indices de la tabla `study_samples`
+--
+ALTER TABLE `study_samples`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `studyId` (`studyId`);
+
+--
+-- Indices de la tabla `study_synonyms`
+--
+ALTER TABLE `study_synonyms`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `studyId` (`studyId`);
 
 --
 -- Indices de la tabla `users`
 --
 ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `role_id` (`role_id`);
 
 --
 -- AUTO_INCREMENT de las tablas volcadas
@@ -658,6 +753,30 @@ ALTER TABLE `studies`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT de la tabla `studies_parameters`
+--
+ALTER TABLE `studies_parameters`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `study_parameters`
+--
+ALTER TABLE `study_parameters`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `study_samples`
+--
+ALTER TABLE `study_samples`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de la tabla `study_synonyms`
+--
+ALTER TABLE `study_synonyms`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT de la tabla `users`
 --
 ALTER TABLE `users`
@@ -668,10 +787,42 @@ ALTER TABLE `users`
 --
 
 --
+-- Filtros para la tabla `integrated_studies`
+--
+ALTER TABLE `integrated_studies`
+  ADD CONSTRAINT `integrated_studies_ibfk_1` FOREIGN KEY (`packageId`) REFERENCES `studies` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `integrated_studies_ibfk_2` FOREIGN KEY (`subStudyId`) REFERENCES `studies` (`id`) ON DELETE CASCADE;
+
+--
 -- Filtros para la tabla `quotes`
 --
 ALTER TABLE `quotes`
   ADD CONSTRAINT `quotes_ibfk_1` FOREIGN KEY (`patientId`) REFERENCES `patients` (`id`);
+
+--
+-- Filtros para la tabla `studies`
+--
+ALTER TABLE `studies`
+  ADD CONSTRAINT `studies_ibfk_1` FOREIGN KEY (`categoryId`) REFERENCES `categories` (`id`),
+  ADD CONSTRAINT `studies_ibfk_2` FOREIGN KEY (`outsourcedLabId`) REFERENCES `providers` (`id`);
+
+--
+-- Filtros para la tabla `study_parameters`
+--
+ALTER TABLE `study_parameters`
+  ADD CONSTRAINT `study_parameters_ibfk_1` FOREIGN KEY (`studyId`) REFERENCES `studies` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `study_samples`
+--
+ALTER TABLE `study_samples`
+  ADD CONSTRAINT `study_samples_ibfk_1` FOREIGN KEY (`studyId`) REFERENCES `studies` (`id`) ON DELETE CASCADE;
+
+--
+-- Filtros para la tabla `study_synonyms`
+--
+ALTER TABLE `study_synonyms`
+  ADD CONSTRAINT `study_synonyms_ibfk_1` FOREIGN KEY (`studyId`) REFERENCES `studies` (`id`) ON DELETE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

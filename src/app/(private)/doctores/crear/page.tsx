@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useRouter } from 'next/navigation';
@@ -15,12 +14,13 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { useLoader } from '@/hooks/useLoader';
 
+// Esquema actualizado para usar 'commission_rate'
 const doctorSchema = z.object({
   name: z.string().min(1, { message: "El nombre es requerido." }),
   phone: z.string().optional(),
   email: z.string().email({ message: "Correo electrónico no válido." }).optional().or(z.literal('')),
   address: z.string().optional(),
-  commission: z.coerce.number().min(0, "La comisión no puede ser negativa.").max(100, "La comisión no puede ser mayor a 100."),
+  commission_rate: z.coerce.number().min(0, "La comisión no puede ser negativa.").max(100, "La comisión no puede ser mayor a 100."),
 });
 
 type DoctorFormValues = z.infer<typeof doctorSchema>;
@@ -38,7 +38,7 @@ export default function CreateDoctorPage() {
             phone: '',
             email: '',
             address: '',
-            commission: 0,
+            commission_rate: 0, // Campo corregido
         }
     });
 
@@ -46,6 +46,7 @@ export default function CreateDoctorPage() {
         let success = false;
         loader.start("create");
         try {
+            // El objeto 'data' ahora tiene la estructura correcta que espera el servicio
             await createDoctor({
                 ...data,
                 phone: data.phone || null,
@@ -98,7 +99,8 @@ export default function CreateDoctorPage() {
                         <FormField control={form.control} name="address" render={({ field }) => (
                             <FormItem><FormLabel>Dirección</FormLabel><FormControl><Input placeholder="Dirección" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={form.control} name="commission" render={({ field }) => (
+                        {/* Campo del formulario corregido a 'commission_rate' */}
+                        <FormField control={form.control} name="commission_rate" render={({ field }) => (
                             <FormItem><FormLabel>Comisión</FormLabel>
                                 <div className="relative">
                                     <FormControl><Input type="number" placeholder="0" {...field} disabled={loader.status !== 'idle'} /></FormControl>

@@ -7,6 +7,7 @@ export const SendEmailReportInputSchema = z.object({
   patientName: z.string().describe("The name of the patient."),
   results: z.array(z.object({
     studyName: z.string(),
+    parameterName: z.string(),
     result: z.string(),
     reference: z.string(),
   })).describe("The list of test results for the patient."),

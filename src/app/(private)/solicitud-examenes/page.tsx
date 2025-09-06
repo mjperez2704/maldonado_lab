@@ -1,172 +1,124 @@
-
 "use client";
 
+import React, { useState, useEffect, useMemo } from 'react';
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FlaskConical, UserSearch, Search, Trash2, Calendar, User, Microscope, DollarSign, Tag, Save, Package } from "lucide-react";
-import React, { useState, useEffect, useMemo } from 'react';
-import { getPatients, Patient } from "@/services/patientService";
-import { getStudies, Study } from "@/services/studyService";
-import { getPackages, Package as PackageType } from "@/services/packageService";
-import { getDoctors, Doctor } from "@/services/doctorService";
-import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
-import { createRecibo, ReciboCreation } from "@/services/reciboService";
+import { User, Microscope, DollarSign, Save, Trash2, FlaskConical, BriefcaseMedical } from "lucide-react";
 import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
 
-type CartItem = {
-    id: string;
-    name: string;
-    price: number;
-    type: 'study' | 'package';
-};
+// Importar las nuevas interfaces y funciones de los servicios refactorizados
+import { getPatients, Patient } from "@/services/patientService";
+import { getStudies, Service } from "@/services/studyService";
+import { getDoctors, Doctor } from "@/services/doctorService";
+import { createRecibo } from "@/services/reciboService";
 
-export default function TestRequestPage() {
+type CartItem = Service & { quantity: number };
+
+export default function CreateTestRequestPage() {
     const [patients, setPatients] = useState<Patient[]>([]);
-    const [studies, setStudies] = useState<Study[]>([]);
-    const [packages, setPackages] = useState<PackageType[]>([]);
+    const [services, setServices] = useState<Service[]>([]);
     const [doctors, setDoctors] = useState<Doctor[]>([]);
 
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
-    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+    const [selectedPatientId, setSelectedPatientId] = useState<string>('');
+    const [selectedDoctorId, setSelectedDoctorId] = useState<string>('');
     const [cart, setCart] = useState<CartItem[]>([]);
+    const [paidAmount, setPaidAmount] = useState<number>(0);
 
-    const [selectedDoctor, setSelectedDoctor] = useState('');
-    const [deliveryDate, setDeliveryDate] = useState('');
     const [loading, setLoading] = useState(false);
     const { toast } = useToast();
     const router = useRouter();
 
-
     useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             try {
-                const [patientsData, studiesData, doctorsData, packagesData] = await Promise.all([
+                const [patientsData, servicesData, doctorsData] = await Promise.all([
                     getPatients(),
                     getStudies(),
                     getDoctors(),
-                    getPackages(),
                 ]);
                 setPatients(patientsData);
-                setStudies(studiesData);
+                setServices(servicesData);
                 setDoctors(doctorsData);
-                setPackages(packagesData);
             } catch (error) {
                 console.error("Error fetching initial data:", error);
-                toast({ title: "Error", description: "No se pudieron cargar los datos iniciales."});
+                toast({ title: "Error", description: "No se pudieron cargar los datos iniciales.", variant: "destructive" });
+            } finally {
+                setLoading(false);
             }
         };
         fetchData();
     }, [toast]);
 
-    const handleSearchPatient = () => {
-        const found = patients.filter(p =>
-            p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            String(p.id).toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setFilteredPatients(found);
-        if (found.length === 1) {
-            setSelectedPatient(found[0]);
-        } else {
-            setSelectedPatient(null);
+    const handleAddItemToCart = (serviceId: string) => {
+        if (!serviceId) return;
+        const id = Number(serviceId);
+
+        if (cart.some(item => item.id === id)) {
+            return toast({ title: "Atención", description: "Este artículo ya está en la solicitud.", variant: "destructive" });
+        }
+
+        const serviceToAdd = services.find(s => s.id === id);
+        if (serviceToAdd) {
+            setCart(prev => [...prev, { ...serviceToAdd, quantity: 1 }]);
         }
     };
 
-    const handleSelectPatient = (patientId: string) => {
-        const patient = patients.find(p => p.id === Number(patientId));
-        if(patient) {
-            setSelectedPatient(patient);
-            setFilteredPatients([]);
-        }
+    const handleRemoveFromCart = (serviceId: number) => {
+        setCart(prev => prev.filter(item => item.id !== serviceId));
     };
 
-    const handleAddItemToCart = (itemId: string) => {
-        if (!itemId) return;
-
-        const existingItem = cart.find(item => item.id === itemId);
-        if (existingItem) {
-            toast({ title: "Atención", description: "Este artículo ya está en la solicitud.", variant: "default" });
-            return;
-        }
-
-        const studyToAdd = studies.find(s => s.id === Number(itemId));
-        if (studyToAdd) {
-            setCart(prev => [...prev, {id: String(studyToAdd.id), name: studyToAdd.name, price: studyToAdd.price, type: 'study'}]);
-            return;
-        }
-
-        const packageToAdd = packages.find(p => p.id === Number(itemId));
-        if (packageToAdd) {
-            setCart(prev => [...prev, {id: String(packageToAdd.id), name: packageToAdd.name, price: packageToAdd.price, type: 'package'}]);
-        }
-    };
-
-
-    const handleRemoveFromCart = (itemId: string) => {
-        setCart(prev => prev.filter(item => item.id !== itemId));
-    };
-
-    const subtotal = useMemo(() => cart.reduce((acc, item) => acc + item.price, 0), [cart]);
-    const discount = 0; // Placeholder for discount logic based on convenio
-    const total = subtotal - discount;
-
-    const resetForm = () => {
-        setSearchTerm('');
-        setSelectedPatient(null);
-        setFilteredPatients([]);
-        setCart([]);
-        setSelectedDoctor('');
-        setDeliveryDate('');
-    };
+    const subtotal = useMemo(() => cart.reduce((acc, item) => acc + (item.price || 0) * item.quantity, 0), [cart]);
+    const total = subtotal; // Lógica de descuento puede añadirse aquí
+    const due = total - paidAmount;
 
     const handleSaveRequest = async () => {
-        if (!selectedPatient || cart.length === 0 || !deliveryDate) {
-            toast({
+        if (!selectedPatientId || cart.length === 0) {
+            return toast({
                 title: "Faltan datos",
-                description: "Por favor, seleccione un paciente, añada estudios y elija una fecha de entrega.",
+                description: "Por favor, seleccione un paciente y añada al menos un estudio.",
                 variant: "destructive"
             });
-            return;
         }
         setLoading(true);
 
-        const studiesInCart = cart.filter(i => i.type === 'study').map(i => i.name);
-        const packagesInCart = cart.filter(i => i.type === 'package').map(i => i.name);
-
         try {
-            const newRecibo: ReciboCreation = {
-                patientCode: String(selectedPatient.id),
-                patientName: selectedPatient.name,
-                contract: selectedPatient.convenio,
-                subtotal,
-                discount,
-                total,
-                paid: 0,
-                due: total,
-                studies: studiesInCart,
-                packages: packagesInCart,
-                doctor: selectedDoctor,
-                deliveryDate,
+            const reciboData = {
+                patient_id: Number(selectedPatientId),
+                doctor_id: selectedDoctorId ? Number(selectedDoctorId) : null,
+                branch_id: 1, // Asumir sucursal principal por defecto
+                created_by_id: 1, // Asumir usuario admin por defecto
+                subtotal: subtotal,
+                discount: 0,
+                total: total,
+                paid: paidAmount,
+                details: cart.map(item => ({
+                    item_type: 'SERVICE' as 'SERVICE',
+                    item_id: item.id,
+                    price: item.price || 0,
+                    quantity: item.quantity,
+                }))
             };
 
-            await createRecibo(newRecibo);
+            const newReciboId = await createRecibo(reciboData);
 
             toast({
                 title: "Éxito",
-                description: "La solicitud de examen ha sido guardada correctamente."
+                description: `La solicitud #${newReciboId} ha sido guardada correctamente.`
             });
-            resetForm();
+            router.push('/entrega-resultados'); // O a donde sea apropiado
 
         } catch (error) {
             console.error("Error saving request:", error);
             toast({
                 title: "Error",
-                description: "No se pudo guardar la solicitud. Por favor, intente de nuevo.",
+                description: "No se pudo guardar la solicitud.",
                 variant: "destructive"
             });
         } finally {
@@ -174,11 +126,7 @@ export default function TestRequestPage() {
         }
     };
 
-    const availableItems = useMemo(() => {
-        const studyItems = studies.map(s => ({ value: s.id, label: `${s.name} ($${s.price})`, type: 'Estudio' }));
-        const packageItems = packages.map(p => ({ value: p.id, label: `${p.name} ($${p.price})`, type: 'Paquete' }));
-        return [...studyItems, ...packageItems];
-    }, [studies, packages]);
+    const selectedPatient = patients.find(p => p.id === Number(selectedPatientId));
 
     return (
         <div className="flex flex-col gap-6 py-8">
@@ -195,165 +143,112 @@ export default function TestRequestPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
                 <div className="lg:col-span-2 flex flex-col gap-6">
                     <Card>
-                        <CardHeader className="bg-primary text-primary-foreground">
-                            <CardTitle className="flex items-center gap-2"><UserSearch /> Buscar Paciente</CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-6 flex items-end gap-4">
-                            <div className="flex-grow space-y-2">
-                                <Label htmlFor="patient-search">Buscar por nombre o número de paciente</Label>
-                                <Input
-                                    id="patient-search"
-                                    placeholder="Escriba aquí..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    onKeyDown={(e) => { if (e.key === 'Enter') handleSearchPatient(); }}
-                                />
+                        <CardHeader><CardTitle>1. Seleccione Paciente y Estudios</CardTitle></CardHeader>
+                        <CardContent className="pt-6 space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Paciente*</Label>
+                                    <Select onValueChange={setSelectedPatientId} value={selectedPatientId}>
+                                        <SelectTrigger><SelectValue placeholder="Seleccionar un paciente..." /></SelectTrigger>
+                                        <SelectContent>
+                                            {patients.map(p => <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Médico (Opcional)</Label>
+                                    <Select onValueChange={setSelectedDoctorId} value={selectedDoctorId}>
+                                        <SelectTrigger><SelectValue placeholder="Seleccionar un médico..." /></SelectTrigger>
+                                        <SelectContent>
+                                            {doctors.map(d => <SelectItem key={d.id} value={String(d.id)}>{d.name}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
-                            <Button onClick={handleSearchPatient}><Search className="mr-2"/> Buscar</Button>
-                             <Button asChild variant="outline">
-                                <Link href="/pacientes/crear">Nuevo Paciente</Link>
-                            </Button>
-                        </CardContent>
-                        {filteredPatients.length > 1 && (
-                            <CardContent>
-                                <Label>Se encontraron varios pacientes, seleccione uno:</Label>
-                                <Select onValueChange={handleSelectPatient}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Seleccione un paciente" />
-                                    </SelectTrigger>
+                            <div className="space-y-2">
+                                <Label>Añadir Estudio o Paquete*</Label>
+                                <Select onValueChange={handleAddItemToCart} disabled={!selectedPatientId}>
+                                    <SelectTrigger><SelectValue placeholder="Seleccionar un servicio..." /></SelectTrigger>
                                     <SelectContent>
-                                        {filteredPatients.map(p => (
-                                            <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
-                                        ))}
+                                        {services.map(s => <SelectItem key={s.id} value={String(s.id)}>{s.name} - ${s.price?.toFixed(2)}</SelectItem>)}
                                     </SelectContent>
                                 </Select>
-                            </CardContent>
-                        )}
+                            </div>
+                        </CardContent>
                     </Card>
 
-                    {selectedPatient && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Estudios en la Solicitud</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                 <div className="overflow-x-auto">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Estudio/Paquete</TableHead>
-                                                <TableHead>Tipo</TableHead>
-                                                <TableHead className="text-right">Precio</TableHead>
-                                                <TableHead></TableHead>
+                    <Card>
+                        <CardHeader><CardTitle>2. Carrito de Solicitud</CardTitle></CardHeader>
+                        <CardContent>
+                             <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Estudio/Paquete</TableHead>
+                                            <TableHead>Tipo</TableHead>
+                                            <TableHead className="text-right">Precio</TableHead>
+                                            <TableHead></TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {cart.length > 0 ? cart.map(item => (
+                                            <TableRow key={item.id}>
+                                                <TableCell>{item.name}</TableCell>
+                                                <TableCell>{item.type}</TableCell>
+                                                <TableCell className="text-right">${(item.price || 0).toFixed(2)}</TableCell>
+                                                <TableCell className="text-right">
+                                                    <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleRemoveFromCart(item.id)}>
+                                                        <Trash2 className="h-4 w-4"/>
+                                                    </Button>
+                                                </TableCell>
                                             </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {cart.length > 0 ? cart.map(item => (
-                                                <TableRow key={`${item.id}-${item.type}`}>
-                                                    <TableCell>{item.name}</TableCell>
-                                                    <TableCell className="capitalize">{item.type === 'study' ? 'Estudio' : 'Paquete'}</TableCell>
-                                                    <TableCell className="text-right">${item.price.toFixed(2)}</TableCell>
-                                                    <TableCell className="text-right">
-                                                        <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleRemoveFromCart(item.id)}>
-                                                            <Trash2 className="h-4 w-4"/>
-                                                        </Button>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )) : (
-                                                <TableRow>
-                                                    <TableCell colSpan={4} className="text-center text-muted-foreground">Añada estudios o paquetes a la solicitud</TableCell>
-                                                </TableRow>
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                                <div className="mt-4 flex items-end gap-4">
-                                    <div className="flex-grow space-y-2">
-                                        <Label>Añadir Estudio o Paquete</Label>
-                                        <Select onValueChange={handleAddItemToCart}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Buscar estudio o paquete por nombre" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {availableItems.map(item => (
-                                                    <SelectItem key={`${item.value}-${item.type}`} value={String(item.value)}>
-                                                        {item.label} ({item.type})
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
+                                        )) : (
+                                            <TableRow>
+                                                <TableCell colSpan={4} className="text-center text-muted-foreground h-24">Añada estudios a la solicitud</TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </CardContent>
+                    </Card>
                 </div>
 
                 <div className="lg:col-span-1 flex flex-col gap-6 sticky top-24">
                      <Card>
-                        <CardHeader>
-                            <CardTitle>Detalles de la Solicitud</CardTitle>
-                        </CardHeader>
+                        <CardHeader><CardTitle>3. Resumen y Pago</CardTitle></CardHeader>
                         <CardContent className="space-y-4">
                              {selectedPatient ? (
-                                <>
-                                    <div className="flex items-center gap-3">
-                                        <User className="text-primary"/>
-                                        <span>{selectedPatient.name}</span>
-                                    </div>
-                                    <div className="text-sm text-muted-foreground">
-                                        <p>Convenio: {selectedPatient.convenio || 'Ninguno'}</p>
-                                        <p>{selectedPatient.age} {selectedPatient.ageUnit}</p>
-                                        <p>{selectedPatient.email}</p>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Médico</Label>
-                                        <Select value={selectedDoctor} onValueChange={setSelectedDoctor}>
-                                            <SelectTrigger><SelectValue placeholder="Seleccionar Médico"/></SelectTrigger>
-                                            <SelectContent>
-                                                {doctors.map(doctor => (
-                                                    <SelectItem key={doctor.id} value={doctor.name}>{doctor.name}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                     <div className="space-y-2">
-                                        <Label>Fecha de Entrega</Label>
-                                        <div className="relative">
-                                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                            <Input type="date" className="pl-10" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)}/>
-                                        </div>
-                                    </div>
-                                </>
+                                <div className="flex items-center gap-3 p-3 bg-secondary rounded-md">
+                                    <User className="text-primary"/>
+                                    <span className="font-semibold">{selectedPatient.name}</span>
+                                </div>
                              ) : (
-                                <p className="text-muted-foreground text-center py-8">Seleccione un paciente para continuar</p>
+                                <p className="text-muted-foreground text-center py-4">Seleccione un paciente</p>
                              )}
+                            <div className="space-y-1">
+                                <div className="flex justify-between"><span>Subtotal:</span><span>${subtotal.toFixed(2)}</span></div>
+                                <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2"><span>Total:</span><span>${total.toFixed(2)}</span></div>
+                            </div>
+                            <div className="space-y-2 border-t pt-4">
+                                <Label htmlFor="paidAmount">Monto Pagado</Label>
+                                <Input
+                                    id="paidAmount"
+                                    type="number"
+                                    placeholder="0.00"
+                                    value={paidAmount}
+                                    onChange={(e) => setPaidAmount(Number(e.target.value))}
+                                />
+                            </div>
+                             <div className="flex justify-between font-bold text-lg text-red-600">
+                                <span>Adeudo:</span>
+                                <span>${due.toFixed(2)}</span>
+                            </div>
+                            <Button className="w-full" size="lg" disabled={!selectedPatientId || cart.length === 0 || loading} onClick={handleSaveRequest}>
+                                <Save className="mr-2"/> {loading ? 'Guardando...' : 'Guardar Solicitud'}
+                            </Button>
                         </CardContent>
                     </Card>
-                    {selectedPatient && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Resumen Financiero</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="flex justify-between items-center text-lg">
-                                    <span className="flex items-center gap-2"><Microscope className="h-5 w-5"/> Subtotal</span>
-                                    <span>${subtotal.toFixed(2)}</span>
-                                </div>
-                                 <div className="flex justify-between items-center text-lg">
-                                    <span className="flex items-center gap-2"><Tag className="h-5 w-5"/> Descuento</span>
-                                    <span>${discount.toFixed(2)}</span>
-                                </div>
-                                <div className="flex justify-between items-center font-bold text-xl text-primary">
-                                    <span className="flex items-center gap-2"><DollarSign className="h-5 w-5"/> Total</span>
-                                    <span>${total.toFixed(2)}</span>
-                                </div>
-                                <Button className="w-full" size="lg" disabled={cart.length === 0 || !deliveryDate || loading} onClick={handleSaveRequest}>
-                                    <Save className="mr-2"/> {loading ? 'Guardando...' : 'Guardar Solicitud'}
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    )}
                 </div>
             </div>
         </div>

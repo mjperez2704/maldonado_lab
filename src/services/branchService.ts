@@ -1,5 +1,6 @@
 "use server";
 import { executeQuery } from '@/lib/db';
+import {connection} from "next/server";
 
 export interface Branch {
   id: number;
@@ -10,7 +11,7 @@ export interface Branch {
 
 export async function getBranches(): Promise<Branch[]> {
     try {
-        const results = await executeQuery('SELECT * FROM branches');
+        const results = await executeQuery('SELECT * FROM branches', []);
         return JSON.parse(JSON.stringify(results)) as Branch[];
     } catch (error) {
         console.error("Database query failed:", error);

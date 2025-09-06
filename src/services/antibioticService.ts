@@ -3,10 +3,11 @@
 import { executeQuery } from '@/lib/db';
 import type { Antibiotic } from '@/types/antibiotic';
 import type { ServerActionResponse } from '@/types/api';
+import {connection} from "next/server";
 
 export async function getAntibiotics(): Promise<Antibiotic[]> {
     try {
-        const results = await executeQuery('SELECT * FROM antibiotics');
+        const results = await executeQuery('SELECT * FROM antibiotics', []);
         return JSON.parse(JSON.stringify(results)) as Antibiotic[];
     } catch (error) {
         console.error("Database query failed:", error);

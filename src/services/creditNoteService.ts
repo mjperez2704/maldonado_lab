@@ -1,5 +1,6 @@
 'use server';
 import { executeQuery } from '@/lib/db';
+import {connection} from "next/server";
 
 export interface CreditNote {
   id: number;
@@ -13,7 +14,7 @@ export interface CreditNote {
 
 export async function getCreditNotes(): Promise<CreditNote[]> {
     try {
-        const results = await executeQuery<CreditNote[]>('SELECT * FROM credit_notes ORDER BY date DESC');
+        const results = await executeQuery<CreditNote[]>('SELECT * FROM credit_notes ORDER BY date DESC', []);
         return JSON.parse(JSON.stringify(results)) as CreditNote[];
     } catch (error) {
         console.error("Database query failed:", error);

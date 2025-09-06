@@ -1,82 +1,139 @@
 'use server';
-import { executeQuery } from '@/lib/db';
 
+import { executeQuery, beginTransaction, commitTransaction, rollbackTransaction } from '@/lib/db';
+import {connection} from "next/server";
+
+// =================================================================
+// INTERFACES NORMALIZADAS
+// =================================================================
+
+// Representa un registro en la tabla `quotes`
 export interface Quote {
     id: number;
-    patientId: string;
-    patientName: string;
+    patient_id: number;
+    created_by_id: number;
     date: string;
-    subtotal: number;
-    discount: number;
-    total: number;
-    studies: string[];
-    packages: string[];
-    status: 'pending' | 'converted';
+    total: number | null;
+    status: 'pending' | 'converted' | 'rejected';
 }
 
-export type QuoteCreation = Omit<Quote, 'id' | 'date' | 'status'>;
+// Representa un registro en la tabla `quote_details`
+export interface QuoteDetail {
+    id?: number;
+    quote_id?: number;
+    item_type: 'SERVICE' | 'PRODUCT';
+    item_id: number;
+    price: number;
+    quantity: number;
+}
 
-export async function getQuotes(): Promise<Quote[]> {
+// Vista completa para el frontend, incluyendo detalles y nombres
+export interface QuoteDetailsView extends Quote {
+    patient_name: string;
+    details: (QuoteDetail & { item_name: string })[];
+}
+
+// =================================================================
+// FUNCIONES DEL SERVICIO
+// =================================================================
+
+/**
+ * Obtiene una lista de todas las cotizaciones con el nombre del paciente.
+ */
+export async function getQuotes(): Promise<(Quote & { patient_name: string })[]> {
     try {
-        // 1. Obtenemos los resultados como un tipo genérico 'any[]'
-        const results = await executeQuery<any[]>('SELECT * FROM quotes ORDER BY date DESC');
-        // 2. Mapeamos cada resultado, transformando los campos JSON string a arrays
-        return results.map((q) => ({
-            ...q,
-            studies: JSON.parse(q.studies || '[]'),
-            packages: JSON.parse(q.packages || '[]'),
-        }));
+        const query = `
+            SELECT q.*, p.name as patient_name
+            FROM quotes q
+            JOIN patients p ON q.patient_id = p.id
+            ORDER BY q.date DESC
+        `;
+        const results = await executeQuery(query, []);
+        return JSON.parse(JSON.stringify(results));
     } catch (error) {
         console.error("Database query failed:", error);
         return [];
     }
 }
 
-export async function createQuote(quote: QuoteCreation): Promise<void> {
-    const date = new Date().toISOString();
-    const status = 'pending';
-    const { patientId, patientName, subtotal, discount, total, studies, packages } = quote;
-    const query = 'INSERT INTO quotes (patientId, patientName, date, subtotal, discount, total, studies, packages, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    await executeQuery(query, [patientId, patientName, date, subtotal, discount, total, JSON.stringify(studies), JSON.stringify(packages), status]);
-}
+/**
+ * Obtiene los detalles completos de una única cotización.
+ */
+export async function getQuoteById(id: number): Promise<QuoteDetailsView | null> {
+    const quoteQuery = `
+        SELECT q.*, p.name as patient_name
+        FROM quotes q
+        JOIN patients p ON q.patient_id = p.id
+        WHERE q.id = ?
+    `;
+    const detailsQuery = `
+        SELECT 
+            qd.*, 
+            s.name as item_name 
+        FROM quote_details qd
+        JOIN services s ON qd.item_id = s.id AND qd.item_type = 'SERVICE'
+        WHERE qd.quote_id = ?
+    `; // Nota: Esta consulta solo une con 'services'. Se necesitaría una UNION ALL para unir con 'products'.
 
-export async function getQuoteById(id: string): Promise<Quote | null> {
-    // 1. Obtenemos el resultado como un tipo genérico 'any[]'
-    const results = await executeQuery<any[]>('SELECT * FROM quotes WHERE id = ?', [id]);
-    if (results.length > 0) {
-        const row = results[0];
-        // 2. Transformamos el resultado individual
+    try {
+        const quoteResult = await executeQuery<any[]>(quoteQuery, [id]);
+        if (quoteResult.length === 0) return null;
+
+        const detailsResult = await executeQuery<any[]>(detailsQuery, [id]);
+
         return {
-            ...row,
-            studies: JSON.parse(row.studies || '[]'),
-            packages: JSON.parse(row.packages || '[]'),
+            ...quoteResult[0],
+            details: detailsResult,
         };
+    } catch (error) {
+        console.error("Error fetching quote details:", error);
+        return null;
     }
-    return null;
 }
 
-export async function updateQuote(id: string, quote: Partial<Omit<Quote, 'id' | 'date' | 'patientId' | 'patientName'>>): Promise<void> {
-    const { subtotal, discount, total, studies, packages, status } = quote;
+/**
+ * Crea una nueva cotización y sus detalles dentro de una transacción.
+ */
+export async function createQuote(data: { patient_id: number; created_by_id: number; total: number; details: Omit<QuoteDetail, 'id' | 'quote_id'>[] }): Promise<number> {
+    const connection = await beginTransaction();
+    try {
+        // 1. Insertar la cotización principal
+        const quoteQuery = `
+            INSERT INTO quotes (patient_id, created_by_id, date, total, status)
+            VALUES (?, ?, NOW(), ?, 'pending')
+        `;
+        const quoteResult = await executeQuery(quoteQuery, [data.patient_id, data.created_by_id, data.total]) as any;
+        const newQuoteId = quoteResult.insertId;
 
-    const fields: string[] = [];
-    const values: any[] = [];
+        // 2. Insertar los detalles
+        if (data.details && data.details.length > 0) {
+            const detailQuery = 'INSERT INTO quote_details (quote_id, item_type, item_id, price, quantity) VALUES ?';
+            const detailValues = data.details.map(d => [newQuoteId, d.item_type, d.item_id, d.price, d.quantity]);
+            await executeQuery(detailQuery, [detailValues]);
+        }
 
-    if (subtotal !== undefined) { fields.push('subtotal = ?'); values.push(subtotal); }
-    if (discount !== undefined) { fields.push('discount = ?'); values.push(discount); }
-    if (total !== undefined) { fields.push('total = ?'); values.push(total); }
-    if (studies !== undefined) { fields.push('studies = ?'); values.push(JSON.stringify(studies)); }
-    if (packages !== undefined) { fields.push('packages = ?'); values.push(JSON.stringify(packages)); }
-    if (status !== undefined) { fields.push('status = ?'); values.push(status); }
-
-    if (fields.length === 0) return;
-
-    const query = `UPDATE quotes SET ${fields.join(', ')} WHERE id = ?`;
-    values.push(id);
-
-    await executeQuery(query, values);
+        await commitTransaction(connection);
+        return newQuoteId;
+    } catch (error) {
+        await rollbackTransaction(connection);
+        console.error("Failed to create quote:", error);
+        throw error;
+    }
 }
 
-export async function deleteQuote(id: string): Promise<void> {
+/**
+ * Actualiza el estado de una cotización (ej. a 'converted').
+ */
+export async function updateQuoteStatus(id: number, status: 'converted' | 'rejected'): Promise<void> {
+    const query = 'UPDATE quotes SET status = ? WHERE id = ?';
+    await executeQuery(query, [status, id]);
+}
+
+
+/**
+ * Elimina una cotización. La BD se encarga de los detalles en cascada.
+ */
+export async function deleteQuote(id: number): Promise<void> {
     const query = 'DELETE FROM quotes WHERE id = ?';
     await executeQuery(query, [id]);
 }

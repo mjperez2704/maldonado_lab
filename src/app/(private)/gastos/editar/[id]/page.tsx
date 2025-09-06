@@ -1,78 +1,94 @@
-
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { BadgePercent, Calendar, Check, DollarSign } from "lucide-react";
-import { useState, useEffect } from "react";
+import { BadgePercent, Check } from "lucide-react";
+import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from "next/navigation";
-import { getExpenseById, updateExpense, Expense } from "@/services/expenseService";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { useLoader } from "@/hooks/useLoader";
+
+// Importar los nuevos servicios y sus interfaces
+import { getExpenseById, updateExpense } from "@/services/expenseService";
+import { getBranches, Branch } from "@/services/branchService";
+import { getExpenseCategories, ExpenseCategory } from "@/services/expenseCategoryService";
+
+// Esquema de Zod actualizado
+const expenseSchema = z.object({
+  date: z.string().min(1, "La fecha es requerida."),
+  branch_id: z.coerce.number().min(1, "La sucursal es requerida."),
+  category_id: z.coerce.number().min(1, "La categoría es requerida."),
+  amount: z.coerce.number().min(0.01, "El monto debe ser mayor a 0."),
+  notes: z.string().optional(),
+});
+
+type ExpenseFormValues = z.infer<typeof expenseSchema>;
 
 export default function EditExpensePage() {
     const router = useRouter();
     const params = useParams();
-    const expenseId = params.id as string;
-    const [loading, setLoading] = useState(true);
-    const [formData, setFormData] = useState<Omit<Expense, 'id'>>({
-        date: '',
-        category: '',
-        amount: 0,
-        paymentMethod: '',
-        notes: ''
+    const expenseId = Number(params.id);
+    const { toast } = useToast();
+    const loader = useLoader();
+
+    const [branches, setBranches] = useState<Branch[]>([]);
+    const [expenseCategories, setExpenseCategories] = useState<ExpenseCategory[]>([]);
+
+    const form = useForm<ExpenseFormValues>({
+        resolver: zodResolver(expenseSchema),
     });
 
     useEffect(() => {
         if (expenseId) {
-            const fetchExpense = async () => {
-                try {
-                    const data = await getExpenseById(expenseId);
-                    if (data) {
-                        setFormData(data);
-                    } else {
-                        console.error("Expense not found");
-                        router.push('/gastos');
-                    }
-                } catch (error) {
-                    console.error("Error fetching expense:", error);
-                } finally {
-                    setLoading(false);
+            loader.start('read');
+            Promise.all([
+                getExpenseById(expenseId),
+                getBranches(),
+                getExpenseCategories()
+            ]).then(([expenseData, branchesData, categoriesData]) => {
+                if (expenseData) {
+                    form.reset({
+                        ...expenseData,
+                        date: new Date(expenseData.date).toISOString().split('T')[0],
+                        notes: expenseData.notes || '',
+                    });
+                } else {
+                    toast({ title: "Error", description: "Gasto no encontrado.", variant: "destructive" });
+                    router.push('/gastos');
                 }
-            };
-            fetchExpense();
+                setBranches(branchesData);
+                setExpenseCategories(categoriesData);
+            }).catch(error => {
+                console.error("Error fetching data:", error);
+                toast({ title: "Error", description: "No se pudieron cargar los datos para la edición.", variant: "destructive" });
+            }).finally(() => loader.stop());
         }
-    }, [expenseId, router]);
+    }, [expenseId, router, form, toast, loader]);
 
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { id, value, type } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [id]: type === 'number' ? parseFloat(value) || 0 : value
-        }));
-    };
-
-    const handleSelectChange = (value: string) => {
-        setFormData(prev => ({ ...prev, paymentMethod: value }));
-    };
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const onSubmit = async (data: ExpenseFormValues) => {
+        loader.start('update');
         try {
-            await updateExpense(expenseId, formData);
+            await updateExpense(expenseId, {
+                ...data,
+                notes: data.notes || null,
+            });
+            toast({ title: "Éxito", description: "Gasto actualizado correctamente." });
             router.push('/gastos');
         } catch (error) {
             console.error("Error updating expense:", error);
+            toast({ title: "Error", description: "No se pudo actualizar el gasto.", variant: "destructive" });
+        } finally {
+            loader.stop();
         }
     };
-
-    if (loading) {
-        return <div>Cargando...</div>;
-    }
 
   return (
     <div className="flex flex-col gap-4 py-8">
@@ -89,52 +105,44 @@ export default function EditExpensePage() {
         <CardHeader>
           <CardTitle>Editar Gasto</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-8">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="date">Fecha</Label>
-                        <div className="relative">
-                            <Input id="date" type="date" value={formData.date} onChange={handleChange} />
-                            <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        </div>
+        <CardContent>
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <FormField control={form.control} name="date" render={({ field }) => (
+                            <FormItem><FormLabel>Fecha*</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                        <FormField control={form.control} name="amount" render={({ field }) => (
+                            <FormItem><FormLabel>Monto*</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl><FormMessage /></FormItem>
+                        )}/>
+                        <FormField control={form.control} name="branch_id" render={({ field }) => (
+                            <FormItem><FormLabel>Sucursal*</FormLabel>
+                                <Select onValueChange={field.onChange} value={String(field.value)}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar sucursal" /></SelectTrigger></FormControl>
+                                    <SelectContent>{branches.map(b => <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>)}</SelectContent>
+                                </Select>
+                            <FormMessage /></FormItem>
+                        )}/>
+                        <FormField control={form.control} name="category_id" render={({ field }) => (
+                            <FormItem><FormLabel>Categoría*</FormLabel>
+                                <Select onValueChange={field.onChange} value={String(field.value)}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar categoría" /></SelectTrigger></FormControl>
+                                    <SelectContent>{expenseCategories.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}</SelectContent>
+                                </Select>
+                            <FormMessage /></FormItem>
+                        )}/>
+                        <FormField control={form.control} name="notes" render={({ field }) => (
+                            <FormItem className="md:col-span-2"><FormLabel>Notas</FormLabel><FormControl><Textarea placeholder="Notas adicionales sobre el gasto..." {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>
+                        )}/>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="category">Categoría</Label>
-                        <Input id="category" placeholder="Ej: Salarios, Renta" value={formData.category} onChange={handleChange}/>
+
+                    <div className="flex justify-start">
+                        <Button type="submit" disabled={loader.status !== 'idle'}>
+                            <Check className="mr-2 h-4 w-4"/> {loader.status === 'update' ? 'Guardando...' : 'Guardar Cambios'}
+                        </Button>
                     </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="amount">Cantidad</Label>
-                        <div className="relative">
-                            <Input id="amount" type="number" placeholder="0.00" value={formData.amount} onChange={handleChange}/>
-                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        </div>
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="payment-method">Método de pago</Label>
-                        <Select onValueChange={handleSelectChange} value={formData.paymentMethod}>
-                            <SelectTrigger id="payment-method">
-                                <SelectValue placeholder="Seleccionar método" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="Efectivo">Efectivo</SelectItem>
-                                <SelectItem value="Tarjeta">Tarjeta</SelectItem>
-                                <SelectItem value="Transferencia">Transferencia</SelectItem>
-                            </SelectContent>
-                        </Select>
-                    </div>
-                     <div className="md:col-span-2 lg:col-span-3 space-y-2">
-                        <Label htmlFor="notes">Notas</Label>
-                        <Textarea id="notes" placeholder="Notas adicionales sobre el gasto" value={formData.notes} onChange={handleChange}/>
-                    </div>
-                </div>
-                
-                <div className="flex justify-start">
-                    <Button type="submit">
-                        <Check className="mr-2"/> Guardar Cambios
-                    </Button>
-                </div>
-            </form>
+                </form>
+            </Form>
         </CardContent>
       </Card>
     </div>

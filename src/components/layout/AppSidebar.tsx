@@ -7,6 +7,8 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
+  SidebarGroup,
+  SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import Link from 'next/link';
 import {
@@ -15,7 +17,6 @@ import {
   FileText,
   Printer,
   ClipboardList,
-  FileStack,
   Building,
   BarChart,
   User,
@@ -39,6 +40,12 @@ import {
   ListTree,
   Boxes,
   ShoppingCart,
+  Palette,
+  DollarSign,
+  BookUser,
+  Cog,
+  ShieldCheck,
+  Building2,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
@@ -65,43 +72,61 @@ const HandshakeIcon = () => (
     </svg>
 );
 
-const menuItems = [
-    { icon: LayoutGrid, label: 'Dashboard', href: '/dashboard' },
-    { icon: Pill, label: 'Antibióticos', href: '/antibioticos' },
-    { icon: ListTree, label: 'Categorías', href: '/categorias' },
-    { icon: ShoppingCart, label: 'Compras', href: '/compras' },
-    { icon: HandshakeIcon, label: 'Convenios', href: '/convenios' },
-    { icon: Calculator, label: 'Corte de Caja', href: '/corte-caja' },
-    { icon: Newspaper, label: 'Cotizaciones', href: '/cotizaciones' },
-    { icon: CreditCard, label: 'Cuentas por Cobrar', href: '/cuentas-por-cobrar' },
-    { icon: TestTube, label: 'Cultivos', href: '/cultivos' },
-    { icon: PlusSquare, label: 'Doctores', href: '/doctores' },
-    { icon: UserCheck, label: 'Empleados', href: '/empleados' },
-    { icon: Printer, label: 'Entrega de Resultados', href: '/entrega-resultados' },
-    { icon: Microscope, label: 'Estudios', href: '/estudios' },
-    { icon: FileText, label: 'Facturación', href: '/facturacion' },
-    { icon: BadgePercent, label: 'Gastos', href: '/gastos' },
-    { icon: FileDown, label: 'Gestión de Calidad', href: '#' },
-    { icon: BarChart, label: 'Informes', href: '#' },
-    { icon: Landmark, label: 'Ingresos y Egresos', href: '/ingresos-y-egresos' },
-    { icon: ClipboardList, label: 'Lista de Precios', href: '/listas-de-precios' },
-    { icon: NotebookTabs, label: 'Notas de Crédito', href: '/notas-de-credito' },
-    { icon: ClipboardList, label: 'Opciones de Cultivos', href: '/cultivos/opciones' },
-    { icon: Users, label: 'Pacientes', href: '/pacientes' },
-    { icon: Package, label: 'Paquetes', href: '/paquetes' },
-    { icon: FileKey, label: 'Permisos', href: '#' },
-    { icon: Boxes, label: 'Productos', href: '/productos' },
-    { icon: User, label: 'Proveedores', href: '/proveedores' },
-    { icon: FileStack, label: 'Reporte de Resultados', href: '/reporte-resultados' },
-    { icon: Settings, label: 'Configuraciones', href: '/configuraciones' },
-    { icon: FlaskConical, label: 'Solicitud de Examenes', href: '/solicitud-examenes' },
-    { icon: Building, label: 'Sucursales', href: '/sucursales' },
-].sort((a, b) => a.label.localeCompare(b.label));
-
-// Move Dashboard to the top
-const dashboardItem = menuItems.find(item => item.label === 'Dashboard');
-const otherItems = menuItems.filter(item => item.label !== 'Dashboard');
-const sortedMenuItems = dashboardItem ? [dashboardItem, ...otherItems] : otherItems;
+export const menuGroups = [
+  {
+    label: "Principal",
+    icon: Palette,
+    items: [
+        { key: 'dashboard', icon: LayoutGrid, label: 'Dashboard', href: '/dashboard' },
+        { key: 'solicitud-examenes', icon: FlaskConical, label: 'Solicitud de Examenes', href: '/solicitud-examenes' },
+        { key: 'entrega-resultados', icon: Printer, label: 'Entrega de Resultados', href: '/entrega-resultados' },
+        { key: 'facturacion', icon: FileText, label: 'Facturación', href: '/facturacion' },
+    ]
+  },
+  {
+      label: "Catálogos",
+      icon: BookUser,
+      items: [
+          { key: 'pacientes', icon: Users, label: 'Pacientes', href: '/pacientes' },
+          { key: 'doctores', icon: PlusSquare, label: 'Doctores', href: '/doctores' },
+          { key: 'empleados', icon: UserCheck, label: 'Empleados', href: '/empleados' },
+          { key: 'proveedores', icon: User, label: 'Proveedores', href: '/proveedores' },
+          { key: 'estudios', icon: Microscope, label: 'Estudios', href: '/estudios' },
+          { key: 'paquetes', icon: Package, label: 'Paquetes', href: '/paquetes' },
+          { key: 'cultivos', icon: TestTube, label: 'Cultivos', href: '/cultivos' },
+          { key: 'antibioticos', icon: Pill, label: 'Antibióticos', href: '/antibioticos' },
+          { key: 'productos', icon: Boxes, label: 'Productos', href: '/productos' },
+          { key: 'categorias', icon: ListTree, label: 'Categorías', href: '/categorias' },
+      ]
+  },
+  {
+      label: "Finanzas",
+      icon: DollarSign,
+      items: [
+          { key: 'compras', icon: ShoppingCart, label: 'Compras', href: '/compras' },
+          { key: 'gastos', icon: BadgePercent, label: 'Gastos', href: '/gastos' },
+          { key: 'ingresos-y-egresos', icon: Landmark, label: 'Ingresos y Egresos', href: '/ingresos-y-egresos' },
+          { key: 'corte-caja', icon: Calculator, label: 'Corte de Caja', href: '/corte-caja' },
+          { key: 'cuentas-por-cobrar', icon: CreditCard, label: 'Cuentas por Cobrar', href: '/cuentas-por-cobrar' },
+          { key: 'notas-de-credito', icon: NotebookTabs, label: 'Notas de Crédito', href: '/notas-de-credito' },
+          { key: 'listas-de-precios', icon: ClipboardList, label: 'Lista de Precios', href: '/listas-de-precios' },
+          { key: 'convenios', icon: HandshakeIcon, label: 'Convenios', href: '/convenios' },
+          { key: 'cotizaciones', icon: Newspaper, label: 'Cotizaciones', href: '/cotizaciones' },
+      ]
+  },
+  {
+      label: "Administración",
+      icon: Cog,
+      items: [
+          { key: 'configuraciones', icon: Settings, label: 'Configuraciones', href: '/configuraciones' },
+          { key: 'permisos', icon: FileKey, label: 'Permisos', href: '/permisos' },
+          { key: 'sucursales', icon: Building, label: 'Sucursales', href: '/sucursales' },
+          { key: 'gestion-calidad', icon: FileDown, label: 'Gestión de Calidad', href: '#' },
+          { key: 'informes', icon: BarChart, label: 'Informes', href: '#' },
+          { key: 'opciones-cultivos', icon: ClipboardList, label: 'Opciones de Cultivos', href: '/cultivos/opciones' },
+      ]
+  }
+];
 
 
 export function AppSidebar() {
@@ -123,25 +148,31 @@ export function AppSidebar() {
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {sortedMenuItems.map((item) => {
-              const isActive = item.href === '/dashboard' 
-                ? pathname === item.href 
-                : item.href !== '#' && pathname.startsWith(item.href);
-              
-              return (
-              <SidebarMenuItem key={item.label}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isActive}
-                  className="gap-3"
-                >
-                  <Link href={item.href}>
-                    <item.icon className="h-5 w-5" />
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            )})}
+            {menuGroups.map((group) => (
+              <SidebarGroup key={group.label}>
+                <SidebarGroupLabel className="flex items-center gap-2">
+                    <group.icon className="h-5 w-5"/>
+                    {group.label}
+                </SidebarGroupLabel>
+                {group.items.map((item) => {
+                  const isActive = item.href !== '/' && item.href !== '#' && pathname.startsWith(item.href);
+                  
+                  return (
+                  <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      className="gap-3"
+                    >
+                      <Link href={item.href}>
+                        <item.icon className="h-5 w-5" />
+                        <span>{item.label}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )})}
+              </SidebarGroup>
+            ))}
           </SidebarMenu>
         </SidebarContent>
       </Sidebar>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState } from 'react';
@@ -12,13 +11,15 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Pencil, Trash2 } from "lucide-react"
-import { deleteEmployee, Employee } from '@/services/employeeService';
+// Importamos la interfaz correcta (EmployeeView) y la función deleteEmployee
+import { deleteEmployee, EmployeeView } from '@/services/employeeService';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useLoader } from '@/hooks/useLoader';
 
-export default function EmployeesTable({ initialEmployees }: { initialEmployees: Employee[] }) {
-  const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
+// El componente ahora espera recibir la interfaz EmployeeView
+export default function EmployeesTable({ initialEmployees }: { initialEmployees: EmployeeView[] }) {
+  const [employees, setEmployees] = useState<EmployeeView[]>(initialEmployees);
   const router = useRouter();
   const { toast } = useToast();
   const loader = useLoader();
@@ -61,7 +62,8 @@ export default function EmployeesTable({ initialEmployees }: { initialEmployees:
               <TableCell>{employee.name}</TableCell>
               <TableCell>{employee.position}</TableCell>
               <TableCell>{employee.email}</TableCell>
-              <TableCell>{employee.branch}</TableCell>
+              {/* Campo corregido para mostrar el nombre de la sucursal */}
+              <TableCell>{employee.branchName}</TableCell>
               <TableCell>
                 <div className="flex gap-2">
                     <Button variant="outline" size="icon" onClick={() => handleEdit(employee.id)}>

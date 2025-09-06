@@ -1,106 +1,52 @@
-"use server";
+'use server';
 import { executeQuery } from '@/lib/db';
 
-export interface FontSettings {
-    color: string;
-    font: string;
-    size: string;
+// Una interfaz genérica para cualquier tipo de ajuste
+export interface Setting {
+  id?: number;
+  name: string; // La 'key', ej: 'general_settings', 'email_settings'
+  value: any;   // El 'value', un objeto JSON
 }
 
-export interface ReportSettings {
-    showHeader: boolean;
-    showPatientAvatar: boolean;
-    showFooter: boolean;
-    showSignature: boolean;
-    showQr: boolean;
-    marginTop: string;
-    marginRight: string;
-    marginBottom: string;
-    marginLeft: string;
-    contentMarginTop: string;
-    contentMarginBg: string;
-    qrcodeDimension: string;
-    headerAlign: 'left' | 'center' | 'right';
-    headerBorderColor: string;
-    headerBorderWidth: number;
-    headerBgColor: string;
-    branchName: FontSettings;
-    branchInfo: FontSettings;
-    patientTitle: FontSettings;
-    patientData: FontSettings;
-    testTitle: FontSettings;
-    testName: FontSettings;
-}
+/**
+ * Obtiene un conjunto de configuraciones por sus nombres (claves).
+ * Devuelve un objeto donde cada clave es el nombre de la configuración y el valor es el objeto de configuración.
+ */
+export async function getSettings(keys: string[]): Promise<Record<string, any>> {
+    if (keys.length === 0) return {};
+    try {
+        const placeholders = keys.map(() => '?').join(',');
+        const query = `SELECT name, value FROM settings WHERE name IN (${placeholders})`;
+        const results = await executeQuery<Setting[]>(query, keys);
+        
+        const settingsObject = results.reduce((acc, setting) => {
+            acc[setting.name] = JSON.parse(setting.value || '{}');
+            return acc;
+        }, {} as Record<string, any>);
 
-export interface EmailTemplate {
-    active: boolean;
-    subject: string;
-    body: string;
-}
-
-export interface EmailSettings {
-    host: string;
-    port: number;
-    username: string;
-    password?: string;
-    encryption: 'ssl' | 'tls';
-    fromAddress: string;
-    fromName: string;
-    headerColor: string;
-    footerColor: string;
-    patientCode: EmailTemplate;
-    resetPassword: EmailTemplate;
-    receipt: EmailTemplate;
-    report: EmailTemplate;
-}
-
-
-export interface DbSettings {
-    host: string;
-    port: number;
-    database: string;
-    user: string;
-    password?: string;
-    ssl: boolean;
-}
-
-const SETTINGS_KEY_REPORTS = 'reports';
-const SETTINGS_KEY_EMAIL = 'email';
-const SETTINGS_KEY_DB = 'db';
-
-async function getSetting<T>(key: string): Promise<T | null> {
-    const results = await executeQuery<{ value: string }[]>('SELECT value FROM settings WHERE `key` = ?', [key]);
-    if (results.length > 0) {
-        return JSON.parse(results[0].value);
+        return settingsObject;
+    } catch (error) {
+        console.error("Database query failed for getSettings:", error);
+        return {};
     }
-    return null;
 }
 
-async function saveSetting<T>(key: string, value: T): Promise<void> {
-    const query = 'INSERT INTO settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = ?';
-    const stringValue = JSON.stringify(value);
-    await executeQuery(query, [key, stringValue, stringValue]);
-}
-
-// Reports
-export const getReportSettings = async () => getSetting<ReportSettings>(SETTINGS_KEY_REPORTS);
-export const saveReportSettings = async (settings: ReportSettings) => saveSetting(SETTINGS_KEY_REPORTS, settings);
-
-// Email
-export const getEmailSettings = async () => getSetting<EmailSettings>(SETTINGS_KEY_EMAIL);
-export const saveEmailSettings = async (settings: EmailSettings) => saveSetting(SETTINGS_KEY_EMAIL, settings);
-
-// DB
-export const getDbSettings = async () => getSetting<DbSettings>(SETTINGS_KEY_DB);
-export const saveDbSettings = async (settings: DbSettings) => saveSetting(SETTINGS_KEY_DB, settings);
-
-export async function testDbConnection(settings: DbSettings): Promise<{ success: boolean; error?: string }> {
-    // This is a placeholder. In a real scenario, you would create a temporary
-    // connection pool with the new settings to test them.
-    // For now, we simulate success if host and user are present.
-    if (settings.host && settings.user && settings.database) {
-        // Here you would attempt a real connection
-        return { success: true };
+/**
+ * Guarda una o más configuraciones en la base de datos.
+ * Utiliza ON DUPLICATE KEY UPDATE para insertar o actualizar según corresponda.
+ */
+export async function saveSettings(settings: { key: string, value: any }[]): Promise<void> {
+    if (settings.length === 0) return;
+    try {
+        const query = `
+            INSERT INTO settings (name, value) 
+            VALUES ? 
+            ON DUPLICATE KEY UPDATE value = VALUES(value)
+        `;
+        const values = settings.map(s => [s.key, JSON.stringify(s.value)]);
+        await executeQuery(query, [values]);
+    } catch (error) {
+        console.error("Database query failed for saveSettings:", error);
+        throw error;
     }
-    return { success: false, error: "Datos de conexión incompletos." };
 }
