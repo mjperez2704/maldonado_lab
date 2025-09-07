@@ -191,7 +191,7 @@ export default function QuotesPage() {
                                 <TableCell>{quote.id.toString().substring(0, 8)}</TableCell>
                                 <TableCell>{new Date(quote.date).toLocaleDateString()}</TableCell>
                                 <TableCell>{quote.patientName}</TableCell>
-                                <TableCell>${quote.total.toFixed(2)}</TableCell>
+                                <TableCell>${Number(quote.total.toFixed(2))}</TableCell>
                                 <TableCell>
                                     <span className={`px-2 py-1 rounded-full text-xs capitalize ${quote.status === 'pending' ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800'}`}>
                                         {quote.status}

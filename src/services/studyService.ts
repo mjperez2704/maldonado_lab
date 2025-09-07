@@ -68,6 +68,7 @@ export async function getStudies(): Promise<Study[]> {
         const plainResults = JSON.parse(JSON.stringify(results)) as any[];
         return plainResults.map((row: any) => ({
             ...row,
+            price: Number(row.price) || Number(row.internalCost) || 0,
             parameters: JSON.parse(row.parameters || '[]'),
             config: JSON.parse(row.config || '{}'),
             integratedStudies: JSON.parse(row.integratedStudies || '[]'),
@@ -98,7 +99,7 @@ export async function createStudy(study: Omit<Study, 'id'>): Promise<void> {
         study.satServiceKey, study.satUnitKey, JSON.stringify(study.parameters),
         JSON.stringify(study.config), study.hasSubStudies, study.isPackage,
         JSON.stringify(study.integratedStudies), JSON.stringify(study.synonyms),
-        JSON.stringify(study.samples), study.internalCost, study.sampleType, study.area, study.code,
+        JSON.stringify(study.samples), study.price, study.sampleType, study.category, study.shortcut,
     ];
     await executeQuery(query, params);
 }
@@ -109,6 +110,7 @@ export async function getStudyById(id: string): Promise<Study | null> {
         const row = JSON.parse(JSON.stringify(results[0]));
         return {
             ...row,
+            price: Number(row.price) || Number(row.internalCost) || 0,
             parameters: JSON.parse(row.parameters || '[]'),
             config: JSON.parse(row.config || '{}'),
             integratedStudies: JSON.parse(row.integratedStudies || '[]'),
@@ -139,7 +141,7 @@ export async function updateStudy(id: string, study: Omit<Study, 'id'>): Promise
         study.satServiceKey, study.satUnitKey, JSON.stringify(study.parameters),
         JSON.stringify(study.config), study.hasSubStudies, study.isPackage,
         JSON.stringify(study.integratedStudies), JSON.stringify(study.synonyms),
-        JSON.stringify(study.samples), study.internalCost, study.sampleType, study.area, study.code,
+        JSON.stringify(study.samples), study.price, study.sampleType, study.category, study.shortcut,
         id
     ];
     await executeQuery(query, params);

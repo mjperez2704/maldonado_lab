@@ -262,29 +262,29 @@ export default function BillingPage() {
                  {/* Placeholder for items */}
                  <div className="flex justify-between">
                     <span>Consulta General</span>
-                    <span>${selectedRecibo.total.toFixed(2)}</span>
+                    <span>${Number(selectedRecibo.total.toFixed(2))}</span>
                  </div>
               </div>
               <div className="border-t border-dashed border-gray-400 pt-2 space-y-1">
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
-                  <span>${selectedRecibo.subtotal.toFixed(2)}</span>
+                  <span>${Number(selectedRecibo.subtotal.toFixed(2))}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Descuento:</span>
-                  <span>${selectedRecibo.discount.toFixed(2)}</span>
+                  <span>${Number(selectedRecibo.discount.toFixed(2))}</span>
                 </div>
                 <div className="flex justify-between font-bold text-base">
                   <span>Total:</span>
-                  <span>${selectedRecibo.total.toFixed(2)}</span>
+                  <span>${Number(selectedRecibo.total.toFixed(2))}</span>
                 </div>
                  <div className="flex justify-between">
                   <span>Pagado:</span>
-                  <span>${selectedRecibo.paid.toFixed(2)}</span>
+                  <span>${Number(selectedRecibo.paid.toFixed(2))}</span>
                 </div>
                  <div className="flex justify-between">
                   <span>Debido:</span>
-                  <span>${selectedRecibo.due.toFixed(2)}</span>
+                  <span>${Number(selectedRecibo.due.toFixed(2))}</span>
                 </div>
               </div>
                <div className="text-center mt-4">

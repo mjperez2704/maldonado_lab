@@ -196,8 +196,8 @@ export default function AccountsReceivablePage() {
                                    <TableCell>{recibo.patientName}</TableCell>
                                    <TableCell className="capitalize">{recibo.status}</TableCell>
                                    <TableCell>Pendiente</TableCell>
-                                   <TableCell>${recibo.total.toFixed(2)}</TableCell>
-                                   <TableCell className="font-bold text-red-600">${recibo.due.toFixed(2)}</TableCell>
+                                   <TableCell>${Number(recibo.total.toFixed(2))}</TableCell>
+                                   <TableCell className="font-bold text-red-600">${Number(recibo.due.toFixed(2))}</TableCell>
                                    <TableCell>
                                        <Checkbox />
                                    </TableCell>

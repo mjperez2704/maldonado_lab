@@ -198,10 +198,10 @@ export default function PriceListPage() {
                                         <TableCell>{study.name}</TableCell>
                                         <TableCell>{study.category}</TableCell>
                                         <TableCell>
-                                            <Input defaultValue={study.price.toFixed(2)} className="w-24" />
+                                            <Input defaultValue={Number(study.price.toFixed(2))} className="w-24" />
                                         </TableCell>
                                         <TableCell>
-                                            <Input defaultValue={(study.price * 0.9).toFixed(2)} className="w-24" />
+                                            <Input defaultValue={Number((study.price * 0.9).toFixed(2))} className="w-24" />
                                         </TableCell>
                                     </TableRow>
                                 ))}

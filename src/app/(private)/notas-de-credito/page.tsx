@@ -190,7 +190,7 @@ export default function CreditNotesPage() {
                                     <TableCell>{new Date(note.date).toLocaleDateString()}</TableCell>
                                     <TableCell>{note.patient}</TableCell>
                                     <TableCell>{note.reason}</TableCell>
-                                    <TableCell>${note.amount.toFixed(2)}</TableCell>
+                                    <TableCell>${Number(note.amount.toFixed(2))}</TableCell>
                                     <TableCell>
                                         <span className={`px-2 py-1 rounded-full text-xs capitalize ${note.status === 'active' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
                                             {note.status === 'active' ? 'Activa' : 'Cancelada'}

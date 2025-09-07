@@ -25,7 +25,7 @@ export default function CorteCajaClient({ initialExpenses }: CorteCajaClientProp
         </CardHeader>
         <CardContent>
           <p className="text-2xl font-bold">
-            Total Gastado: ${totalExpenses.toFixed(2)}
+            Total Gastado: ${Number(totalExpenses.toFixed(2))}
           </p>
         </CardContent>
       </Card>
@@ -50,7 +50,7 @@ export default function CorteCajaClient({ initialExpenses }: CorteCajaClientProp
                   <TableCell>{new Date(expense.date).toLocaleDateString()}</TableCell>
                   <TableCell>{expense.category}</TableCell>
                   <TableCell>{expense.paymentMethod}</TableCell>
-                  <TableCell className="text-right">${expense.amount.toFixed(2)}</TableCell>
+                  <TableCell className="text-right">${Number(expense.amount.toFixed(2))}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

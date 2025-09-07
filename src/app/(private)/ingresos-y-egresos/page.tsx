@@ -240,7 +240,7 @@ export default function IncomeAndExpensesPage() {
                             <span className="capitalize">{op.type === 'ingress' ? 'Ingreso' : 'Egreso'}</span>
                         </TableCell>
                         <TableCell>{op.paymentMethod}</TableCell>
-                        <TableCell>${op.amount.toFixed(2)}</TableCell>
+                        <TableCell>${Number(op.amount.toFixed(2))}</TableCell>
                         <TableCell>
                             <Button variant="destructive" size="icon" onClick={() => handleDeleteOperation(String(op.id))}>
                                 <Trash2 className="h-4 w-4"/>
@@ -266,15 +266,15 @@ export default function IncomeAndExpensesPage() {
         <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
             <div className="bg-white p-4 rounded-md shadow">
                 <p className="text-sm text-muted-foreground">TOTAL DE INGRESOS</p>
-                <p className="text-2xl font-bold text-green-600">${summary.ingress.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-green-600">${Number(summary.ingress.toFixed(2))}</p>
             </div>
             <div className="bg-white p-4 rounded-md shadow">
                 <p className="text-sm text-muted-foreground">TOTAL DE EGRESOS</p>
-                <p className="text-2xl font-bold text-red-600">${summary.egress.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-red-600">${Number(summary.egress.toFixed(2))}</p>
             </div>
             <div className="bg-white p-4 rounded-md shadow">
                 <p className="text-sm text-muted-foreground">SALDO FINAL</p>
-                <p className="text-2xl font-bold text-primary">${summary.balance.toFixed(2)}</p>
+                <p className="text-2xl font-bold text-primary">${Number(summary.balance.toFixed(2))}</p>
             </div>
         </CardContent>
       </Card>

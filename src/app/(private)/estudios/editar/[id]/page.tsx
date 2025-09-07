@@ -456,7 +456,7 @@ export default function EditStudyPage() {
                                         <TableCell>{sample.type}</TableCell>
                                         <TableCell>{sample.container}</TableCell>
                                         <TableCell>{sample.indications}</TableCell>
-                                        <TableCell>{sample.cost.toFixed(2)}</TableCell>
+                                        <TableCell>{Number(sample.cost.toFixed(2))}</TableCell>
                                         <TableCell>
                                             <Button type="button" variant="destructive" size="icon" onClick={() => handleRemoveSample(index)}><Trash2/></Button>
                                         </TableCell>

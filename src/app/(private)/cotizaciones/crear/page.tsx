@@ -240,7 +240,7 @@ export default function CreateQuotePage() {
                                                 <TableRow key={`${item.id}-${item.type}`}>
                                                     <TableCell>{item.name}</TableCell>
                                                     <TableCell className="capitalize">{item.type === 'study' ? 'Estudio' : 'Paquete'}</TableCell>
-                                                    <TableCell className="text-right">${item.price.toFixed(2)}</TableCell>
+                                                    <TableCell className="text-right">${Number(item.price.toFixed(2))}</TableCell>
                                                     <TableCell className="text-right">
                                                         <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleRemoveFromCart(item.id)}>
                                                             <Trash2 className="h-4 w-4"/>
@@ -303,15 +303,15 @@ export default function CreateQuotePage() {
                             <CardContent className="space-y-4">
                                 <div className="flex justify-between items-center text-lg">
                                     <span className="flex items-center gap-2"><Microscope className="h-5 w-5"/> Subtotal</span>
-                                    <span>${subtotal.toFixed(2)}</span>
+                                    <span>${Number(subtotal.toFixed(2))}</span>
                                 </div>
                                  <div className="flex justify-between items-center text-lg">
                                     <span className="flex items-center gap-2"><Tag className="h-5 w-5"/> Descuento</span>
-                                    <span>${discount.toFixed(2)}</span>
+                                    <span>${Number(discount.toFixed(2))}</span>
                                 </div>
                                 <div className="flex justify-between items-center font-bold text-xl text-primary">
                                     <span className="flex items-center gap-2"><DollarSign className="h-5 w-5"/> Total</span>
-                                    <span>${total.toFixed(2)}</span>
+                                    <span>${Number(total.toFixed(2))}</span>
                                 </div>
                                 <Button className="w-full" size="lg" disabled={cart.length === 0 || loading} onClick={handleSaveQuote}>
                                     <Save className="mr-2"/> {loading ? 'Guardando...' : 'Guardar Cotización'}
