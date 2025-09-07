@@ -1,122 +1,68 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import { Calculator, Building, Calendar, DollarSign, Scissors, TrendingUp, TrendingDown } from "lucide-react";
-import React, { useEffect, useState, useMemo } from 'react';
+import { 
+    Calculator, 
+    Building, 
+    Calendar, 
+    DollarSign, 
+    ClipboardEdit, 
+    RefreshCw, 
+    Scissors,
+    FileText,
+    BadgePercent,
+    ArrowRightLeft,
+    ArrowDown,
+    ArrowUp,
+    Users
+} from "lucide-react";
+import React, { useEffect, useState } from 'react';
 import Link from "next/link";
-import { useToast } from "@/hooks/use-toast";
-
-// Importar todos los servicios necesarios
-import { getRecibos, ReciboView } from "@/services/reciboService";
-import { getExpenses, ExpenseView } from "@/services/expenseService";
-import { getOperations, OperationView } from "@/services/operationService";
-import { getBranches, Branch } from "@/services/branchService";
-import { createCashCut } from "@/services/cashCutService";
+import { getRecibos, Recibo } from "@/services/reciboService";
+import { getExpenses, Expense } from "@/services/expenseService";
 
 export default function CashCutPage() {
-    const { toast } = useToast();
+    const [recibos, setRecibos] = useState<Recibo[]>([]);
+    const [expenses, setExpenses] = useState<Expense[]>([]);
     const [loading, setLoading] = useState(true);
-
-    // Datos originales sin filtrar
-    const [allRecibos, setAllRecibos] = useState<ReciboView[]>([]);
-    const [allExpenses, setAllExpenses] = useState<ExpenseView[]>([]);
-    const [allOperations, setAllOperations] = useState<OperationView[]>([]);
-    const [branches, setBranches] = useState<Branch[]>([]);
-
-    // Filtros
-    const [selectedBranchId, setSelectedBranchId] = useState<string>('');
-    const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-
-    // Estado para el formulario de cierre
-    const [initialCash, setInitialCash] = useState(0);
-    const [notes, setNotes] = useState('');
+    const [cashInBox, setCashInBox] = useState(0);
 
     useEffect(() => {
         const fetchData = async () => {
-            setLoading(true);
             try {
-                const [recibosData, expensesData, operationsData, branchesData] = await Promise.all([
+                const [recibosData, expensesData] = await Promise.all([
                     getRecibos(),
                     getExpenses(),
-                    getOperations(),
-                    getBranches(),
                 ]);
-                setAllRecibos(recibosData);
-                setAllExpenses(expensesData);
-                setAllOperations(operationsData);
-                setBranches(branchesData);
-                if (branchesData.length > 0) {
-                    setSelectedBranchId(String(branchesData[0].id)); // Seleccionar la primera por defecto
-                }
+                setRecibos(recibosData);
+                setExpenses(expensesData);
+
+                const totalIncome = recibosData.reduce((acc, recibo) => acc + recibo.paid, 0);
+                const totalExpenses = expensesData.reduce((acc, expense) => acc + expense.amount, 0);
+                setCashInBox(totalIncome - totalExpenses);
+
             } catch (error) {
                 console.error("Error fetching data for cash cut:", error);
-                toast({ title: "Error", description: "No se pudieron cargar los datos.", variant: "destructive" });
             } finally {
                 setLoading(false);
             }
         };
         fetchData();
-    }, [toast]);
+    }, []);
 
-    // Lógica de filtrado
-    const { filteredRecibos, filteredExpenses, filteredOperations } = useMemo(() => {
-        if (!selectedBranchId || !selectedDate) {
-            return { filteredRecibos: [], filteredExpenses: [], filteredOperations: [] };
-        }
-        const branchId = Number(selectedBranchId);
-        const date = new Date(selectedDate).toDateString();
-
-        const fRecibos = allRecibos.filter(r => r.branch_id === branchId && new Date(r.date).toDateString() === date);
-        const fExpenses = allExpenses.filter(e => e.branch_id === branchId && new Date(e.date).toDateString() === date);
-        const fOperations = allOperations.filter(o => o.branch_id === branchId && new Date(o.date).toDateString() === date);
-
-        return { filteredRecibos: fRecibos, filteredExpenses: fExpenses, filteredOperations: fOperations };
-    }, [allRecibos, allExpenses, allOperations, selectedBranchId, selectedDate]);
-
-    // Lógica de resumen financiero
-    const summary = useMemo(() => {
-        const incomeFromRecibos = filteredRecibos.reduce((acc, recibo) => acc + recibo.paid, 0);
-        const incomeFromOps = filteredOperations.filter(op => op.type === 'ingress').reduce((acc, op) => acc + op.amount, 0);
-        const egressFromExpenses = filteredExpenses.reduce((acc, expense) => acc + expense.amount, 0);
-        const egressFromOps = filteredOperations.filter(op => op.type === 'egress').reduce((acc, op) => acc + op.amount, 0);
-
-        const totalIngress = incomeFromRecibos + incomeFromOps;
-        const totalEgress = egressFromExpenses + egressFromOps;
-        const calculatedBalance = initialCash + totalIngress - totalEgress;
-
-        return { totalIngress, totalEgress, calculatedBalance };
-    }, [filteredRecibos, filteredExpenses, filteredOperations, initialCash]);
-
-    const handlePerformCut = async () => {
-        if (!selectedBranchId) return;
-        setLoading(true);
-        try {
-            await createCashCut({
-                branch_id: Number(selectedBranchId),
-                user_id: 1, // Asumir usuario admin por defecto
-                start_time: new Date().toISOString(), // Simulado
-                initial_balance: initialCash,
-                final_balance: summary.calculatedBalance, // Simulado, debería ser un conteo físico
-                calculated_balance: summary.calculatedBalance,
-                difference: 0, // Simulado
-                notes: notes,
-            });
-            toast({ title: "Éxito", description: "Corte de caja realizado correctamente." });
-        } catch (error) {
-            console.error("Error performing cash cut:", error);
-            toast({ title: "Error", description: "No se pudo realizar el corte de caja.", variant: "destructive" });
-        } finally {
-            setLoading(false);
-        }
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('es-MX', {
+            style: 'currency',
+            currency: 'MXN'
+        }).format(amount);
     };
-
-    const formatCurrency = (amount: number) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount);
 
     return (
         <div className="flex flex-col gap-8 py-8">
@@ -134,66 +80,160 @@ export default function CashCutPage() {
                 <CardHeader className="bg-primary text-primary-foreground rounded-t-lg">
                     <CardTitle className="flex items-center gap-2"><ClipboardEdit /> Resumen y Cierre de Caja</CardTitle>
                 </CardHeader>
-                <CardContent className="pt-6 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <CardContent className="pt-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
                         <div className="space-y-2">
-                            <Label>Sucursal</Label>
-                            <Select onValueChange={setSelectedBranchId} value={selectedBranchId}>
-                                <SelectTrigger><SelectValue placeholder="Seleccionar..." /></SelectTrigger>
-                                <SelectContent>{branches.map(b => <SelectItem key={b.id} value={String(b.id)}>{b.name}</SelectItem>)}</SelectContent>
-                            </Select>
+                            <Label htmlFor="branch">Sucursal</Label>
+                            <div className="relative">
+                                <IconWrapper><Building /></IconWrapper>
+                                <Input id="branch" value="Unidad Matriz" readOnly className="pl-10"/>
+                            </div>
                         </div>
                         <div className="space-y-2">
-                            <Label>Fecha de Corte</Label>
-                            <Input type="date" value={selectedDate} onChange={(e) => setSelectedDate(e.target.value)} />
+                             <Label htmlFor="cutoff-date">Fecha de Corte</Label>
+                            <div className="relative">
+                               <IconWrapper><Calendar /></IconWrapper>
+                                <Input id="cutoff-date" type="date" defaultValue={new Date().toISOString().split('T')[0]} className="pl-10"/>
+                            </div>
                         </div>
                         <div className="space-y-2">
-                            <Label>Efectivo inicial en Caja</Label>
-                            <Input type="number" placeholder="0.00" value={initialCash} onChange={(e) => setInitialCash(Number(e.target.value))} />
+                            <Label htmlFor="initial-cash">Efectivo inicial en Caja</Label>
+                            <div className="relative">
+                                <IconWrapper><DollarSign /></IconWrapper>
+                                <Input id="initial-cash" placeholder="Efectivo inicial en Caja" className="pl-10"/>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Total Efectivo en Caja</Label>
+                            <div className="relative">
+                                <IconWrapper><DollarSign /></IconWrapper>
+                                <Input value={formatCurrency(cashInBox)} readOnly className="pl-10 bg-muted"/>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="total-for-cut">Coloque el total para Corte</Label>
+                            <div className="relative">
+                                <IconWrapper><DollarSign /></IconWrapper>
+                                <Input id="total-for-cut" placeholder="Coloque el total para Corte" className="pl-10"/>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="initial-for-next">Efectivo inicial para siguiente corte</Label>
+                            <div className="relative">
+                               <IconWrapper><RefreshCw /></IconWrapper>
+                                <Input id="initial-for-next" placeholder="Efectivo inicial para siguiente corte" className="pl-10"/>
+                            </div>
+                        </div>
+                        <div className="md:col-span-2 space-y-2">
+                            <Label htmlFor="notes">Notas</Label>
+                            <Textarea id="notes" placeholder="Notas" />
                         </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                        <div className="bg-green-100 p-4 rounded-md"><p className="text-sm text-green-800">INGRESOS</p><p className="text-2xl font-bold text-green-600">{formatCurrency(summary.totalIngress)}</p></div>
-                        <div className="bg-red-100 p-4 rounded-md"><p className="text-sm text-red-800">EGRESOS</p><p className="text-2xl font-bold text-red-600">{formatCurrency(summary.totalEgress)}</p></div>
-                        <div className="bg-blue-100 p-4 rounded-md"><p className="text-sm text-blue-800">SALDO CALCULADO</p><p className="text-2xl font-bold text-blue-600">{formatCurrency(summary.calculatedBalance)}</p></div>
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Notas del Corte</Label>
-                        <Textarea placeholder="Notas adicionales..." value={notes} onChange={(e) => setNotes(e.target.value)} />
-                    </div>
-                    <div className="flex justify-end">
-                        <Button onClick={handlePerformCut} disabled={loading}><Scissors className="mr-2 h-4 w-4" /> Realizar Corte de Caja</Button>
+                     <div className="flex justify-end mt-6">
+                        <Button>
+                            <Scissors className="mr-2 h-4 w-4" /> Realizar Corte de Caja
+                        </Button>
                     </div>
                 </CardContent>
             </Card>
 
             <Card>
-                 <CardHeader><CardTitle>Detalle de Movimientos</CardTitle></CardHeader>
-                <CardContent className="pt-4">
-                    <h3 className="font-semibold text-lg mb-2 flex items-center gap-2"><TrendingUp className="text-green-500"/>Ingresos</h3>
-                    <div className="overflow-x-auto border rounded-md mb-6">
-                        <Table>
-                            <TableHeader><TableRow><TableHead>Folio/ID</TableHead><TableHead>Concepto</TableHead><TableHead>Monto</TableHead></TableRow></TableHeader>
-                            <TableBody>
-                                {filteredRecibos.map(r => <TableRow key={`rec-${r.id}`}><TableCell>Recibo #{r.id}</TableCell><TableCell>Venta a {r.patient_name}</TableCell><TableCell>{formatCurrency(r.paid)}</TableCell></TableRow>)}
-                                {filteredOperations.filter(o => o.type === 'ingress').map(o => <TableRow key={`op-${o.id}`}><TableCell>Op. #{o.id}</TableCell><TableCell>{o.concept}</TableCell><TableCell>{formatCurrency(o.amount)}</TableCell></TableRow>)}
-                                {filteredRecibos.length === 0 && filteredOperations.filter(o => o.type === 'ingress').length === 0 && <TableRow><TableCell colSpan={3} className="text-center h-24">No hay ingresos para el día y sucursal seleccionados.</TableCell></TableRow>}
-                            </TableBody>
-                        </Table>
-                    </div>
-                    <h3 className="font-semibold text-lg mb-2 flex items-center gap-2"><TrendingDown className="text-red-500"/>Egresos</h3>
-                    <div className="overflow-x-auto border rounded-md">
-                        <Table>
-                            <TableHeader><TableRow><TableHead>ID</TableHead><TableHead>Concepto/Categoría</TableHead><TableHead>Monto</TableHead></TableRow></TableHeader>
-                            <TableBody>
-                                {filteredExpenses.map(e => <TableRow key={`exp-${e.id}`}><TableCell>Gasto #{e.id}</TableCell><TableCell>{e.category_name}</TableCell><TableCell>{formatCurrency(e.amount)}</TableCell></TableRow>)}
-                                {filteredOperations.filter(o => o.type === 'egress').map(o => <TableRow key={`op-${o.id}`}><TableCell>Op. #{o.id}</TableCell><TableCell>{o.concept}</TableCell><TableCell>{formatCurrency(o.amount)}</TableCell></TableRow>)}
-                                {filteredExpenses.length === 0 && filteredOperations.filter(o => o.type === 'egress').length === 0 && <TableRow><TableCell colSpan={3} className="text-center h-24">No hay egresos para el día y sucursal seleccionados.</TableCell></TableRow>}
-                            </TableBody>
-                        </Table>
-                    </div>
+                 <CardHeader className="bg-primary text-primary-foreground rounded-t-lg">
+                    <CardTitle className="flex items-center gap-2"><ClipboardEdit /> Detalle de Movimientos</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-6">
+                    <Tabs defaultValue="requests">
+                        <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+                            <TabsTrigger value="requests"><FileText className="mr-2"/>Solicitudes</TabsTrigger>
+                            <TabsTrigger value="discounts"><BadgePercent className="mr-2"/>Descuentos Posteriores</TabsTrigger>
+                            <TabsTrigger value="refunds"><ArrowRightLeft className="mr-2"/>Reembolsos</TabsTrigger>
+                            <TabsTrigger value="expenses"><ArrowDown className="mr-2"/>Gastos</TabsTrigger>
+                            <TabsTrigger value="income"><ArrowUp className="mr-2"/>Ingresos</TabsTrigger>
+                            <TabsTrigger value="staff-payments"><Users className="mr-2"/>Pagos por Personal</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="requests" className="pt-4">
+                           <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Folio</TableHead>
+                                            <TableHead>Paciente</TableHead>
+                                            <TableHead>Total</TableHead>
+                                            <TableHead>Pagado</TableHead>
+                                            <TableHead>Debido</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {loading ? (
+                                            <TableRow><TableCell colSpan={5} className="text-center">Cargando...</TableCell></TableRow>
+                                        ) : recibos.length > 0 ? (
+                                            recibos.map(recibo => (
+                                                <TableRow key={recibo.id}>
+                                                    <TableCell>{recibo.barcode}</TableCell>
+                                                    <TableCell>{recibo.patientName}</TableCell>
+                                                    <TableCell>{formatCurrency(recibo.total)}</TableCell>
+                                                    <TableCell>{formatCurrency(recibo.paid)}</TableCell>
+                                                    <TableCell>{formatCurrency(recibo.due)}</TableCell>
+                                                </TableRow>
+                                            ))
+                                        ) : (
+                                            <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground">No hay solicitudes para mostrar.</TableCell></TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                           </div>
+                        </TabsContent>
+                        <TabsContent value="discounts" className="pt-4">
+                           <p className="text-center text-muted-foreground">No hay descuentos para mostrar.</p>
+                        </TabsContent>
+                        <TabsContent value="refunds" className="pt-4">
+                            <p className="text-center text-muted-foreground">No hay reembolsos para mostrar.</p>
+                        </TabsContent>
+                         <TabsContent value="expenses" className="pt-4">
+                             <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead>Fecha</TableHead>
+                                            <TableHead>Categoría</TableHead>
+                                            <TableHead>Cantidad</TableHead>
+                                            <TableHead>Notas</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {loading ? (
+                                            <TableRow><TableCell colSpan={4} className="text-center">Cargando...</TableCell></TableRow>
+                                        ) : expenses.length > 0 ? (
+                                            expenses.map(expense => (
+                                                <TableRow key={expense.id}>
+                                                    <TableCell>{expense.date}</TableCell>
+                                                    <TableCell>{expense.category}</TableCell>
+                                                    <TableCell>{formatCurrency(expense.amount)}</TableCell>
+                                                    <TableCell>{expense.notes}</TableCell>
+                                                </TableRow>
+                                            ))
+                                        ) : (
+                                            <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground">No hay gastos para mostrar.</TableCell></TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                           </div>
+                        </TabsContent>
+                         <TabsContent value="income" className="pt-4">
+                             <p className="text-center text-muted-foreground">No hay ingresos para mostrar.</p>
+                        </TabsContent>
+                        <TabsContent value="staff-payments" className="pt-4">
+                            <p className="text-center text-muted-foreground">No hay pagos para mostrar.</p>
+                        </TabsContent>
+                    </Tabs>
                 </CardContent>
             </Card>
         </div>
     );
 }
+
+const IconWrapper = ({ children }: { children: React.ReactNode }) => (
+    <span className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground">
+        {children}
+    </span>
+);

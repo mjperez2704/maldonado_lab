@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -25,35 +26,30 @@ import {
   Pencil,
   Trash2,
   FileCheck,
+  Calendar,
   User,
   Hash,
   Filter,
 } from "lucide-react"
+import { getQuotes, deleteQuote, updateQuote, Quote } from '@/services/quoteService';
+import { createRecibo } from '@/services/reciboService';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 
-// Importar las nuevas interfaces y funciones de los servicios refactorizados
-import { getQuotes, deleteQuote, updateQuoteStatus, getQuoteById, Quote } from '@/services/quoteService';
-import { createRecibo } from '@/services/reciboService';
-
-// El tipo de dato que devuelve nuestro nuevo servicio getQuotes
-type QuoteForTable = Quote & { patient_name: string };
-
 export default function QuotesPage() {
-    const [quotes, setQuotes] = useState<QuoteForTable[]>([]);
+    const [quotes, setQuotes] = useState<Quote[]>([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({ folio: '', patient: '' });
     const router = useRouter();
     const { toast } = useToast();
 
     const fetchQuotes = async () => {
-        setLoading(true);
         try {
             const data = await getQuotes();
             setQuotes(data);
         } catch (error) {
             console.error("Error fetching quotes: ", error);
-            toast({ title: "Error", description: "No se pudieron cargar las cotizaciones.", variant: "destructive" });
+            toast({ title: "Error", description: "No se pudieron cargar las cotizaciones." });
         } finally {
             setLoading(false);
         }
@@ -65,8 +61,8 @@ export default function QuotesPage() {
 
     const filteredQuotes = useMemo(() => {
         return quotes.filter(quote => {
-            const folioMatch = filters.folio ? String(quote.id).includes(filters.folio) : true;
-            const patientMatch = filters.patient ? quote.patient_name.toLowerCase().includes(filters.patient.toLowerCase()) : true;
+            const folioMatch = filters.folio ? quote.id.toString().toLowerCase().includes(filters.folio.toLowerCase()) : true;
+            const patientMatch = filters.patient ? quote.patientName.toLowerCase().includes(filters.patient.toLowerCase()) : true;
             return folioMatch && patientMatch;
         });
     }, [quotes, filters]);
@@ -75,7 +71,7 @@ export default function QuotesPage() {
         setFilters(prev => ({ ...prev, [e.target.id]: e.target.value }));
     };
 
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (id: string) => {
         if (confirm('¿Estás seguro de que quieres eliminar esta cotización?')) {
             try {
                 await deleteQuote(id);
@@ -88,46 +84,30 @@ export default function QuotesPage() {
         }
     };
 
-    const handleConvertToRequest = async (quote: QuoteForTable) => {
+    const handleConvertToRequest = async (quote: Quote) => {
         if (quote.status === 'converted') {
-            return toast({ title: "Atención", description: "Esta cotización ya ha sido convertida."});
+            toast({ title: "Atención", description: "Esta cotización ya ha sido convertida."});
+            return;
         }
 
         try {
-            // 1. Obtener los detalles completos de la cotización
-            const quoteDetails = await getQuoteById(quote.id);
-            if (!quoteDetails || !quoteDetails.details) {
-                throw new Error("No se encontraron los detalles de la cotización.");
-            }
+            await createRecibo({
+                patientCode: quote.patientId,
+                patientName: quote.patientName,
+                studies: quote.studies,
+                packages: quote.packages,
+                subtotal: quote.subtotal,
+                discount: quote.discount,
+                total: quote.total,
+                paid: 0,
+                due: quote.total,
+            });
 
-            // 2. Construir el objeto para createRecibo
-            const reciboData = {
-                patient_id: quote.patient_id,
-                doctor_id: null, // No hay doctor en la cotización, se puede añadir en la solicitud
-                branch_id: 1, // Asumir sucursal principal por defecto
-                created_by_id: 1, // Asumir usuario admin por defecto
-                subtotal: quote.total || 0,
-                discount: 0,
-                total: quote.total || 0,
-                paid: 0, // El pago se realiza en la solicitud
-                details: quoteDetails.details.map(d => ({
-                    item_type: d.item_type,
-                    item_id: d.item_id,
-                    price: d.price,
-                    quantity: d.quantity,
-                }))
-            };
+            await updateQuote(String(quote.id), { status: 'converted' });
 
-            // 3. Crear el recibo
-            const newReciboId = await createRecibo(reciboData);
-
-            // 4. Actualizar el estado de la cotización
-            await updateQuoteStatus(quote.id, 'converted');
-
-            toast({ title: "Éxito", description: `La cotización ha sido convertida a la solicitud #${newReciboId}.` });
-            fetchQuotes(); // Refrescar la lista
-            // Opcional: redirigir a la nueva solicitud/recibo
-            // router.push(`/solicitud-examenes/editar/${newReciboId}`);
+            toast({ title: "Éxito", description: `La cotización ${quote.id.toString().substring(0,8)} ha sido convertida a solicitud.` });
+            fetchQuotes(); // Refresh the list to show the new status
+            router.push('/facturacion'); // Navigate to the billing/receipts page
 
         } catch (error) {
             console.error("Error converting quote to request:", error);
@@ -135,10 +115,8 @@ export default function QuotesPage() {
         }
     };
 
-    const handleEdit = (id: number) => {
-        // La edición de cotizaciones puede deshabilitarse o requerir una página de edición refactorizada
-        toast({ title: "Info", description: "La edición de cotizaciones está deshabilitada temporalmente." });
-        // router.push(`/cotizaciones/editar/${id}`);
+    const handleEdit = (id: string) => {
+        router.push(`/cotizaciones/editar/${id}`);
     };
 
   return (
@@ -154,7 +132,9 @@ export default function QuotesPage() {
         </div>
       <Card>
         <CardHeader className="bg-primary text-primary-foreground rounded-t-lg">
-          <CardTitle className="flex items-center gap-2"><Filter /> Filtros de Búsqueda</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Filter /> Filtros de Búsqueda
+          </CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
@@ -179,9 +159,13 @@ export default function QuotesPage() {
       <Card>
         <CardHeader className="bg-primary text-primary-foreground rounded-t-lg">
             <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2"><Newspaper /> Listado de Cotizaciones</div>
+                <div className="flex items-center gap-2">
+                    <Newspaper /> Listado de Cotizaciones
+                </div>
                 <Button asChild className="bg-green-600 hover:bg-green-700">
-                    <Link href="/cotizaciones/crear"><Plus className="mr-2"/> Registrar nueva Cotización</Link>
+                    <Link href="/cotizaciones/crear">
+                        <Plus className="mr-2"/> Registrar nueva Cotización
+                    </Link>
                 </Button>
             </CardTitle>
         </CardHeader>
@@ -204,23 +188,23 @@ export default function QuotesPage() {
                     ) : filteredQuotes.length > 0 ? (
                         filteredQuotes.map(quote => (
                             <TableRow key={quote.id}>
-                                <TableCell>#{quote.id}</TableCell>
+                                <TableCell>{quote.id.toString().substring(0, 8)}</TableCell>
                                 <TableCell>{new Date(quote.date).toLocaleDateString()}</TableCell>
-                                <TableCell>{quote.patient_name}</TableCell>
-                                <TableCell>${(quote.total || 0).toFixed(2)}</TableCell>
+                                <TableCell>{quote.patientName}</TableCell>
+                                <TableCell>${quote.total.toFixed(2)}</TableCell>
                                 <TableCell>
                                     <span className={`px-2 py-1 rounded-full text-xs capitalize ${quote.status === 'pending' ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800'}`}>
-                                        {quote.status === 'pending' ? 'Pendiente' : 'Convertida'}
+                                        {quote.status}
                                     </span>
                                 </TableCell>
                                 <TableCell className="text-right flex gap-2 justify-end">
                                     <Button variant="outline" size="icon" title="Convertir a Solicitud" onClick={() => handleConvertToRequest(quote)} disabled={quote.status === 'converted'}>
                                         <FileCheck className="h-4 w-4 text-green-600"/>
                                     </Button>
-                                    <Button variant="outline" size="icon" title="Editar Cotización" onClick={() => handleEdit(quote.id)} disabled={quote.status === 'converted'}>
+                                    <Button variant="outline" size="icon" title="Editar Cotización" onClick={() => handleEdit(String(quote.id))} disabled={quote.status === 'converted'}>
                                         <Pencil className="h-4 w-4"/>
                                     </Button>
-                                    <Button variant="destructive" size="icon" title="Eliminar Cotización" onClick={() => handleDelete(quote.id)}>
+                                    <Button variant="destructive" size="icon" title="Eliminar Cotización" onClick={() => handleDelete(String(quote.id))}>
                                         <Trash2 className="h-4 w-4"/>
                                     </Button>
                                 </TableCell>

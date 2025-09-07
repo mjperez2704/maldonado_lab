@@ -25,7 +25,7 @@ Laboratorios Maldonado`
   const subject = reportTemplate.subject.replace('{patient_name}', input.patientName);
   let body = reportTemplate.body.replace('{patient_name}', input.patientName);
   
-  const resultsText = input.results.map(r => `- ${r.studyName} (${r.parameterName}): ${r.result} (Ref: ${r.reference})`).join('\n');
+  const resultsText = input.results.map(r => `- ${r.studyName}: ${r.result} (Ref: ${r.reference})`).join('\n');
   
   // This is a simplified replacement. A real implementation would be more robust.
   if (body.includes('Adjunto encontrarás tus resultados de laboratorio.')) {

@@ -27,8 +27,7 @@ export default function LoginPage() {
     try {
       const user = await login({ email, password });
 
-     // if (user && user.name && user.position) {
-      if (true===true) {
+      if (user) {
         // --- Manejo de Sesión y Permisos (Básico) ---
         // NOTA: Esto es para desarrollo. En producción se usan cookies seguras (httpOnly).
         sessionStorage.setItem('userData', JSON.stringify({
@@ -47,10 +46,9 @@ export default function LoginPage() {
       } else {
         toast({
           title: "Error de autenticación",
-          description: "Usuario o contraseña incorrectos. Intente de nuevo.\n " + { email: user.email, password: user.password},
+          description: "Usuario o contraseña incorrectos.",
           variant: "destructive",
         });
-        //setLoading(false);
         setLoading(false);
       }
     } catch (error) {

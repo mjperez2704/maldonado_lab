@@ -3,97 +3,71 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getReciboById, Recibo, TestResult, saveResults } from "@/services/reciboService";
 import { FileStack, Save, User, Calendar, Hash } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
-// Importar las nuevas interfaces y funciones de los servicios refactorizados
-import { getReciboById, saveResults, ReciboView, ReciboResult } from "@/services/reciboService";
-
 export default function CaptureResultsPage() {
     const params = useParams();
     const router = useRouter();
     const { toast } = useToast();
-    const reciboId = Number(params.id);
+    const reciboId = params.id as string;
 
-    const [recibo, setRecibo] = useState<ReciboView | null>(null);
+    const [recibo, setRecibo] = useState<Recibo | null>(null);
+    const [results, setResults] = useState<TestResult[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (reciboId) {
-            getReciboById(reciboId)
-                .then(reciboData => {
-                    if (reciboData) {
-                        setRecibo(reciboData);
-                    } else {
-                        toast({ title: "Error", description: "Solicitud no encontrada.", variant: "destructive" });
-                        router.push('/reporte-resultados');
-                    }
-                })
-                .catch(err => {
-                    console.error("Error fetching data:", err);
-                    toast({ title: "Error", description: "No se pudieron cargar los datos de la solicitud.", variant: "destructive" });
-                })
-                .finally(() => setLoading(false));
+            getReciboById(reciboId).then(data => {
+                if (data) {
+                    setRecibo({
+                        ...data,
+                        status: (data.status as Recibo['status']) || 'pending', // Provide a default value for undefined status
+                    });
+                    // Initialize results state based on studies in the receipt
+                    const initialResults = data.studies?.map((studyName: string) => {
+                        const existingResult = data.results?.find((r: TestResult) => r.studyName === studyName);
+                        return existingResult || { studyName, result: '', reference: '' };
+                    }) || [];
+                    setResults(initialResults);
+                } else {
+                    toast({ title: "Error", description: "Solicitud no encontrada.", variant: "destructive" });
+                    router.push('/reporte-resultados');
+                }
+            }).finally(() => setLoading(false));
         }
     }, [reciboId, router, toast]);
 
-    const handleResultChange = (detailIndex: number, paramIndex: number, value: string) => {
-        if (!recibo) return;
-
-        // Actualización inmutable del estado anidado
-        const updatedRecibo = { ...recibo };
-        const updatedDetails = [...updatedRecibo.details];
-        const updatedDetail = { ...updatedDetails[detailIndex] };
-        const updatedParameters = [...(updatedDetail.parameters || [])];
-        updatedParameters[paramIndex] = { ...updatedParameters[paramIndex], result: value };
-
-        updatedDetail.parameters = updatedParameters;
-        updatedDetails[detailIndex] = updatedDetail;
-        updatedRecibo.details = updatedDetails;
-
-        setRecibo(updatedRecibo);
+    const handleResultChange = (index: number, field: keyof TestResult, value: string) => {
+        const newResults = [...results];
+        (newResults[index] as any)[field] = value;
+        setResults(newResults);
     };
 
     const handleSaveChanges = async () => {
         if (!recibo) return;
-        setLoading(true);
-
         try {
-            // Transformar los datos del estado al formato que espera el servicio
-            const resultsToSave: Omit<ReciboResult, 'id' | 'validated_at' | 'validated_by_id'>[] = [];
-            recibo.details.forEach(detail => {
-                detail.parameters?.forEach(param => {
-                    if (param.result !== null && param.result !== undefined && param.result !== '') {
-                        resultsToSave.push({
-                            recibo_detail_id: detail.id,
-                            parameter_id: param.id,
-                            result: param.result,
-                        });
-                    }
-                });
-            });
-
-            await saveResults(recibo.id, resultsToSave);
-            toast({ title: "Éxito", description: "Resultados guardados correctamente." });
+            await saveResults(recibo.id, results);
+            toast({ title: "Éxito", description: "Resultados guardados correctamente."});
             router.push('/reporte-resultados');
         } catch (error) {
             console.error("Error saving results:", error);
-            toast({ title: "Error", description: "No se pudieron guardar los resultados.", variant: "destructive" });
-        } finally {
-            setLoading(false);
+            toast({ title: "Error", description: "No se pudieron guardar los resultados.", variant: "destructive"});
         }
-    };
+    }
 
     if (loading) {
-        return <div className="flex justify-center items-center h-full">Cargando información de la solicitud...</div>;
+        return <div>Cargando información de la solicitud...</div>
     }
 
     if (!recibo) {
-        return <div className="flex justify-center items-center h-full">No se encontró la solicitud.</div>;
+        return <div>No se encontró la solicitud.</div>
     }
 
     return (
@@ -116,11 +90,11 @@ export default function CaptureResultsPage() {
                 <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="flex items-center gap-2">
                         <Hash className="text-primary"/>
-                        <strong>Folio:</strong> #{recibo.id}
+                        <strong>Folio:</strong> {recibo.barcode}
                     </div>
                     <div className="flex items-center gap-2">
                         <User className="text-primary"/>
-                        <strong>Paciente:</strong> {recibo.patient_name}
+                        <strong>Paciente:</strong> {recibo.patientName}
                     </div>
                     <div className="flex items-center gap-2">
                         <Calendar className="text-primary"/>
@@ -139,50 +113,37 @@ export default function CaptureResultsPage() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Estudio</TableHead>
-                                    <TableHead>Parámetro</TableHead>
                                     <TableHead>Resultado</TableHead>
                                     <TableHead>Valores de Referencia</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                               {recibo.details.flatMap((detail, detailIndex) =>
-                                   detail.parameters && detail.parameters.length > 0 ? (
-                                       detail.parameters.map((param, paramIndex) => (
-                                           <TableRow key={`${detail.id}-${param.id}`}>
-                                               <TableCell className="font-medium">{detail.item_name}</TableCell>
-                                               <TableCell>{param.name}</TableCell>
-                                               <TableCell>
-                                                   <Input
-                                                       value={param.result || ''}
-                                                       onChange={(e) => handleResultChange(detailIndex, paramIndex, e.target.value)}
-                                                       placeholder="Ingrese resultado"
-                                                    />
-                                               </TableCell>
-                                               <TableCell>{param.reference_value}</TableCell>
-                                           </TableRow>
-                                       ))
-                                   ) : (
-                                    // Renderiza una fila para estudios sin parámetros predefinidos
-                                    <TableRow key={`${detail.id}-no-params`}>
-                                        <TableCell className="font-medium">{detail.item_name}</TableCell>
-                                        <TableCell>Resultado General</TableCell>
-                                        <TableCell>
-                                            <Input
-                                                placeholder="Ingrese resultado"
-                                                // Aquí se necesitaría una lógica para manejar resultados que no están ligados a un parámetro
+                               {results.map((result, index) => (
+                                   <TableRow key={index}>
+                                       <TableCell className="font-medium">{result.studyName}</TableCell>
+                                       <TableCell>
+                                           <Input
+                                               value={result.result}
+                                               onChange={(e) => handleResultChange(index, 'result', e.target.value)}
+                                               placeholder="Ingrese resultado"
                                             />
-                                        </TableCell>
-                                        <TableCell>N/A</TableCell>
-                                    </TableRow>
-                                   )
-                               )}
+                                       </TableCell>
+                                       <TableCell>
+                                            <Input
+                                               value={result.reference}
+                                               onChange={(e) => handleResultChange(index, 'reference', e.target.value)}
+                                               placeholder="Ej. 70-110 mg/dL"
+                                            />
+                                       </TableCell>
+                                   </TableRow>
+                               ))}
                             </TableBody>
                         </Table>
                     </div>
                 </CardContent>
                 <CardFooter className="justify-end">
-                    <Button onClick={handleSaveChanges} disabled={loading}>
-                        <Save className="mr-2 h-4 w-4"/> {loading ? 'Guardando...' : 'Guardar Resultados'}
+                    <Button onClick={handleSaveChanges}>
+                        <Save className="mr-2 h-4 w-4"/> Guardar Resultados
                     </Button>
                 </CardFooter>
             </Card>

@@ -1,32 +1,101 @@
+
+"use client";
+
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { UserCheck } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Check, UserCheck } from "lucide-react";
+import { useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
+import { getEmployeeById, updateEmployee } from "@/services/employeeService";
 import Link from "next/link";
-import { getBranches } from "@/services/branchService";
-import { getEmployeeById } from "@/services/employeeService";
-import EditEmployeeForm from "./EditEmployeeForm";
-import { notFound } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { useLoader } from "@/hooks/useLoader";
 
-// Definimos las props que recibirá la página desde la URL (el 'id' del empleado)
-interface EditEmployeePageProps {
-    params: {
-        id: string;
-    }
-}
+const employeeSchema = z.object({
+  name: z.string().min(1, { message: "El nombre es requerido." }),
+  username: z.string().min(1, { message: "El nombre de usuario es requerido." }),
+  email: z.string().email({ message: "Correo electrónico no válido." }),
+  password: z.string().optional(),
+  phone: z.string().optional(),
+  branch: z.string().min(1, { message: "La sucursal es requerida." }),
+  position: z.string().min(1, { message: "El puesto es requerido." }),
+});
 
-// La página ahora es un componente de servidor asíncrono.
-export default async function EditEmployeePage({ params }: EditEmployeePageProps) {
+type EmployeeFormValues = z.infer<typeof employeeSchema>;
+
+
+export default function EditEmployeePage() {
+  const router = useRouter();
+  const params = useParams();
   const employeeId = Number(params.id);
+  const { toast } = useToast();
+  const loader = useLoader();
 
-  // Obtenemos los datos en paralelo para mayor eficiencia.
-  const [employee, branches] = await Promise.all([
-    getEmployeeById(employeeId),
-    getBranches()
-  ]);
+  const form = useForm<EmployeeFormValues>({
+    resolver: zodResolver(employeeSchema),
+    defaultValues: {
+      name: '',
+      username: '',
+      email: '',
+      password: '',
+      phone: '',
+      branch: '',
+      position: '',
+    },
+  });
 
-  // Si el empleado no se encuentra, mostramos una página 404.
-  if (!employee) {
-    notFound();
-  }
+  useEffect(() => {
+    if (employeeId) {
+      loader.start('read');
+      getEmployeeById(employeeId).then(data => {
+        if(data) {
+          form.reset({ 
+              ...data, 
+              password: '', // Don't pre-fill password
+              phone: data.phone || ''
+            });
+        } else {
+          toast({ title: "Error", description: "Empleado no encontrado.", variant: "destructive" });
+          router.push('/empleados');
+        }
+      }).catch(error => {
+        console.error("Error fetching employee:", error);
+        toast({ title: "Error", description: "No se pudieron cargar los datos del empleado.", variant: "destructive" });
+      }).finally(() => loader.stop());
+    }
+  }, [employeeId, router, form.reset, toast, loader.start, loader.stop]);
+
+  const onSubmit = async (data: EmployeeFormValues) => {
+    loader.start("update");
+    try {
+      const updateData = { ...data };
+      if (!updateData.password) {
+        delete updateData.password;
+      }
+      
+      await updateEmployee(employeeId, updateData);
+      toast({
+          title: "Éxito",
+          description: "Empleado actualizado correctamente.",
+      });
+      router.push('/empleados');
+    } catch (error) {
+      console.error("Error updating employee: ", error);
+      toast({
+          title: "Error",
+          description: "No se pudo actualizar el empleado.",
+          variant: "destructive",
+      });
+    } finally {
+        loader.stop();
+    }
+  };
 
   return (
     <div className="flex flex-col gap-4 py-8">
@@ -44,8 +113,56 @@ export default async function EditEmployeePage({ params }: EditEmployeePageProps
           <CardTitle>Editar Empleado</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-8 pt-6">
-          {/* Renderizamos el componente de cliente con los datos obtenidos. */}
-          <EditEmployeeForm branches={branches} employee={employee} />
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <FormField control={form.control} name="name" render={({ field }) => (
+                      <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input placeholder="Nombre completo" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
+                  )}/>
+                  <FormField control={form.control} name="username" render={({ field }) => (
+                      <FormItem><FormLabel>Nombre de usuario</FormLabel><FormControl><Input placeholder="Nombre de usuario" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
+                  )}/>
+                  <FormField control={form.control} name="email" render={({ field }) => (
+                      <FormItem><FormLabel>Correo electrónico</FormLabel><FormControl><Input type="email" placeholder="Correo electrónico" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
+                  )}/>
+                  <FormField control={form.control} name="password" render={({ field }) => (
+                      <FormItem><FormLabel>Contraseña</FormLabel><FormControl><Input type="password" placeholder="Dejar en blanco para no cambiar" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
+                  )}/>
+                  <FormField control={form.control} name="phone" render={({ field }) => (
+                      <FormItem><FormLabel>Teléfono</FormLabel><FormControl><Input placeholder="Número de teléfono" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
+                  )}/>
+                  <FormField control={form.control} name="branch" render={({ field }) => (
+                      <FormItem><FormLabel>Sucursal</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value} disabled={loader.status !== 'idle'}>
+                              <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar sucursal" /></SelectTrigger></FormControl>
+                              <SelectContent>
+                                  <SelectItem value="Sucursal Principal">Sucursal Principal</SelectItem>
+                                  <SelectItem value="Sucursal Secundaria">Sucursal Secundaria</SelectItem>
+                              </SelectContent>
+                          </Select>
+                      <FormMessage /></FormItem>
+                  )}/>
+                  <FormField control={form.control} name="position" render={({ field }) => (
+                      <FormItem><FormLabel>Puesto</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value} disabled={loader.status !== 'idle'}>
+                              <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar puesto" /></SelectTrigger></FormControl>
+                              <SelectContent>
+                                  <SelectItem value="Administrador de Sistema">Administrador de Sistema</SelectItem>
+                                  <SelectItem value="Recepcionista">Recepcionista</SelectItem>
+                                  <SelectItem value="Químico Analista">Químico Analista</SelectItem>
+                              </SelectContent>
+                          </Select>
+                      <FormMessage /></FormItem>
+                  )}/>
+              </div>
+              
+              <div className="flex justify-start">
+                  <Button type="submit" disabled={loader.status !== 'idle'}>
+                      <Check className="mr-2"/> {loader.status === 'update' ? 'Guardando...' : 'Guardar Cambios'}
+                  </Button>
+              </div>
+            </form>
+          </Form>
         </CardContent>
       </Card>
     </div>

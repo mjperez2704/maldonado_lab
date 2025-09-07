@@ -1,6 +1,5 @@
 'use server';
 import { executeQuery } from '@/lib/db';
-import {connection} from "next/server";
 
 export interface CultureOption {
   id: number;
@@ -10,7 +9,7 @@ export interface CultureOption {
 
 export async function getCultureOptions(): Promise<CultureOption[]> {
     try {
-        const results = await executeQuery<CultureOption[]>('SELECT * FROM culture_options', []);
+        const results = await executeQuery<CultureOption[]>('SELECT * FROM culture_options');
         return results.map(row => ({
             ...row,
             options: Array.isArray(row.options) ? row.options : JSON.parse(row.options ?? '[]') as string[]

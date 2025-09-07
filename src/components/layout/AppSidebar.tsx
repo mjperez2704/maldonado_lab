@@ -1,5 +1,6 @@
 
 "use client";
+import React from 'react';
 import {
   Sidebar,
   SidebarHeader,
@@ -7,8 +8,7 @@ import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
-  SidebarGroup,
-  SidebarGroupLabel,
+  SidebarSeparator,
 } from "@/components/ui/sidebar";
 import Link from 'next/link';
 import {
@@ -17,6 +17,7 @@ import {
   FileText,
   Printer,
   ClipboardList,
+  FileStack,
   Building,
   BarChart,
   User,
@@ -40,12 +41,6 @@ import {
   ListTree,
   Boxes,
   ShoppingCart,
-  Palette,
-  DollarSign,
-  BookUser,
-  Cog,
-  ShieldCheck,
-  Building2,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
@@ -72,60 +67,66 @@ const HandshakeIcon = () => (
     </svg>
 );
 
-export const menuGroups = [
-  {
-    label: "Principal",
-    icon: Palette,
-    items: [
-        { key: 'dashboard', icon: LayoutGrid, label: 'Dashboard', href: '/dashboard' },
-        { key: 'solicitud-examenes', icon: FlaskConical, label: 'Solicitud de Examenes', href: '/solicitud-examenes' },
-        { key: 'entrega-resultados', icon: Printer, label: 'Entrega de Resultados', href: '/entrega-resultados' },
-        { key: 'facturacion', icon: FileText, label: 'Facturación', href: '/facturacion' },
-    ]
-  },
-  {
-      label: "Catálogos",
-      icon: BookUser,
-      items: [
-          { key: 'pacientes', icon: Users, label: 'Pacientes', href: '/pacientes' },
-          { key: 'doctores', icon: PlusSquare, label: 'Doctores', href: '/doctores' },
-          { key: 'empleados', icon: UserCheck, label: 'Empleados', href: '/empleados' },
-          { key: 'proveedores', icon: User, label: 'Proveedores', href: '/proveedores' },
-          { key: 'estudios', icon: Microscope, label: 'Estudios', href: '/estudios' },
-          { key: 'paquetes', icon: Package, label: 'Paquetes', href: '/paquetes' },
-          { key: 'cultivos', icon: TestTube, label: 'Cultivos', href: '/cultivos' },
-          { key: 'antibioticos', icon: Pill, label: 'Antibióticos', href: '/antibioticos' },
-          { key: 'productos', icon: Boxes, label: 'Productos', href: '/productos' },
-          { key: 'categorias', icon: ListTree, label: 'Categorías', href: '/categorias' },
-      ]
-  },
-  {
-      label: "Finanzas",
-      icon: DollarSign,
-      items: [
-          { key: 'compras', icon: ShoppingCart, label: 'Compras', href: '/compras' },
-          { key: 'gastos', icon: BadgePercent, label: 'Gastos', href: '/gastos' },
-          { key: 'ingresos-y-egresos', icon: Landmark, label: 'Ingresos y Egresos', href: '/ingresos-y-egresos' },
-          { key: 'corte-caja', icon: Calculator, label: 'Corte de Caja', href: '/corte-caja' },
-          { key: 'cuentas-por-cobrar', icon: CreditCard, label: 'Cuentas por Cobrar', href: '/cuentas-por-cobrar' },
-          { key: 'notas-de-credito', icon: NotebookTabs, label: 'Notas de Crédito', href: '/notas-de-credito' },
-          { key: 'listas-de-precios', icon: ClipboardList, label: 'Lista de Precios', href: '/listas-de-precios' },
-          { key: 'convenios', icon: HandshakeIcon, label: 'Convenios', href: '/convenios' },
-          { key: 'cotizaciones', icon: Newspaper, label: 'Cotizaciones', href: '/cotizaciones' },
-      ]
-  },
-  {
-      label: "Administración",
-      icon: Cog,
-      items: [
-          { key: 'configuraciones', icon: Settings, label: 'Configuraciones', href: '/configuraciones' },
-          { key: 'permisos', icon: FileKey, label: 'Permisos', href: '/permisos' },
-          { key: 'sucursales', icon: Building, label: 'Sucursales', href: '/sucursales' },
-          { key: 'gestion-calidad', icon: FileDown, label: 'Gestión de Calidad', href: '#' },
-          { key: 'informes', icon: BarChart, label: 'Informes', href: '#' },
-          { key: 'opciones-cultivos', icon: ClipboardList, label: 'Opciones de Cultivos', href: '/cultivos/opciones' },
-      ]
-  }
+const menuGroups = [
+    {
+        items: [
+            { icon: LayoutGrid, label: 'Dashboard', href: '/dashboard' },
+        ]
+    },
+    {
+        groupLabel: 'Operaciones',
+        items: [
+            { icon: FlaskConical, label: 'Solicitud de Examenes', href: '/solicitud-examenes' },
+            { icon: FileStack, label: 'Reporte de Resultados', href: '/reporte-resultados' },
+            { icon: Printer, label: 'Entrega de Resultados', href: '/entrega-resultados' },
+            { icon: Newspaper, label: 'Cotizaciones', href: '/cotizaciones' },
+        ]
+    },
+    {
+        groupLabel: 'Catálogos',
+        items: [
+            { icon: Microscope, label: 'Estudios', href: '/estudios' },
+            { icon: TestTube, label: 'Cultivos', href: '/cultivos' },
+            { icon: ClipboardList, label: 'Opciones de Cultivos', href: '/cultivos/opciones' },
+            { icon: Package, label: 'Paquetes', href: '/paquetes' },
+            { icon: ListTree, label: 'Categorías', href: '/categorias' },
+            { icon: Pill, label: 'Antibióticos', href: '/antibioticos' },
+            { icon: Boxes, label: 'Productos', href: '/productos' },
+        ]
+    },
+    {
+        groupLabel: 'Administración',
+        items: [
+            { icon: Users, label: 'Pacientes', href: '/pacientes' },
+            { icon: PlusSquare, label: 'Doctores', href: '/doctores' },
+            { icon: User, label: 'Proveedores', href: '/proveedores' },
+            { icon: HandshakeIcon, label: 'Convenios', href: '/convenios' },
+            { icon: UserCheck, label: 'Empleados', href: '/empleados' },
+            { icon: Building, label: 'Sucursales', href: '/sucursales' },
+        ]
+    },
+    {
+        groupLabel: 'Finanzas',
+        items: [
+            { icon: Calculator, label: 'Corte de Caja', href: '/corte-caja' },
+            { icon: Landmark, label: 'Ingresos y Egresos', href: '/ingresos-y-egresos' },
+            { icon: CreditCard, label: 'Cuentas por Cobrar', href: '/cuentas-por-cobrar' },
+            { icon: NotebookTabs, label: 'Notas de Crédito', href: '/notas-de-credito' },
+            { icon: FileText, label: 'Facturación', href: '/facturacion' },
+            { icon: BadgePercent, label: 'Gastos', href: '/gastos' },
+            { icon: ShoppingCart, label: 'Compras', href: '/compras' },
+            { icon: ClipboardList, label: 'Lista de Precios', href: '/listas-de-precios' },
+        ]
+    },
+    {
+        groupLabel: 'Sistema',
+        items: [
+            { icon: BarChart, label: 'Informes', href: '#' },
+            { icon: FileDown, label: 'Gestión de Calidad', href: '#' },
+            { icon: FileKey, label: 'Permisos', href: '#' },
+            { icon: Settings, label: 'Configuraciones', href: '/configuraciones' },
+        ]
+    }
 ];
 
 
@@ -148,16 +149,31 @@ export function AppSidebar() {
         </SidebarHeader>
         <SidebarContent>
           <SidebarMenu>
-            {menuGroups.map((group) => (
-              <SidebarGroup key={group.label}>
-                <SidebarGroupLabel className="flex items-center gap-2">
-                    <group.icon className="h-5 w-5"/>
-                    {group.label}
-                </SidebarGroupLabel>
-                {group.items.map((item) => {
-                  const isActive = item.href !== '/' && item.href !== '#' && pathname.startsWith(item.href);
-                  
-                  return (
+            {menuGroups.flatMap((group, index) => {
+              const groupContent = [];
+
+              if (index > 0) {
+                groupContent.push(
+                  <li key={`${group.groupLabel || index}-separator`} aria-hidden="true">
+                    <SidebarSeparator className="my-1" />
+                  </li>
+                );
+              }
+
+              if (group.groupLabel) {
+                groupContent.push(
+                  <li key={group.groupLabel} className="px-3 pt-2 pb-1 text-xs font-bold text-muted-foreground tracking-wider uppercase">
+                    {group.groupLabel}
+                  </li>
+                );
+              }
+
+              group.items.forEach(item => {
+                const isActive = item.href === '/dashboard' 
+                  ? pathname === item.href 
+                  : item.href !== '#' && pathname.startsWith(item.href);
+                
+                groupContent.push(
                   <SidebarMenuItem key={item.label}>
                     <SidebarMenuButton
                       asChild
@@ -170,9 +186,11 @@ export function AppSidebar() {
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                )})}
-              </SidebarGroup>
-            ))}
+                );
+              });
+
+              return groupContent;
+            })}
           </SidebarMenu>
         </SidebarContent>
       </Sidebar>

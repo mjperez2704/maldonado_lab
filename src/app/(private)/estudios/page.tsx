@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -6,7 +7,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/ui/card"
 import {
   Table,
   TableBody,
@@ -14,29 +15,36 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+} from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import Link from "next/link";
 import {
   Plus,
+  Upload,
+  Copy,
+  FileSpreadsheet,
+  FileText,
+  FileDown,
+  ChevronDown,
+  Eye,
   Search,
+  Settings,
   Pencil,
   Trash2,
   ArrowUpDown,
   Microscope
-} from "lucide-react";
-// Importar las nuevas interfaces y funciones del servicio refactorizado
-import { getStudies, deleteStudy, Service } from '@/services/studyService';
+} from "lucide-react"
+import { getStudies, deleteStudy, Study } from '@/services/studyService';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useRouter } from 'next/navigation';
 import { useToast } from "@/hooks/use-toast";
 
-// Definir el tipo de dato que realmente se usa en el estado
-type StudyForTable = Service & { category_name: string | null };
 
 export default function StudiesPage() {
-    const [studies, setStudies] = useState<StudyForTable[]>([]);
+    const [studies, setStudies] = useState<Study[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const router = useRouter();
@@ -59,6 +67,7 @@ export default function StudiesPage() {
                 setLoading(false);
             }
         };
+
         fetchStudies();
     }, [toast]);
 
@@ -72,11 +81,12 @@ export default function StudiesPage() {
         );
     }, [searchTerm, studies]);
 
-    const handleDelete = async (id: number) => {
+
+    const handleDelete = async (id: string) => {
         if (confirm('¿Estás seguro de que quieres eliminar este estudio? Esta acción no se puede deshacer.')) {
             try {
                 await deleteStudy(id);
-                setStudies(studies.filter(s => s.id !== id));
+                setStudies(studies.filter(s => s.id !== Number(id)));
                 toast({
                     title: "Éxito",
                     description: "Estudio eliminado correctamente.",
@@ -92,7 +102,7 @@ export default function StudiesPage() {
         }
     };
 
-    const handleEdit = (id: number) => {
+    const handleEdit = (id: string) => {
         router.push(`/estudios/editar/${id}`);
     }
 
@@ -120,56 +130,101 @@ export default function StudiesPage() {
             </Link>
           </Button>
         </CardHeader>
-        <CardContent className="p-6 space-y-4">
-            <div className="flex justify-end">
-                <div className="relative w-full max-w-sm">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Buscar por nombre o código..."
-                        className="pl-10"
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                    />
+        <CardContent className="p-6">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4 p-4 bg-primary/10 rounded-lg">
+                <Button variant="outline" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                    <Upload className="mr-2 h-4 w-4" /> Importación / Exportación
+                </Button>
+                <div className="flex items-center gap-2">
+                    <Button variant="outline"><Copy className="mr-2 h-4 w-4" />Copiar</Button>
+                    <Button variant="outline"><FileSpreadsheet className="mr-2 h-4 w-4" />Excel</Button>
+                    <Button variant="outline"><FileText className="mr-2 h-4 w-4" />CSV</Button>
+                    <Button variant="outline"><FileDown className="mr-2 h-4 w-4" />PDF</Button>
+                    <Button variant="outline" size="icon"><Eye /></Button>
                 </div>
             </div>
-            <div className="overflow-x-auto border rounded-md">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline">
+                      Mostrar 10 <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem>10</DropdownMenuItem>
+                    <DropdownMenuItem>25</DropdownMenuItem>
+                    <DropdownMenuItem>50</DropdownMenuItem>
+                    <DropdownMenuItem>100</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <span className="text-muted-foreground">registros</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline">
+                      <Settings className="mr-2 h-4 w-4" /> Acción masiva <ChevronDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem>Eliminar seleccionados</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                    placeholder="Buscar por nombre o código..."
+                    className="pl-10"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="overflow-x-auto">
                 <Table>
                     <TableHeader>
-                        <TableRow>
-                            <TableHead>
-                                <Button variant="ghost" size="sm">Nombre <ArrowUpDown className="ml-2 h-4 w-4" /></Button>
-                            </TableHead>
-                            <TableHead>Categoría</TableHead>
-                            <TableHead>Tipo</TableHead>
-                            <TableHead>Precio</TableHead>
-                            <TableHead className="text-right">Acciones</TableHead>
-                        </TableRow>
+                    <TableRow>
+                        <TableHead className="w-[40px]">
+                        <Checkbox />
+                        </TableHead>
+                        <TableHead className="w-[80px]">#</TableHead>
+                        <TableHead>
+                            <Button variant="ghost" size="sm">Nombre <ArrowUpDown className="ml-2 h-4 w-4" /></Button>
+                        </TableHead>
+                        <TableHead>Área</TableHead>
+                        <TableHead>Método</TableHead>
+                        <TableHead>Costo Interno</TableHead>
+                        <TableHead className="text-right">Acción</TableHead>
+                    </TableRow>
                     </TableHeader>
                     <TableBody>
-                    {filteredStudies.length > 0 ? filteredStudies.map((study) => (
+                    {filteredStudies.length > 0 ? filteredStudies.map((study, index) => (
                         <TableRow key={study.id}>
-                            <TableCell className="font-medium">{study.name}</TableCell>
-                            <TableCell>{study.category_name || 'N/A'}</TableCell>
-                            <TableCell>
-                                <Badge variant={study.type === 'PAQUETE' ? 'default' : 'secondary'}>
-                                    {study.type}
-                                </Badge>
-                            </TableCell>
-                            <TableCell>${Number(study.price || 0).toFixed(2)}</TableCell>
-                            <TableCell>
-                                <div className="flex items-center justify-end gap-2">
-                                    <Button variant="outline" size="icon" onClick={() => handleEdit(study.id)}>
-                                        <Pencil className="h-4 w-4" />
-                                    </Button>
-                                    <Button variant="destructive" size="icon" onClick={() => handleDelete(study.id)}>
-                                        <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </TableCell>
+                        <TableCell>
+                            <Checkbox />
+                        </TableCell>
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell>{study.name}</TableCell>
+                        <TableCell>{study.area}</TableCell>
+                        <TableCell>{study.method || 'N/A'}</TableCell>
+                            <TableCell>${Number((study.internalCost || 0)).toFixed(2)}</TableCell>
+                        <TableCell>
+                            <div className="flex items-center justify-end gap-2">
+                            <Button variant="outline" size="icon" onClick={() => handleEdit(String(study.id))}>
+                                <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button variant="destructive" size="icon" onClick={() => handleDelete(String(study.id))}>
+                                <Trash2 className="h-4 w-4" />
+                            </Button>
+                            </div>
+                        </TableCell>
                         </TableRow>
                     )) : (
                         <TableRow>
-                            <TableCell colSpan={5} className="text-center text-muted-foreground h-24">
+                            <TableCell colSpan={7} className="text-center text-muted-foreground h-24">
                                 No se encontraron estudios.
                             </TableCell>
                         </TableRow>
@@ -177,6 +232,25 @@ export default function StudiesPage() {
                     </TableBody>
                 </Table>
             </div>
+             <div className="flex justify-between items-center">
+                <div className="text-sm text-muted-foreground">
+                    Mostrando 1 a {filteredStudies.length} de {studies.length} registros
+                </div>
+                <Pagination>
+                    <PaginationContent>
+                        <PaginationItem>
+                        <PaginationPrevious href="#" />
+                        </PaginationItem>
+                        <PaginationItem>
+                        <PaginationLink href="#" isActive>1</PaginationLink>
+                        </PaginationItem>
+                        <PaginationItem>
+                        <PaginationNext href="#" />
+                        </PaginationItem>
+                    </PaginationContent>
+                </Pagination>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>

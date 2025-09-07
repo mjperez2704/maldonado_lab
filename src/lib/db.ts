@@ -2,7 +2,6 @@
 
 import mysql from 'mysql2/promise';
 import dataNull from "./datanull.json";
-import {Connection} from "mysql";
 
 // Configuración de la base de datos
 const dbConfig = {
@@ -16,8 +15,6 @@ const dbConfig = {
     waitForConnections: true,
     queueLimit: 0,
 };
-
-
 
 function getTableNameFromQuery(query: string): keyof typeof dataNull | null {
     const match = query.match(/(?:FROM|INTO|UPDATE|DELETE\s+FROM)\s+`?(\w+)`?/i);

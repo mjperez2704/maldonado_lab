@@ -2,11 +2,10 @@
 "use server";
 import { executeQuery } from '@/lib/db';
 import * as bcrypt from 'bcryptjs';
-import {connection} from "next/server";
 
 export async function login({ email, password }: { email: string; password: string }) {
   // Cambiamos 'employees' por 'users' y seleccionamos 'role_id'
-  const results = await executeQuery<any[]>('SELECT id, employee_id, email, username, password, role_id, is_active FROM users WHERE email = ?', [email]);
+  const results = await executeQuery<any[]>('SELECT id, users.username, email, password, role_id FROM users WHERE email = ?', [email]);
 
   if (results.length === 0) {
     return null; // Usuario no encontrado

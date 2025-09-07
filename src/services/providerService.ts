@@ -1,6 +1,5 @@
 "use server";
 import { executeQuery } from '@/lib/db';
-import {connection} from "next/server";
 
 export interface Provider {
   id: number;
@@ -12,7 +11,7 @@ export interface Provider {
 
 export async function getProviders(): Promise<Provider[]> {
     try {
-        const results = await executeQuery('SELECT * FROM providers', []);
+        const results = await executeQuery('SELECT * FROM providers');
         return JSON.parse(JSON.stringify(results)) as Provider[];
     } catch (error) {
         console.error("Database query failed:", error);

@@ -1,12 +1,13 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { Boxes, Check } from "lucide-react";
-import React, { useEffect } from 'react';
+import { Switch } from "@/components/ui/switch";
+import { Boxes, Check, Calendar as CalendarIcon } from "lucide-react";
+import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from "next/navigation";
 import { getProductById, updateProduct } from "@/services/productService";
 import Link from "next/link";
@@ -17,17 +18,19 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { useLoader } from "@/hooks/useLoader";
 
-// Esquema de Zod actualizado para coincidir con la nueva BD
 const productSchema = z.object({
   name: z.string().min(1, "El nombre es requerido."),
   sku: z.string().optional(),
-  description: z.string().optional(),
-  type: z.enum(['ANTIBIOTICO', 'CONSUMIBLE', 'PRUEBA_RAPIDA', 'OTRO']),
-  unit: z.string().optional(),
-  price: z.coerce.number().min(0, "El precio debe ser positivo."),
-  cost: z.coerce.number().min(0, "El costo debe ser positivo.").optional(),
-  stock: z.coerce.number().min(0, "El stock no puede ser negativo."),
-  stock_alert: z.coerce.number().min(0, "La alerta de stock no puede ser negativa."),
+  branch: z.string().min(1, "La sucursal es requerida."),
+  category: z.string().min(1, "La categoría es requerida."),
+  unit: z.string().min(1, "La unidad es requerida."),
+  purchasePrice: z.coerce.number().min(0, "El precio debe ser positivo."),
+  salePrice: z.coerce.number().min(0, "El precio debe ser positivo."),
+  initialStock: z.coerce.number().min(0, "El stock debe ser positivo."),
+  stockAlert: z.coerce.number().min(0, "La alerta de stock debe ser positiva."),
+  expiryDate: z.string().optional(),
+  expiryAlertDays: z.coerce.number().min(0, "Los días deben ser positivos."),
+  expiryAlertActive: z.boolean().default(false),
 });
 
 type ProductFormValues = z.infer<typeof productSchema>;
@@ -50,10 +53,8 @@ export default function EditProductPage() {
                 if (productData) {
                     form.reset({
                         ...productData,
+                        expiryDate: productData.expiryDate ? productData.expiryDate.split('T')[0] : '',
                         sku: productData.sku || '',
-                        description: productData.description || '',
-                        unit: productData.unit || '',
-                        cost: productData.cost || 0,
                     });
                 } else {
                     toast({ title: "Error", description: "Producto no encontrado.", variant: "destructive" });
@@ -64,18 +65,12 @@ export default function EditProductPage() {
                 toast({ title: "Error", description: "No se pudieron cargar los datos del producto.", variant: "destructive" });
             }).finally(() => loader.stop());
         }
-    }, [productId, router, form, toast, loader]);
+    }, [productId, router, form.reset, toast, loader.start, loader.stop]);
 
     const onSubmit = async (data: ProductFormValues) => {
         loader.start('update');
         try {
-            await updateProduct(productId, {
-                ...data,
-                sku: data.sku || null,
-                description: data.description || null,
-                unit: data.unit || null,
-                cost: data.cost || null,
-            });
+            await updateProduct(productId, data);
             toast({
                 title: "Éxito",
                 description: "Producto actualizado correctamente.",
@@ -108,52 +103,53 @@ export default function EditProductPage() {
         <CardHeader>
           <CardTitle>Editar producto</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex flex-col gap-8 pt-6">
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         <FormField control={form.control} name="name" render={({ field }) => (
-                            <FormItem><FormLabel>Nombre*</FormLabel><FormControl><Input placeholder="Nombre del producto" {...field} disabled={loader.status !== 'idle'}/></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input placeholder="Nombre del producto" {...field} disabled={loader.status !== 'idle'}/></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={form.control} name="sku" render={({ field }) => (
-                            <FormItem><FormLabel>SKU</FormLabel><FormControl><Input placeholder="Código de producto" {...field} value={field.value || ''} disabled={loader.status !== 'idle'}/></FormControl><FormMessage /></FormItem>
+                            <FormItem><FormLabel>SKU</FormLabel><FormControl><Input placeholder="SKU" {...field} disabled={loader.status !== 'idle'}/></FormControl><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={form.control} name="type" render={({ field }) => (
-                            <FormItem><FormLabel>Tipo*</FormLabel>
-                                <Select onValueChange={field.onChange} value={field.value} disabled={loader.status !== 'idle'}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar tipo" /></SelectTrigger></FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="CONSUMIBLE">Consumible</SelectItem>
-                                        <SelectItem value="PRUEBA_RAPIDA">Prueba Rápida</SelectItem>
-                                        <SelectItem value="ANTIBIOTICO">Antibiótico</SelectItem>
-                                        <SelectItem value="OTRO">Otro</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            <FormMessage /></FormItem>
+                        <FormField control={form.control} name="branch" render={({ field }) => (
+                            <FormItem><FormLabel>Sucursal</FormLabel><Select onValueChange={field.onChange} value={field.value} disabled={loader.status !== 'idle'}><FormControl><SelectTrigger><SelectValue placeholder="Seleccionar sucursal" /></SelectTrigger></FormControl><SelectContent><SelectItem value="main">Sucursal Principal</SelectItem><SelectItem value="secondary">Sucursal Secundaria</SelectItem></SelectContent></Select><FormMessage /></FormItem>
+                        )}/>
+                        <FormField control={form.control} name="category" render={({ field }) => (
+                            <FormItem><FormLabel>Categoría</FormLabel><Select onValueChange={field.onChange} value={field.value} disabled={loader.status !== 'idle'}><FormControl><SelectTrigger><SelectValue placeholder="Seleccionar categoría" /></SelectTrigger></FormControl><SelectContent><SelectItem value="reagents">Reactivos</SelectItem><SelectItem value="materials">Materiales</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                         )}/>
                         <FormField control={form.control} name="unit" render={({ field }) => (
-                           <FormItem><FormLabel>Unidad</FormLabel><FormControl><Input placeholder="Ej. Pieza, Caja, Kit" {...field} value={field.value || ''} disabled={loader.status !== 'idle'}/></FormControl><FormMessage /></FormItem>
+                           <FormItem><FormLabel>Unidad</FormLabel><Select onValueChange={field.onChange} value={field.value} disabled={loader.status !== 'idle'}><FormControl><SelectTrigger><SelectValue placeholder="Seleccionar unidad" /></SelectTrigger></FormControl><SelectContent><SelectItem value="piece">Pieza</SelectItem><SelectItem value="kit">Kit</SelectItem><SelectItem value="box">Caja</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                         )}/>
-                         <FormField control={form.control} name="price" render={({ field }) => (
-                            <FormItem><FormLabel>Precio de Venta*</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
+                         <FormField control={form.control} name="purchasePrice" render={({ field }) => (
+                            <FormItem><FormLabel>Precio de compra</FormLabel><div className="flex items-center"><span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-muted-foreground">MXN</span><FormControl><Input type="number" placeholder="Precio de compra" className="rounded-l-none" {...field} disabled={loader.status !== 'idle'}/></FormControl></div><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={form.control} name="cost" render={({ field }) => (
-                            <FormItem><FormLabel>Costo de Compra</FormLabel><FormControl><Input type="number" placeholder="0.00" {...field} value={field.value || 0} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
+                        <FormField control={form.control} name="salePrice" render={({ field }) => (
+                            <FormItem><FormLabel>Precio de venta</FormLabel><div className="flex items-center"><span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-muted-foreground">MXN</span><FormControl><Input type="number" placeholder="Precio de venta" className="rounded-l-none" {...field} disabled={loader.status !== 'idle'}/></FormControl></div><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={form.control} name="stock" render={({ field }) => (
-                            <FormItem><FormLabel>Stock*</FormLabel><FormControl><Input type="number" placeholder="0" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
+                        <FormField control={form.control} name="initialStock" render={({ field }) => (
+                            <FormItem><FormLabel>Cantidad inicial</FormLabel><FormControl><Input type="number" placeholder="Cantidad inicial" {...field} disabled={loader.status !== 'idle'}/></FormControl><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={form.control} name="stock_alert" render={({ field }) => (
-                            <FormItem><FormLabel>Alerta de Stock*</FormLabel><FormControl><Input type="number" placeholder="0" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
+                        <FormField control={form.control} name="stockAlert" render={({ field }) => (
+                            <FormItem><FormLabel>Alerta de cantidad</FormLabel><FormControl><Input type="number" placeholder="Alerta de cantidad" {...field} disabled={loader.status !== 'idle'}/></FormControl><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={form.control} name="description" render={({ field }) => (
-                            <FormItem className="md:col-span-2 lg:col-span-3"><FormLabel>Descripción</FormLabel><FormControl><Textarea placeholder="Descripción del producto..." {...field} value={field.value || ''} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
+                        <FormField control={form.control} name="expiryDate" render={({ field }) => (
+                            <FormItem><FormLabel>Caducidad</FormLabel><div className="relative"><FormControl><Input type="date" placeholder="DD/MM/AAAA" {...field} disabled={loader.status !== 'idle'}/></FormControl><CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /></div><FormMessage /></FormItem>
                         )}/>
+                        <div className="flex items-end space-x-2">
+                           <FormField control={form.control} name="expiryAlertDays" render={({ field }) => (
+                                <FormItem className="flex-grow"><FormLabel>Días aviso caducidad</FormLabel><FormControl><Input type="number" placeholder="Días" {...field} disabled={loader.status !== 'idle'}/></FormControl><FormMessage /></FormItem>
+                           )}/>
+                            <FormField control={form.control} name="expiryAlertActive" render={({ field }) => (
+                                <FormItem className="flex items-center space-x-2 pb-2"><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} disabled={loader.status !== 'idle'}/></FormControl><FormLabel>Activo</FormLabel></FormItem>
+                           )}/>
+                        </div>
                     </div>
-
+                    
                     <div className="flex justify-start">
                         <Button type="submit" disabled={loader.status !== 'idle'}>
-                            <Check className="mr-2 h-4 w-4"/> {loader.status === 'update' ? 'Guardando...' : 'Guardar Cambios'}
+                            <Check className="mr-2"/> {loader.status === 'update' ? 'Guardando...' : 'Guardar Cambios'}
                         </Button>
                     </div>
                 </form>

@@ -1,6 +1,5 @@
 "use server";
 import { executeQuery } from '@/lib/db';
-import {connection} from "next/server";
 
 export interface Category {
   id: number;
@@ -9,7 +8,7 @@ export interface Category {
 
 export async function getCategories(): Promise<Category[]> {
     try {
-        const results = await executeQuery('SELECT * FROM categories', []);
+        const results = await executeQuery('SELECT * FROM categories');
         return JSON.parse(JSON.stringify(results)) as Category[];
     } catch (error) {
         console.error("Database query failed:", error);

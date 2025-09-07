@@ -1,6 +1,5 @@
 "use server";
 import { executeQuery } from '@/lib/db';
-import {connection} from "next/server";
 
 export interface Convenio {
     id: number;
@@ -11,7 +10,7 @@ export interface Convenio {
 
 export async function getConvenios(): Promise<Convenio[]> {
     try {
-        const results = await executeQuery('SELECT * FROM convenios', []);
+        const results = await executeQuery('SELECT * FROM convenios');
         return JSON.parse(JSON.stringify(results)) as Convenio[];
     } catch (error) {
         console.error("Database query failed:", error);

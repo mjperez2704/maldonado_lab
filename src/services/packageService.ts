@@ -1,6 +1,5 @@
 "use server";
 import { executeQuery } from '@/lib/db';
-import {connection} from "next/server";
 
 export interface Package {
     id: number;
@@ -14,7 +13,7 @@ export interface Package {
 
 export async function getPackages(): Promise<Package[]> {
     try {
-        const results = await executeQuery<any[]>('SELECT * FROM packages', []);
+        const results = await executeQuery<any[]>('SELECT * FROM packages');
         const plainResults = JSON.parse(JSON.stringify(results));
         return plainResults.map((pkg: any) => ({
             ...pkg,

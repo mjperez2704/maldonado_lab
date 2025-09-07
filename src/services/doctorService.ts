@@ -1,22 +1,23 @@
 'use server';
 import { executeQuery } from '@/lib/db';
-import {connection} from "next/server";
 
-// Interfaz actualizada para reflejar el schema de la BD simplificado.
-// Se eliminaron los campos: code, total, paid, due. 'commission' se renombra a 'commission_rate'.
 export interface Doctor {
     id: number;
+    code: string;
     name: string;
     phone: string | null;
     email: string | null;
     address: string | null;
-    commission_rate: number;
+    commission: number;
+    total: number;
+    paid: number;
+    due: number;
 }
 
-// getDoctors ahora selecciona solo las columnas existentes.
 export async function getDoctors(): Promise<Doctor[]> {
     try {
-        const results = await executeQuery('SELECT id, name, phone, email, address, commission_rate FROM doctors', []);
+        const results = await executeQuery('SELECT * FROM doctors');
+        // Convertimos los resultados a objetos simples
         return JSON.parse(JSON.stringify(results)) as Doctor[];
     } catch (error) {
         console.error("Database query failed:", error);
@@ -24,28 +25,26 @@ export async function getDoctors(): Promise<Doctor[]> {
     }
 }
 
-// createDoctor ahora usa solo los campos correctos.
-export async function createDoctor(doctor: Omit<Doctor, 'id'>): Promise<void> {
-    const { name, phone, email, address, commission_rate } = doctor;
-    const query = 'INSERT INTO doctors (name, phone, email, address, commission_rate) VALUES (?, ?, ?, ?, ?)';
-    await executeQuery(query, [name, phone, email, address, commission_rate]);
+export async function createDoctor(doctor: Omit<Doctor, 'id' | 'code' | 'total' | 'paid' | 'due'>): Promise<void> {
+    const { name, phone, email, address, commission } = doctor;
+    // El código único y los totales se manejarán de otra forma o se les asignará un valor por defecto.
+    // Por ahora, generaremos un código simple basado en el timestamp para mantener la funcionalidad.
+    const code = `DR${Date.now()}`;
+    const query = 'INSERT INTO doctors (code, name, phone, email, address, commission, total, paid, due) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    await executeQuery(query, [code, name, phone, email, address, commission, 0, 0, 0]);
 }
 
-// getDoctorById ahora selecciona solo las columnas existentes.
 export async function getDoctorById(id: number): Promise<Doctor | null> {
-    const results = await executeQuery<Doctor[]>('SELECT id, name, phone, email, address, commission_rate FROM doctors WHERE id = ?', [id]);
-    if (results.length > 0) {
-        return JSON.parse(JSON.stringify(results[0]));
-    }
-    return null;
+    const results = await executeQuery<Doctor[]>('SELECT * FROM doctors WHERE id = ?', [id]);
+    return results.length > 0 ? results[0] : null;
 }
 
-// updateDoctor ahora usa solo los campos correctos.
-export async function updateDoctor(id: number, doctor: Partial<Omit<Doctor, 'id'>>): Promise<void> {
-    const { name, phone, email, address, commission_rate } = doctor;
-    const query = 'UPDATE doctors SET name = ?, phone = ?, email = ?, address = ?, commission_rate = ? WHERE id = ?';
-    await executeQuery(query, [name, phone, email, address, commission_rate, id]);
+export async function updateDoctor(id: number, doctor: Partial<Omit<Doctor, 'id' | 'code' | 'total' | 'paid' | 'due'>>): Promise<void> {
+    const { name, phone, email, address, commission } = doctor;
+    const query = 'UPDATE doctors SET name = ?, phone = ?, email = ?, address = ?, commission = ? WHERE id = ?';
+    await executeQuery(query, [name, phone, email, address, commission, id]);
 }
+
 
 export async function deleteDoctor(id: number): Promise<void> {
   const query = 'DELETE FROM doctors WHERE id = ?';
