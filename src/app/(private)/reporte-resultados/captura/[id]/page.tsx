@@ -43,29 +43,33 @@ export default function CaptureResultsPage() {
                     setAllStudies(studiesData);
 
                     const initialResults: ResultInput[] = [];
-                    const studiesInRecibo = studiesData.filter(s => reciboData.studies.includes(s.name));
+                    const studiesInRecibo = studiesData.filter(s => 
+                        reciboData.studies.includes(s.name) || 
+                        reciboData.packages.some(pkgName => pkgName === s.name)
+                    );
 
                     studiesInRecibo.forEach(study => {
+                        // Add a row for the main study itself, regardless of parameters
+                        const existingMainResult = reciboData.results?.find(r => r.studyName === study.name && !r.parameterName);
+                        initialResults.push({
+                            studyName: study.name,
+                            parameterName: '', // Empty for the main study
+                            result: existingMainResult?.result || '',
+                            reference: existingMainResult?.reference || '',
+                            unit: existingMainResult?.unit || ''
+                        });
+
+                        // If there are parameters, add a row for each one
                         if (study.parameters && study.parameters.length > 0) {
                             study.parameters.forEach(param => {
-                                const existingResult = reciboData.results?.find(r => r.studyName === study.name && r.parameterName === param.name);
+                                const existingParamResult = reciboData.results?.find(r => r.studyName === study.name && r.parameterName === param.name);
                                 initialResults.push({
                                     studyName: study.name,
                                     parameterName: param.name,
-                                    result: existingResult?.result || '',
-                                    reference: existingResult?.reference || param.referenceType || '', // Fallback to parameter default
-                                    unit: param.unit || ''
+                                    result: existingParamResult?.result || '',
+                                    reference: existingParamResult?.reference || param.referenceType || '', // Fallback to parameter default
+                                    unit: existingParamResult?.unit || param.unit || ''
                                 });
-                            });
-                        } else {
-                            // Handle studies without parameters
-                            const existingResult = reciboData.results?.find(r => r.studyName === study.name && !r.parameterName);
-                            initialResults.push({
-                                studyName: study.name,
-                                parameterName: '',
-                                result: existingResult?.result || '',
-                                reference: existingResult?.reference || '',
-                                unit: ''
                             });
                         }
                     });
@@ -82,6 +86,7 @@ export default function CaptureResultsPage() {
         }
     }, [reciboId, router, toast]);
 
+
     const handleResultChange = (index: number, field: keyof ResultInput, value: string) => {
         const newResults = [...results];
         (newResults[index] as any)[field] = value;
@@ -90,6 +95,7 @@ export default function CaptureResultsPage() {
 
     const handleSaveChanges = async () => {
         if (!recibo) return;
+        setLoading(true);
         try {
             // Map ResultInput[] to TestResult[] before saving
             const resultsToSave: TestResult[] = results.map(r => ({
@@ -98,13 +104,16 @@ export default function CaptureResultsPage() {
                 result: r.result,
                 reference: r.reference,
                 unit: r.unit,
-            }));
+            })).filter(r => r.result); // Only save results that have a value
+            
             await saveResults(recibo.id, resultsToSave);
             toast({ title: "Éxito", description: "Resultados guardados correctamente."});
             router.push('/reporte-resultados');
         } catch (error) {
             console.error("Error saving results:", error);
             toast({ title: "Error", description: "No se pudieron guardar los resultados.", variant: "destructive"});
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -186,6 +195,7 @@ export default function CaptureResultsPage() {
                                                 value={result.unit}
                                                 onChange={(e) => handleResultChange(index, 'unit', e.target.value)}
                                                 placeholder="Unidad"
+                                                disabled={!result.parameterName}
                                             />
                                        </TableCell>
                                        <TableCell>
