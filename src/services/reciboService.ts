@@ -3,8 +3,10 @@ import { executeQuery } from '@/lib/db';
 
 export interface TestResult {
     studyName: string;
+    parameterName?: string; // Make parameterName optional
     result: string;
     reference: string;
+    unit?: string;
 }
 
 export interface Recibo {

@@ -382,7 +382,7 @@ export default function CreateStudyPage() {
                              <RadioGroupItem value="yes" id="subexam-yes"/><Label htmlFor="subexam-yes">Si</Label>
                              <RadioGroupItem value="no" id="subexam-no"/><Label htmlFor="subexam-no">No</Label>
                          </RadioGroup>
-                        <p className="text-xs text-muted-foreground">Al seleccionar la opción Sí, en el módulo de Reporte de Resultados podrá capturar los resultados por separado para cada uno de los estudios que lo integran. Así mismo en el módulo de Entrega de Resultados podrá realizar la impresión de forma individual de cada uno de los estudios que lo conforman.</p>
+                        <p className="text-xs text-muted-foreground">Al seleccionar la opción Sí, en el módulo de Entrega de Resultados podrá capturar los resultados por separado para cada uno de los estudios que lo integran. Así mismo en el módulo de Entrega de Resultados podrá realizar la impresión de forma individual de cada uno de los estudios que lo conforman.</p>
                     </div>
                      <div className="space-y-2">
                         <div className="flex items-center gap-2">

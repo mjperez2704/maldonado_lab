@@ -101,10 +101,10 @@ export default function ResultsReportPage() {
             <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                     <FileStack className="h-8 w-8 text-primary" />
-                    <h1 className="text-2xl font-bold">Reporte de Resultados</h1>
+                    <h1 className="text-2xl font-bold">Entrega de Resultados</h1>
                 </div>
                 <div className="text-sm text-muted-foreground">
-                    <Link href="/" className="hover:text-primary">Hogar</Link> / Reporte de Resultados
+                    <Link href="/" className="hover:text-primary">Hogar</Link> / Entrega de Resultados
                 </div>
             </div>
 

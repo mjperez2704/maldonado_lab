@@ -6,11 +6,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { getReciboById, Recibo, TestResult, saveResults } from "@/services/reciboService";
+import { getStudies, Study } from "@/services/studyService";
 import { FileStack, Save, User, Calendar, Hash } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
+
+type ResultInput = {
+    studyName: string;
+    parameterName?: string; // Optional for studies without parameters
+    result: string;
+    reference: string;
+    unit: string;
+};
 
 export default function CaptureResultsPage() {
     const params = useParams();
@@ -19,32 +28,61 @@ export default function CaptureResultsPage() {
     const reciboId = params.id as string;
 
     const [recibo, setRecibo] = useState<Recibo | null>(null);
-    const [results, setResults] = useState<TestResult[]>([]);
+    const [allStudies, setAllStudies] = useState<Study[]>([]);
+    const [results, setResults] = useState<ResultInput[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (reciboId) {
-            getReciboById(reciboId).then(data => {
-                if (data) {
-                    setRecibo({
-                        ...data,
-                        status: (data.status as Recibo['status']) || 'pending', // Provide a default value for undefined status
+            Promise.all([
+                getReciboById(reciboId),
+                getStudies()
+            ]).then(([reciboData, studiesData]) => {
+                if (reciboData) {
+                    setRecibo(reciboData);
+                    setAllStudies(studiesData);
+
+                    const initialResults: ResultInput[] = [];
+                    const studiesInRecibo = studiesData.filter(s => reciboData.studies.includes(s.name));
+
+                    studiesInRecibo.forEach(study => {
+                        if (study.parameters && study.parameters.length > 0) {
+                            study.parameters.forEach(param => {
+                                const existingResult = reciboData.results?.find(r => r.studyName === study.name && r.parameterName === param.name);
+                                initialResults.push({
+                                    studyName: study.name,
+                                    parameterName: param.name,
+                                    result: existingResult?.result || '',
+                                    reference: existingResult?.reference || param.referenceType || '', // Fallback to parameter default
+                                    unit: param.unit || ''
+                                });
+                            });
+                        } else {
+                            // Handle studies without parameters
+                            const existingResult = reciboData.results?.find(r => r.studyName === study.name && !r.parameterName);
+                            initialResults.push({
+                                studyName: study.name,
+                                parameterName: '',
+                                result: existingResult?.result || '',
+                                reference: existingResult?.reference || '',
+                                unit: ''
+                            });
+                        }
                     });
-                    // Initialize results state based on studies in the receipt
-                    const initialResults = data.studies?.map((studyName: string) => {
-                        const existingResult = data.results?.find((r: TestResult) => r.studyName === studyName);
-                        return existingResult || { studyName, result: '', reference: '' };
-                    }) || [];
                     setResults(initialResults);
+
                 } else {
                     toast({ title: "Error", description: "Solicitud no encontrada.", variant: "destructive" });
                     router.push('/reporte-resultados');
                 }
+            }).catch(err => {
+                console.error("Error fetching data:", err);
+                toast({ title: "Error", description: "No se pudieron cargar los datos.", variant: "destructive" });
             }).finally(() => setLoading(false));
         }
     }, [reciboId, router, toast]);
 
-    const handleResultChange = (index: number, field: keyof TestResult, value: string) => {
+    const handleResultChange = (index: number, field: keyof ResultInput, value: string) => {
         const newResults = [...results];
         (newResults[index] as any)[field] = value;
         setResults(newResults);
@@ -53,7 +91,15 @@ export default function CaptureResultsPage() {
     const handleSaveChanges = async () => {
         if (!recibo) return;
         try {
-            await saveResults(recibo.id, results);
+            // Map ResultInput[] to TestResult[] before saving
+            const resultsToSave: TestResult[] = results.map(r => ({
+                studyName: r.studyName,
+                parameterName: r.parameterName || '',
+                result: r.result,
+                reference: r.reference,
+                unit: r.unit,
+            }));
+            await saveResults(recibo.id, resultsToSave);
             toast({ title: "Éxito", description: "Resultados guardados correctamente."});
             router.push('/reporte-resultados');
         } catch (error) {
@@ -78,7 +124,7 @@ export default function CaptureResultsPage() {
                     <h1 className="text-2xl font-bold">Captura de Resultados</h1>
                 </div>
                 <div className="text-sm text-muted-foreground">
-                    <Link href="/" className="hover:text-primary">Hogar</Link> / <Link href="/reporte-resultados" className="hover:text-primary">Reporte de Resultados</Link> / Captura
+                    <Link href="/" className="hover:text-primary">Hogar</Link> / <Link href="/reporte-resultados" className="hover:text-primary">Entrega de Resultados</Link> / Captura
                 </div>
             </div>
 
@@ -112,20 +158,34 @@ export default function CaptureResultsPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>Estudio</TableHead>
+                                    <TableHead>Estudio / Parámetro</TableHead>
                                     <TableHead>Resultado</TableHead>
+                                    <TableHead>Unidades</TableHead>
                                     <TableHead>Valores de Referencia</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                {results.map((result, index) => (
                                    <TableRow key={index}>
-                                       <TableCell className="font-medium">{result.studyName}</TableCell>
+                                       <TableCell className="font-medium">
+                                           {result.parameterName ? (
+                                               <div className="pl-4">{result.parameterName}</div>
+                                           ) : (
+                                               <strong>{result.studyName}</strong>
+                                           )}
+                                       </TableCell>
                                        <TableCell>
                                            <Input
                                                value={result.result}
                                                onChange={(e) => handleResultChange(index, 'result', e.target.value)}
                                                placeholder="Ingrese resultado"
+                                            />
+                                       </TableCell>
+                                       <TableCell>
+                                            <Input
+                                                value={result.unit}
+                                                onChange={(e) => handleResultChange(index, 'unit', e.target.value)}
+                                                placeholder="Unidad"
                                             />
                                        </TableCell>
                                        <TableCell>
@@ -142,8 +202,8 @@ export default function CaptureResultsPage() {
                     </div>
                 </CardContent>
                 <CardFooter className="justify-end">
-                    <Button onClick={handleSaveChanges}>
-                        <Save className="mr-2 h-4 w-4"/> Guardar Resultados
+                    <Button onClick={handleSaveChanges} disabled={loading}>
+                        <Save className="mr-2 h-4 w-4"/> {loading ? "Guardando..." : "Guardar Resultados"}
                     </Button>
                 </CardFooter>
             </Card>

@@ -77,8 +77,7 @@ const menuGroups = [
         groupLabel: 'Operaciones',
         items: [
             { icon: FlaskConical, label: 'Solicitud de Examenes', href: '/solicitud-examenes' },
-            { icon: FileStack, label: 'Reporte de Resultados', href: '/reporte-resultados' },
-            { icon: Printer, label: 'Entrega de Resultados', href: '/entrega-resultados' },
+            { icon: Printer, label: 'Entrega de Resultados', href: '/reporte-resultados' },
             { icon: Newspaper, label: 'Cotizaciones', href: '/cotizaciones' },
         ]
     },
