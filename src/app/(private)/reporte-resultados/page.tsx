@@ -233,6 +233,7 @@ export default function ResultsReportPage() {
                     </DialogHeader>
                     {selectedRecibo && (
                         <iframe
+                            key={selectedRecibo.id}
                             id="report-iframe"
                             src={`/reporte-resultados/imprimir/${selectedRecibo.id}`}
                             className="w-full h-full border-0"

@@ -50,7 +50,7 @@ export default function ReportPreview({ reciboId }: { reciboId: string }) {
             {/* Header */}
             <header className="flex justify-between items-center border-b-2 border-black pb-4">
                 <div className="flex items-center gap-4">
-                    <Image src="https://maldonado.mega-spots-test.shop/storage/images/logo-maldonado.png" alt="Logo" width={80} height={80} data-ai-hint="logo" />
+                    <Image src="https://maldonado.mega-spots-test.shop/storage/images/logo-maldonado.png" alt="Logo Laboratorio Maldonado" width={200} height={50} data-ai-hint="logo" />
                     <div>
                         <h1 className="font-bold text-2xl">LABORATORIOS MALDONADO</h1>
                         <p>Unidad Matriz</p>
