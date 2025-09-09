@@ -198,37 +198,52 @@ export default function TestRequestPage() {
                         <CardHeader className="bg-primary text-primary-foreground">
                             <CardTitle className="flex items-center gap-2"><UserSearch /> Buscar Paciente</CardTitle>
                         </CardHeader>
-                        <CardContent className="pt-6 flex items-end gap-4">
-                            <div className="flex-grow space-y-2">
-                                <Label htmlFor="patient-search">Buscar por nombre o número de paciente</Label>
-                                <Input
-                                    id="patient-search"
-                                    placeholder="Escriba aquí..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    onKeyDown={(e) => { if (e.key === 'Enter') handleSearchPatient(); }}
-                                />
+                        <CardContent className="pt-6 space-y-4">
+                            <div className="flex items-end gap-4">
+                                <div className="flex-grow space-y-2">
+                                    <Label htmlFor="patient-search">Buscar por nombre o número de paciente</Label>
+                                    <Input
+                                        id="patient-search"
+                                        placeholder="Escriba aquí..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        onKeyDown={(e) => { if (e.key === 'Enter') handleSearchPatient(); }}
+                                    />
+                                </div>
+                                <Button onClick={handleSearchPatient}><Search className="mr-2"/> Buscar</Button>
+                                 <Button asChild variant="outline">
+                                    <Link href="/pacientes/crear">Nuevo Paciente</Link>
+                                </Button>
                             </div>
-                            <Button onClick={handleSearchPatient}><Search className="mr-2"/> Buscar</Button>
-                             <Button asChild variant="outline">
-                                <Link href="/pacientes/crear">Nuevo Paciente</Link>
-                            </Button>
-                        </CardContent>
-                        {filteredPatients.length > 1 && (
-                            <CardContent>
-                                <Label>Se encontraron varios pacientes, seleccione uno:</Label>
+                            {filteredPatients.length > 1 && (
+                                <div className="space-y-2">
+                                    <Label>Se encontraron varios pacientes, seleccione uno:</Label>
+                                    <Select onValueChange={handleSelectPatient}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Seleccione un paciente" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {filteredPatients.map(p => (
+                                                <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            )}
+                             <div className="space-y-2">
+                                <Label>O seleccione de la lista</Label>
                                 <Select onValueChange={handleSelectPatient}>
                                     <SelectTrigger>
-                                        <SelectValue placeholder="Seleccione un paciente" />
+                                        <SelectValue placeholder="Seleccionar un paciente de la lista" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {filteredPatients.map(p => (
+                                        {patients.map(p => (
                                             <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
-                            </CardContent>
-                        )}
+                            </div>
+                        </CardContent>
                     </Card>
 
                     {selectedPatient && (
