@@ -7,6 +7,10 @@ export interface StudyParameter {
     cost: number;
     factor: string;
     referenceType: string;
+    gender?: 'Ambos' | 'Masculino' | 'Femenino';
+    ageStart?: number;
+    ageEnd?: number;
+    ageUnit?: 'Anos' | 'Meses' | 'Dias';
 }
 
 export interface IntegratedStudyRef {

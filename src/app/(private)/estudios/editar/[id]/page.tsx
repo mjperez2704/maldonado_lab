@@ -50,7 +50,9 @@ export default function EditStudyPage() {
     const [providers, setProviders] = useState<Provider[]>([]);
     const [allStudies, setAllStudies] = useState<Study[]>([]);
 
-    const [newParam, setNewParam] = useState<StudyParameter>({ name: '', unit: '', cost: 0, factor: '', referenceType: 'Intervalo BR' });
+    const [newParam, setNewParam] = useState<StudyParameter>({
+        name: '', unit: '', cost: 0, factor: '', referenceType: 'Intervalo Biologico de Referencia', gender: 'Ambos', ageStart: 0, ageEnd: 0, ageUnit: 'Anos'
+    });
     const [newSample, setNewSample] = useState<StudySample>({ type: '', container: '', indications: '', cost: 0 });
     const [studySearchTerm, setStudySearchTerm] = useState('');
     const [selectedIntegratedStudy, setSelectedIntegratedStudy] = useState<string | null>(null);
@@ -112,7 +114,7 @@ export default function EditStudyPage() {
             return;
         }
         setFormData(prev => ({...prev, parameters: [...(prev.parameters || []), newParam]}));
-        setNewParam({ name: '', unit: '', cost: 0, factor: '', referenceType: 'Intervalo BR' });
+        setNewParam({ name: '', unit: '', cost: 0, factor: '', referenceType: 'Intervalo Biologico de Referencia', gender: 'Ambos', ageStart: 0, ageEnd: 0, ageUnit: 'Anos' });
     };
 
     const handleRemoveParameter = (index: number) => {
@@ -291,7 +293,7 @@ export default function EditStudyPage() {
                                     <TableHead>UNIDAD DE MEDIDA</TableHead>
                                     <TableHead>COSTO INDIVIDUAL</TableHead>
                                     <TableHead>FACTOR DE CONVERSIÓN</TableHead>
-                                    <TableHead>TIPO DE VALOR DE REFERENCIA</TableHead>
+                                    <TableHead>VALOR DE REFERENCIA</TableHead>
                                     <TableHead>ELIMINAR</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -302,7 +304,12 @@ export default function EditStudyPage() {
                                         <TableCell>{param.unit}</TableCell>
                                         <TableCell>{param.cost}</TableCell>
                                         <TableCell>{param.factor}</TableCell>
-                                        <TableCell>{param.referenceType}</TableCell>
+                                        <TableCell>
+                                            {param.referenceType === 'Intervalo Biologico de Referencia'
+                                                ? `${param.gender}, ${param.ageStart}-${param.ageEnd} ${param.ageUnit}`
+                                                : param.referenceType
+                                            }
+                                        </TableCell>
                                         <TableCell>
                                             <Button type="button" variant="destructive" size="icon" onClick={() => handleRemoveParameter(index)}><Trash2/></Button>
                                         </TableCell>
@@ -312,20 +319,28 @@ export default function EditStudyPage() {
                         </Table>
                     </div>
                      <div className="p-4 border rounded-md space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="space-y-2"><Label>Parámetro</Label><Input placeholder="Nombre" value={newParam.name} onChange={(e) => setNewParam({...newParam, name: e.target.value})}/></div>
-                            <div className="space-y-2"><Label>Unidad</Label><Input placeholder="Unidad" value={newParam.unit} onChange={(e) => setNewParam({...newParam, unit: e.target.value})}/></div>
-                            <div className="space-y-2"><Label>Costo</Label><Input type="number" placeholder="0.00" value={newParam.cost} onChange={(e) => setNewParam({...newParam, cost: parseFloat(e.target.value) || 0})}/></div>
-                            <div className="space-y-2"><Label>Factor Conversión</Label><Input placeholder="U.I" value={newParam.factor} onChange={(e) => setNewParam({...newParam, factor: e.target.value})}/></div>
-                        </div>
                         <div className="space-y-2">
                              <Label>Tipo de Valor de Referencia</Label>
                             <RadioGroup value={newParam.referenceType} onValueChange={(v) => setNewParam({...newParam, referenceType: v})} className="flex flex-wrap gap-x-4 gap-y-2">
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo BR" id="ref-intervalo-edit" /><Label htmlFor="ref-intervalo-edit">Intervalo BR</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo Biologico de Referencia" id="ref-intervalo-edit" /><Label htmlFor="ref-intervalo-edit">Intervalo Biologico de Referencia</Label></div>
                                 <div className="flex items-center space-x-2"><RadioGroupItem value="Mixto" id="ref-mixto-edit" /><Label htmlFor="ref-mixto-edit">Mixto</Label></div>
                                 <div className="flex items-center space-x-2"><RadioGroupItem value="Criterio" id="ref-criterio-edit" /><Label htmlFor="ref-criterio-edit">Criterio</Label></div>
                                 <div className="flex items-center space-x-2"><RadioGroupItem value="Sin valor de referencia" id="ref-sin-valor-edit" /><Label htmlFor="ref-sin-valor-edit">Sin valor de referencia</Label></div>
                             </RadioGroup>
+                        </div>
+                        {newParam.referenceType === 'Intervalo Biologico de Referencia' && (
+                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-md">
+                                <div className="space-y-2"><Label>Género</Label><Select value={newParam.gender} onValueChange={(v) => setNewParam({...newParam, gender: v})}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="Ambos">Ambos</SelectItem><SelectItem value="Masculino">Masculino</SelectItem><SelectItem value="Femenino">Femenino</SelectItem></SelectContent></Select></div>
+                                <div className="space-y-2"><Label>Edad Inicio</Label><Input type="number" value={newParam.ageStart} onChange={(e) => setNewParam({...newParam, ageStart: Number(e.target.value)})}/></div>
+                                <div className="space-y-2"><Label>Edad Fin</Label><Input type="number" value={newParam.ageEnd} onChange={(e) => setNewParam({...newParam, ageEnd: Number(e.target.value)})}/></div>
+                                <div className="space-y-2"><Label>Tipo de Edad</Label><Select value={newParam.ageUnit} onValueChange={(v) => setNewParam({...newParam, ageUnit: v})}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="Anos">Años</SelectItem><SelectItem value="Meses">Meses</SelectItem><SelectItem value="Dias">Días</SelectItem></SelectContent></Select></div>
+                            </div>
+                        )}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="space-y-2"><Label>Parámetro</Label><Input placeholder="Nombre" value={newParam.name} onChange={(e) => setNewParam({...newParam, name: e.target.value})}/></div>
+                            <div className="space-y-2"><Label>Unidad</Label><Input placeholder="Unidad" value={newParam.unit} onChange={(e) => setNewParam({...newParam, unit: e.target.value})}/></div>
+                            <div className="space-y-2"><Label>Costo</Label><Input type="number" placeholder="0.00" value={newParam.cost} onChange={(e) => setNewParam({...newParam, cost: parseFloat(e.target.value) || 0})}/></div>
+                            <div className="space-y-2"><Label>Factor Conversión</Label><Input placeholder="U.I" value={newParam.factor} onChange={(e) => setNewParam({...newParam, factor: e.target.value})}/></div>
                         </div>
                         <Button type="button" onClick={handleAddParameter}><Plus className="mr-2"/> Agregar Parametro</Button>
                     </div>
@@ -465,7 +480,7 @@ export default function EditStudyPage() {
                                         <TableCell>{sample.type}</TableCell>
                                         <TableCell>{sample.container}</TableCell>
                                         <TableCell>{sample.indications}</TableCell>
-                                        <TableCell>{Number(sample.cost.toFixed(2))}</TableCell>
+                                        <TableCell>{Number(sample.cost).toFixed(2)}</TableCell>
                                         <TableCell>
                                             <Button type="button" variant="destructive" size="icon" onClick={() => handleRemoveSample(index)}><Trash2/></Button>
                                         </TableCell>
