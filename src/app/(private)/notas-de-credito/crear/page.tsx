@@ -9,15 +9,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { NotebookTabs, User, Calendar, DollarSign, Building, Save } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createCreditNote } from "@/services/creditNoteService";
 import { useToast } from "@/hooks/use-toast";
+import { getPatients, Patient } from "@/services/patientService";
 
 
 export default function CreateCreditNotePage() {
   const router = useRouter();
   const { toast } = useToast();
+  const [patients, setPatients] = useState<Patient[]>([]);
   const [formData, setFormData] = useState({
     branch: 'main',
     date: new Date().toISOString().split('T')[0],
@@ -25,6 +27,23 @@ export default function CreateCreditNotePage() {
     amount: 0,
     reason: '',
   });
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+        try {
+            const patientsData = await getPatients();
+            setPatients(patientsData);
+        } catch (error) {
+            console.error("Error fetching patients:", error);
+            toast({
+                title: "Error",
+                description: "No se pudieron cargar los pacientes.",
+                variant: "destructive",
+            });
+        }
+    };
+    fetchPatients();
+  }, [toast]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { id, value, type } = e.target;
@@ -34,7 +53,7 @@ export default function CreateCreditNotePage() {
     }));
   };
 
-  const handleSelectChange = (id: 'branch', value: string) => {
+  const handleSelectChange = (id: 'branch' | 'patient', value: string) => {
       setFormData(prev => ({...prev, [id]: value}));
   }
 
@@ -108,7 +127,18 @@ export default function CreateCreditNotePage() {
                         <Label htmlFor="patient">Paciente</Label>
                         <div className="relative">
                             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input id="patient" placeholder="Buscar por nombre o número de solicitud" className="pl-10" value={formData.patient} onChange={handleChange} />
+                            <Select value={formData.patient} onValueChange={(value) => handleSelectChange('patient', value)}>
+                                <SelectTrigger id="patient" className="pl-10">
+                                    <SelectValue placeholder="Seleccionar Paciente" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {patients.map(p => (
+                                        <SelectItem key={p.id} value={p.name}>
+                                            {p.name}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
                      <div className="space-y-2">
