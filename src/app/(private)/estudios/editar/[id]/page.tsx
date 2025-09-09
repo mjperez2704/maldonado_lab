@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -49,7 +50,7 @@ export default function EditStudyPage() {
     const [providers, setProviders] = useState<Provider[]>([]);
     const [allStudies, setAllStudies] = useState<Study[]>([]);
 
-    const [newParam, setNewParam] = useState<StudyParameter>({ name: '', unit: '', cost: 0, factor: '', referenceType: '' });
+    const [newParam, setNewParam] = useState<StudyParameter>({ name: '', unit: '', cost: 0, factor: '', referenceType: 'Intervalo BR' });
     const [newSample, setNewSample] = useState<StudySample>({ type: '', container: '', indications: '', cost: 0 });
     const [studySearchTerm, setStudySearchTerm] = useState('');
     const [selectedIntegratedStudy, setSelectedIntegratedStudy] = useState<string | null>(null);
@@ -111,7 +112,7 @@ export default function EditStudyPage() {
             return;
         }
         setFormData(prev => ({...prev, parameters: [...(prev.parameters || []), newParam]}));
-        setNewParam({ name: '', unit: '', cost: 0, factor: '', referenceType: '' });
+        setNewParam({ name: '', unit: '', cost: 0, factor: '', referenceType: 'Intervalo BR' });
     };
 
     const handleRemoveParameter = (index: number) => {
@@ -311,12 +312,20 @@ export default function EditStudyPage() {
                         </Table>
                     </div>
                      <div className="p-4 border rounded-md space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 items-end">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2"><Label>Parámetro</Label><Input placeholder="Nombre" value={newParam.name} onChange={(e) => setNewParam({...newParam, name: e.target.value})}/></div>
                             <div className="space-y-2"><Label>Unidad</Label><Input placeholder="Unidad" value={newParam.unit} onChange={(e) => setNewParam({...newParam, unit: e.target.value})}/></div>
                             <div className="space-y-2"><Label>Costo</Label><Input type="number" placeholder="0.00" value={newParam.cost} onChange={(e) => setNewParam({...newParam, cost: parseFloat(e.target.value) || 0})}/></div>
                             <div className="space-y-2"><Label>Factor Conversión</Label><Input placeholder="U.I" value={newParam.factor} onChange={(e) => setNewParam({...newParam, factor: e.target.value})}/></div>
-                            <div className="space-y-2"><Label>Tipo Ref.</Label><Input placeholder="Tipo" value={newParam.referenceType} onChange={(e) => setNewParam({...newParam, referenceType: e.target.value})}/></div>
+                        </div>
+                        <div className="space-y-2">
+                             <Label>Tipo de Valor de Referencia</Label>
+                            <RadioGroup value={newParam.referenceType} onValueChange={(v) => setNewParam({...newParam, referenceType: v})} className="flex flex-wrap gap-x-4 gap-y-2">
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo BR" id="ref-intervalo-edit" /><Label htmlFor="ref-intervalo-edit">Intervalo BR</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Mixto" id="ref-mixto-edit" /><Label htmlFor="ref-mixto-edit">Mixto</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Criterio" id="ref-criterio-edit" /><Label htmlFor="ref-criterio-edit">Criterio</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Sin valor de referencia" id="ref-sin-valor-edit" /><Label htmlFor="ref-sin-valor-edit">Sin valor de referencia</Label></div>
+                            </RadioGroup>
                         </div>
                         <Button type="button" onClick={handleAddParameter}><Plus className="mr-2"/> Agregar Parametro</Button>
                     </div>
