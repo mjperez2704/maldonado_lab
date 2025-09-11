@@ -85,7 +85,7 @@ export default function CreateDoctorPage() {
         <CardContent className="flex flex-col gap-8 pt-6">
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <FormField control={form.control} name="name" render={({ field }) => (
                             <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input placeholder="Nombre del doctor" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                         )}/>

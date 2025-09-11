@@ -11,18 +11,88 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
-import { FlaskConical, UserSearch, Search, Trash2, Calendar, User, Microscope, DollarSign, Tag, Save, Package } from "lucide-react";
+import { FlaskConical, UserSearch, Search, Trash2, Calendar, User, Microscope, DollarSign, Tag, Save, Package, PlusSquare, Plus } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
 import { getPatients, Patient } from "@/services/patientService";
 import { getStudies, Study } from "@/services/studyService";
 import { getPackages, Package as PackageType } from "@/services/packageService";
-import { getDoctors, Doctor } from "@/services/doctorService";
+import { getDoctors, Doctor, createDoctor } from "@/services/doctorService";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { createRecibo, ReciboCreation } from "@/services/reciboService";
 import Link from "next/link";
 import { SalesTicket } from "./SalesTicket";
 import { CreatePatientForm } from "../../pacientes/CreatePatientForm";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useForm } from "@/components/ui/form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+
+const doctorSchema = z.object({
+  name: z.string().min(1, { message: "El nombre es requerido." }),
+  phone: z.string().optional(),
+  email: z.string().email({ message: "Correo electrónico no válido." }).optional().or(z.literal('')),
+  address: z.string().optional(),
+  commission: z.coerce.number().min(0, "La comisión no puede ser negativa.").max(100, "La comisión no puede ser mayor a 100."),
+});
+
+type DoctorFormValues = z.infer<typeof doctorSchema>;
+
+function CreateDoctorForm({ onSuccess }: { onSuccess: (doctor: Doctor) => void }) {
+    const { toast } = useToast();
+    
+    const form = useForm<DoctorFormValues>({
+        resolver: zodResolver(doctorSchema),
+        defaultValues: { name: '', phone: '', email: '', address: '', commission: 0 },
+    });
+
+    const onSubmit = async (data: DoctorFormValues) => {
+        try {
+            const newDoctorData: Omit<Doctor, 'id' | 'code' | 'total' | 'paid' | 'due'> = {
+                ...data,
+                phone: data.phone || null,
+                email: data.email || null,
+                address: data.address || null,
+            };
+            await createDoctor(newDoctorData);
+            const createdDoctor = { ...newDoctorData, id: Date.now(), code: '', total: 0, paid: 0, due: 0 };
+            toast({ title: "Éxito", description: "Doctor creado correctamente." });
+            form.reset();
+            onSuccess(createdDoctor as Doctor);
+        } catch (error) {
+            console.error("Error creating doctor:", error);
+            toast({ title: "Error", description: "No se pudo crear el doctor.", variant: "destructive" });
+        }
+    };
+
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField control={form.control} name="name" render={({ field }) => (
+                        <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="phone" render={({ field }) => (
+                        <FormItem><FormLabel>Teléfono</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="email" render={({ field }) => (
+                        <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="commission" render={({ field }) => (
+                        <FormItem><FormLabel>Comisión (%)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                    <FormField control={form.control} name="address" render={({ field }) => (
+                        <FormItem className="md:col-span-2"><FormLabel>Dirección</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                </div>
+                 <DialogFooter>
+                    <Button type="submit">Guardar Doctor</Button>
+                </DialogFooter>
+            </form>
+        </Form>
+    );
+}
+
 
 type CartItem = {
     id: string;
@@ -54,8 +124,9 @@ export default function CreateTestRequestPage() {
     const [discountReason, setDiscountReason] = useState('');
     const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
     const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
+    const [isDoctorModalOpen, setIsDoctorModalOpen] = useState(false);
 
-    const [selectedDoctor, setSelectedDoctor] = useState('');
+    const [selectedDoctor, setSelectedDoctor] = useState('A QUIEN CORRESPONDA');
     const [deliveryDate, setDeliveryDate] = useState('');
     const [loading, setLoading] = useState(false);
     const [showPrintDialog, setShowPrintDialog] = useState(false);
@@ -85,7 +156,7 @@ export default function CreateTestRequestPage() {
 
     useEffect(() => {
         fetchAllData();
-    }, [toast]);
+    }, []);
 
     const handleSearchPatient = () => {
         const found = patients.filter(p =>
@@ -116,6 +187,13 @@ export default function CreateTestRequestPage() {
       });
       await fetchAllData(); // Refresh all data to get the new patient
       setSelectedPatient(newPatient); // Automatically select the new patient
+    };
+    
+    const handleDoctorCreated = async (newDoctor: Doctor) => {
+        setIsDoctorModalOpen(false);
+        toast({ title: "Éxito", description: `Doctor ${newDoctor.name} creado.` });
+        await fetchAllData(); // Refresh doctors list
+        setSelectedDoctor(newDoctor.name); // Automatically select the new doctor
     };
 
 
@@ -181,7 +259,7 @@ export default function CreateTestRequestPage() {
         setSelectedPatient(null);
         setFilteredPatients([]);
         setCart([]);
-        setSelectedDoctor('');
+        setSelectedDoctor('A QUIEN CORRESPONDA');
         setDeliveryDate('');
         setDiscount(null);
     };
@@ -417,14 +495,28 @@ export default function CreateTestRequestPage() {
                                         </div>
                                         <div className="space-y-2">
                                             <Label>Médico</Label>
-                                            <Select value={selectedDoctor} onValueChange={setSelectedDoctor}>
-                                                <SelectTrigger><SelectValue placeholder="Seleccionar Médico"/></SelectTrigger>
-                                                <SelectContent>
-                                                    {doctors.map(doctor => (
-                                                        <SelectItem key={doctor.id} value={doctor.name}>{doctor.name}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                            <div className="flex gap-2">
+                                                <Select value={selectedDoctor} onValueChange={setSelectedDoctor}>
+                                                    <SelectTrigger><SelectValue/></SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="A QUIEN CORRESPONDA">A QUIEN CORRESPONDA</SelectItem>
+                                                        {doctors.map(doctor => (
+                                                            <SelectItem key={doctor.id} value={doctor.name}>{doctor.name}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <Dialog open={isDoctorModalOpen} onOpenChange={setIsDoctorModalOpen}>
+                                                    <DialogTrigger asChild>
+                                                        <Button variant="outline" size="icon"><Plus className="h-4 w-4"/></Button>
+                                                    </DialogTrigger>
+                                                    <DialogContent>
+                                                        <DialogHeader>
+                                                            <DialogTitle>Agregar Nuevo Doctor</DialogTitle>
+                                                        </DialogHeader>
+                                                        <CreateDoctorForm onSuccess={handleDoctorCreated} />
+                                                    </DialogContent>
+                                                </Dialog>
+                                            </div>
                                         </div>
                                         <div className="space-y-2">
                                             <Label>Fecha de Entrega</Label>
@@ -451,10 +543,10 @@ export default function CreateTestRequestPage() {
                                     </div>
                                     <div className="flex justify-between items-center text-lg">
                                         <span className="flex items-center gap-2">
-                                            <Dialog open={isDiscountModalOpen} onOpenChange={setIsDiscountModalOpen}>
+                                             <Dialog open={isDiscountModalOpen} onOpenChange={setIsDiscountModalOpen}>
                                                 <DialogTrigger asChild>
-                                                     <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 -ml-2">
-                                                        <Tag className="h-5 w-5"/>
+                                                     <Button variant="ghost" className="text-red-500 hover:text-red-600 p-0 h-auto">
+                                                        <Tag className="h-5 w-5 mr-2"/> Descuento
                                                     </Button>
                                                 </DialogTrigger>
                                                 <DialogContent>
@@ -498,13 +590,12 @@ export default function CreateTestRequestPage() {
                                                     </DialogFooter>
                                                 </DialogContent>
                                             </Dialog>
-                                            Descuento
                                         </span>
-                                        <span>-${Number(calculatedDiscount).toFixed(0)}</span>
+                                        <span>-${Number(calculatedDiscount).toFixed(2)}</span>
                                     </div>
                                     <div className="flex justify-between items-center font-bold text-xl text-primary">
                                         <span className="flex items-center gap-2"><DollarSign className="h-5 w-5"/> Total</span>
-                                        <span>${Number(total).toFixed(0)}</span>
+                                        <span>${Number(total).toFixed(2)}</span>
                                     </div>
                                     <Button className="w-full" size="lg" disabled={cart.length === 0 || !deliveryDate || loading} onClick={handleSaveRequest}>
                                         <Save className="mr-2"/> {loading ? 'Guardando...' : 'Guardar Solicitud'}
