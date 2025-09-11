@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -15,9 +16,9 @@ import { useToast } from "@/hooks/use-toast";
 
 type ResultInput = {
     studyName: string;
-    parameterName?: string; // Optional for studies without parameters
+    parameterName: string; // Will be an empty string for the main study result
     result: string;
-    reference: string;
+    reference: string; // This will now be read-only
     unit: string;
 };
 
@@ -49,25 +50,28 @@ export default function CaptureResultsPage() {
                     );
 
                     studiesInRecibo.forEach(study => {
-                        // Add a row for the main study itself, regardless of parameters
                         const existingMainResult = reciboData.results?.find(r => r.studyName === study.name && !r.parameterName);
                         initialResults.push({
                             studyName: study.name,
-                            parameterName: '', // Empty for the main study
+                            parameterName: '',
                             result: existingMainResult?.result || '',
-                            reference: existingMainResult?.reference || '',
+                            reference: '', // Main study might not have a direct reference value
                             unit: existingMainResult?.unit || ''
                         });
 
-                        // If there are parameters, add a row for each one
                         if (study.parameters && study.parameters.length > 0) {
                             study.parameters.forEach(param => {
                                 const existingParamResult = reciboData.results?.find(r => r.studyName === study.name && r.parameterName === param.name);
+                                let referenceValue = param.referenceType;
+                                if (param.referenceType === 'Intervalo Biologico de Referencia') {
+                                    referenceValue = `${param.gender}, ${param.ageStart}-${param.ageEnd} ${param.ageUnit}`;
+                                }
+                                
                                 initialResults.push({
                                     studyName: study.name,
                                     parameterName: param.name,
                                     result: existingParamResult?.result || '',
-                                    reference: existingParamResult?.reference || param.referenceType || '', // Fallback to parameter default
+                                    reference: existingParamResult?.reference || referenceValue,
                                     unit: existingParamResult?.unit || param.unit || ''
                                 });
                             });
@@ -97,14 +101,13 @@ export default function CaptureResultsPage() {
         if (!recibo) return;
         setLoading(true);
         try {
-            // Map ResultInput[] to TestResult[] before saving
             const resultsToSave: TestResult[] = results.map(r => ({
                 studyName: r.studyName,
                 parameterName: r.parameterName || '',
                 result: r.result,
                 reference: r.reference,
                 unit: r.unit,
-            })).filter(r => r.result); // Only save results that have a value
+            })).filter(r => r.result); 
             
             await saveResults(recibo.id, resultsToSave);
             toast({ title: "Éxito", description: "Resultados guardados correctamente."});
@@ -201,8 +204,9 @@ export default function CaptureResultsPage() {
                                        <TableCell>
                                             <Input
                                                value={result.reference}
-                                               onChange={(e) => handleResultChange(index, 'reference', e.target.value)}
                                                placeholder="Ej. 70-110 mg/dL"
+                                               readOnly
+                                               className="bg-muted/50 cursor-not-allowed border-none"
                                             />
                                        </TableCell>
                                    </TableRow>

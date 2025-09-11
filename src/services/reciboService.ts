@@ -49,7 +49,6 @@ export async function getRecibos(): Promise<Recibo[]> {
 }
 
 export async function createRecibo(reciboData: ReciboCreation): Promise<void> {
-    // Faltaban las comillas invertidas (`) aquí
     const barcode = `BC-${Date.now()}`;
     const date = new Date().toISOString();
     const status: Recibo['status'] = 'pending';
@@ -60,7 +59,6 @@ export async function createRecibo(reciboData: ReciboCreation): Promise<void> {
         studies, packages, doctor, deliveryDate
     } = reciboData;
 
-    // Y también faltaban las comillas invertidas (`) aquí para el texto de varias líneas
     const query = `
         INSERT INTO recibos (
             createdBy, barcode, patientCode, patientName, contract, 
