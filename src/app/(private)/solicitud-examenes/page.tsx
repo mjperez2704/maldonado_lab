@@ -175,7 +175,7 @@ export default function TestRequestsPage() {
                                 <TableCell>{recibo.barcode}</TableCell>
                                 <TableCell>{new Date(recibo.date).toLocaleDateString()}</TableCell>
                                 <TableCell>{recibo.patientName}</TableCell>
-                                <TableCell>${Number(recibo.total.toFixed(2))}</TableCell>
+                                <TableCell>${Number(recibo.total)}</TableCell>
                                 <TableCell>
                                     <span className={`px-2 py-1 rounded-full text-xs capitalize ${
                                         recibo.status === 'pending' ? 'bg-yellow-200 text-yellow-800' : 
