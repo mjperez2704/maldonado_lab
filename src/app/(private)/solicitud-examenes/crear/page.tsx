@@ -8,6 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from "@/components/ui/dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Textarea } from "@/components/ui/textarea";
 import { FlaskConical, UserSearch, Search, Trash2, Calendar, User, Microscope, DollarSign, Tag, Save, Package } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
 import { getPatients, Patient } from "@/services/patientService";
@@ -27,6 +30,12 @@ type CartItem = {
     type: 'study' | 'package';
 };
 
+type Discount = {
+    type: 'monto' | 'porcentaje';
+    value: number;
+    reason: string;
+};
+
 export default function CreateTestRequestPage() {
     const [patients, setPatients] = useState<Patient[]>([]);
     const [studies, setStudies] = useState<Study[]>([]);
@@ -37,6 +46,12 @@ export default function CreateTestRequestPage() {
     const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
     const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
     const [cart, setCart] = useState<CartItem[]>([]);
+    
+    const [discount, setDiscount] = useState<Discount | null>(null);
+    const [discountType, setDiscountType] = useState<'monto' | 'porcentaje'>('monto');
+    const [discountValue, setDiscountValue] = useState(0);
+    const [discountReason, setDiscountReason] = useState('');
+    const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
 
     const [selectedDoctor, setSelectedDoctor] = useState('');
     const [deliveryDate, setDeliveryDate] = useState('');
@@ -116,9 +131,36 @@ export default function CreateTestRequestPage() {
         setCart(prev => prev.filter(item => item.id !== itemId));
     };
 
+    const handleApplyDiscount = () => {
+        if (discountValue <= 0) {
+            toast({ title: "Valor inválido", description: "El valor del descuento debe ser mayor a cero.", variant: "destructive" });
+            return;
+        }
+        setDiscount({ type: discountType, value: discountValue, reason: discountReason });
+        setIsDiscountModalOpen(false);
+    };
+
+    const handleRemoveDiscount = () => {
+        setDiscount(null);
+        setDiscountValue(0);
+        setDiscountReason('');
+        setIsDiscountModalOpen(false);
+    }
+
     const subtotal = useMemo(() => cart.reduce((acc, item) => acc + item.price, 0), [cart]);
-    const discount = 0; // Placeholder for discount logic based on convenio
-    const total = subtotal - discount;
+    
+    const calculatedDiscount = useMemo(() => {
+        if (!discount) return 0;
+        if (discount.type === 'monto') {
+            return Math.min(discount.value, subtotal);
+        }
+        if (discount.type === 'porcentaje') {
+            return (subtotal * discount.value) / 100;
+        }
+        return 0;
+    }, [discount, subtotal]);
+
+    const total = subtotal - calculatedDiscount;
 
     const resetForm = () => {
         setSearchTerm('');
@@ -127,6 +169,7 @@ export default function CreateTestRequestPage() {
         setCart([]);
         setSelectedDoctor('');
         setDeliveryDate('');
+        setDiscount(null);
     };
     
     const handlePrintTicket = () => {
@@ -169,7 +212,7 @@ export default function CreateTestRequestPage() {
                 patientName: selectedPatient.name,
                 contract: selectedPatient.convenio,
                 subtotal,
-                discount,
+                discount: calculatedDiscount,
                 total,
                 paid: 0,
                 due: total,
@@ -385,8 +428,59 @@ export default function CreateTestRequestPage() {
                                         <span>${Number(subtotal.toFixed(2))}</span>
                                     </div>
                                     <div className="flex justify-between items-center text-lg">
-                                        <span className="flex items-center gap-2"><Tag className="h-5 w-5"/> Descuento</span>
-                                        <span>${Number(discount.toFixed(2))}</span>
+                                        <span className="flex items-center gap-2">
+                                            <Tag className="h-5 w-5"/> Descuento
+                                        </span>
+                                        <div className="flex items-center gap-2">
+                                          <span>-${Number(calculatedDiscount).toFixed(2)}</span>
+                                           <Dialog open={isDiscountModalOpen} onOpenChange={setIsDiscountModalOpen}>
+                                                <DialogTrigger asChild>
+                                                    <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600">
+                                                        <Tag className="h-5 w-5"/>
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent>
+                                                    <DialogHeader>
+                                                        <DialogTitle>Gestionar Descuento</DialogTitle>
+                                                    </DialogHeader>
+                                                    <div className="space-y-4 py-4">
+                                                        {discount && (
+                                                          <div className="p-3 rounded-md bg-muted flex justify-between items-center">
+                                                              <div>
+                                                                  <p className="font-semibold">
+                                                                      {discount.type === 'monto' ? `$${discount.value}` : `${discount.value}%`} de descuento
+                                                                  </p>
+                                                                  <p className="text-sm text-muted-foreground">{discount.reason}</p>
+                                                              </div>
+                                                              <Button variant="destructive" size="sm" onClick={handleRemoveDiscount}>Eliminar</Button>
+                                                          </div>
+                                                        )}
+                                                        <div className="space-y-2">
+                                                            <Label>Tipo de Descuento</Label>
+                                                            <RadioGroup value={discountType} onValueChange={(v) => setDiscountType(v as any)} className="flex gap-4">
+                                                                <div className="flex items-center space-x-2"><RadioGroupItem value="monto" id="monto"/><Label htmlFor="monto">Por Monto</Label></div>
+                                                                <div className="flex items-center space-x-2"><RadioGroupItem value="porcentaje" id="porcentaje"/><Label htmlFor="porcentaje">Por Porcentaje</Label></div>
+                                                            </RadioGroup>
+                                                        </div>
+                                                        <div className="space-y-2">
+                                                            <Label>Valor</Label>
+                                                            <div className="relative">
+                                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{discountType === 'monto' ? '$' : '%'}</span>
+                                                                <Input type="number" value={discountValue} onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)} className="pl-8"/>
+                                                            </div>
+                                                        </div>
+                                                         <div className="space-y-2">
+                                                            <Label>Motivo del Descuento</Label>
+                                                            <Textarea value={discountReason} onChange={(e) => setDiscountReason(e.target.value)} />
+                                                        </div>
+                                                    </div>
+                                                    <DialogFooter>
+                                                        <Button variant="outline" onClick={() => setIsDiscountModalOpen(false)}>Cancelar</Button>
+                                                        <Button onClick={handleApplyDiscount}>Aplicar Descuento</Button>
+                                                    </DialogFooter>
+                                                </DialogContent>
+                                            </Dialog>
+                                        </div>
                                     </div>
                                     <div className="flex justify-between items-center font-bold text-xl text-primary">
                                         <span className="flex items-center gap-2"><DollarSign className="h-5 w-5"/> Total</span>
