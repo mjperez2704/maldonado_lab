@@ -1,34 +1,3 @@
 {
-    "sqltools.connections": [
-        {
-            "mysqlOptions": {
-                "authProtocol": "default",
-                "enableSsl": "Disabled"
-            },
-            "ssh": "Disabled",
-            "previewLimit": 50,
-            "server": "195.250.27.25",
-            "port": 3306,
-            "driver": "MariaDB",
-            "name": "maldonado",
-            "database": "megaspots_maldonado",
-            "username": "megaspots_maldonado",
-            "password": "megaspots_maldonado"
-        },
-        {
-            "mysqlOptions": {
-                "authProtocol": "default",
-                "enableSsl": "Disabled"
-            },
-            "ssh": "Disabled",
-            "previewLimit": 500,
-            "server": "34.172.217.232",
-            "driver": "MariaDB",
-            "name": "maldonado-labs-2108:us-central1:lab-hdm-080925",
-            "database": "megaspots_maldonado",
-            "username": "megaspots_maldonado",
-            "password": "GAOE560718qq6@",
-            "connectString": "maldonado-labs-2108:us-central1:lab-hdm-080925"
-        }
-    ]
+    "sqltools.connections": []
 }

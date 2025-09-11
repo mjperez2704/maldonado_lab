@@ -3,61 +3,18 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { FileText, Save, Upload, Ruler, ImagePlay, Droplets } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { FileText, Plus, MoreVertical, FileEdit, Trash2 } from "lucide-react";
 import React from 'react';
 import Link from "next/link";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 
-const TemplateSection = ({ title }: { title: string }) => (
-    <Card>
-        <CardHeader>
-            <CardTitle className="text-lg">{title}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-            <div className="space-y-2">
-                <Label htmlFor={`image-upload-${title}`}>Cargar Imagen</Label>
-                <div className="flex items-center gap-2">
-                    <Input id={`image-upload-${title}`} type="file" />
-                    <Button variant="outline" size="icon">
-                        <Upload className="h-4 w-4" />
-                    </Button>
-                </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                    <Label htmlFor={`width-${title}`}>Ancho</Label>
-                    <div className="relative">
-                        <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id={`width-${title}`} placeholder="ej. 210mm" className="pl-10"/>
-                    </div>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor={`height-${title}`}>Alto</Label>
-                     <div className="relative">
-                        <Ruler className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input id={`height-${title}`} placeholder="ej. 297mm" className="pl-10"/>
-                    </div>
-                </div>
-            </div>
-            <div className="flex items-center justify-between pt-4 border-t">
-                <div className="flex items-center gap-2">
-                    <ImagePlay className="h-5 w-5 text-primary"/>
-                    <Label htmlFor={`background-${title}`}>Establecer como fondo</Label>
-                </div>
-                <Switch id={`background-${title}`} />
-            </div>
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Droplets className="h-5 w-5 text-primary"/>
-                    <Label htmlFor={`watermark-${title}`}>Establecer como marca de agua</Label>
-                </div>
-                <Switch id={`watermark-${title}`} />
-            </div>
-        </CardContent>
-    </Card>
-);
+// Datos simulados de plantillas
+const templates = [
+    { id: 1, name: "Reporte General", description: "Plantilla estándar para resultados de estudios." },
+    { id: 2, name: "Reporte de Cultivos", description: "Plantilla específica para microbiología." },
+    { id: 3, name: "Formato de Consentimiento", description: "Consentimiento informado para pacientes." },
+];
 
 export default function ReportTemplatesPage() {
   return (
@@ -73,19 +30,52 @@ export default function ReportTemplatesPage() {
       </div>
       
       <Card>
-        <CardHeader>
-            <CardTitle>Diseño de Plantilla</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle>Listado de Plantillas</CardTitle>
+            <Button asChild>
+                <Link href="/configuraciones/plantillas/crear">
+                    <Plus className="mr-2 h-4 w-4"/> Crear Nueva Plantilla
+                </Link>
+            </Button>
         </CardHeader>
-        <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <TemplateSection title="Encabezado" />
-                <TemplateSection title="Cuerpo" />
-                <TemplateSection title="Pie de página" />
-            </div>
-             <div className="flex justify-end">
-                <Button>
-                    <Save className="mr-2" /> Guardar Plantilla
-                </Button>
+        <CardContent>
+            <div className="overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Nombre</TableHead>
+                            <TableHead>Descripción</TableHead>
+                            <TableHead className="text-right">Acciones</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {templates.map((template) => (
+                            <TableRow key={template.id}>
+                                <TableCell className="font-medium">{template.name}</TableCell>
+                                <TableCell>{template.description}</TableCell>
+                                <TableCell className="text-right">
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon">
+                                                <MoreVertical className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem>
+                                                <FileEdit className="mr-2 h-4 w-4" />
+                                                Editar
+                                            </DropdownMenuItem>
+                                            <DropdownMenuItem className="text-red-500">
+                                                <Trash2 className="mr-2 h-4 w-4" />
+                                                Eliminar
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
             </div>
         </CardContent>
       </Card>
