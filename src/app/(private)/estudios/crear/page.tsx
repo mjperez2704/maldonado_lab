@@ -79,6 +79,7 @@ const initialNewParam: StudyParameter = {
     possibleValues: [],
     defaultValue: '',
     referenceValue: '',
+    referenceText: '',
 };
 
 export default function CreateStudyPage() {
@@ -392,7 +393,7 @@ export default function CreateStudyPage() {
                             <div className="col-span-full md:col-span-5"><Label>Tipo de Valor de Referencia</Label><RadioGroup value={newParam.referenceType} onValueChange={(v) => setNewParam({...newParam, referenceType: v})} className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
                                 <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo Biologico de Referencia" id="ref-intervalo" /><Label htmlFor="ref-intervalo">Intervalo BR</Label></div>
                                 <div className="flex items-center space-x-2"><RadioGroupItem value="Mixto" id="ref-mixto" /><Label htmlFor="ref-mixto">Mixto</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Criterio" id="ref-criterio" /><Label htmlFor="ref-criterio">Criterio R</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Criterio R" id="ref-criterio" /><Label htmlFor="ref-criterio">Criterio R</Label></div>
                                 <div className="flex items-center space-x-2"><RadioGroupItem value="Sin valor de referencia" id="ref-sin-valor" /><Label htmlFor="ref-sin-valor">Sin valor de referencia</Label></div>
                             </RadioGroup></div>
                         </div>
@@ -440,6 +441,19 @@ export default function CreateStudyPage() {
                                             </SelectContent>
                                         </Select>
                                     </div>
+                                </div>
+                            </div>
+                        )}
+                        {newParam.referenceType === 'Criterio R' && (
+                            <div className="p-4 bg-muted/50 rounded-md">
+                                <div className="space-y-2">
+                                    <Label htmlFor="referenceText">Introduce un texto que será el valor de referencia:</Label>
+                                    <Textarea
+                                        id="referenceText"
+                                        placeholder="Ej: Menor de 1.0"
+                                        value={newParam.referenceText}
+                                        onChange={(e) => setNewParam({...newParam, referenceText: e.target.value})}
+                                    />
                                 </div>
                             </div>
                         )}

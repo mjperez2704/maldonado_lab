@@ -20,6 +20,8 @@ export interface StudyParameter {
     possibleValues?: string[];
     defaultValue?: string;
     referenceValue?: string;
+    // New field for 'Criterio R' type
+    referenceText?: string;
 }
 
 export interface IntegratedStudyRef {
