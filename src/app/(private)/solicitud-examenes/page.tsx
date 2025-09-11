@@ -1,376 +1,211 @@
-
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { FlaskConical, UserSearch, Search, Trash2, Calendar, User, Microscope, DollarSign, Tag, Save, Package } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
-import { getPatients, Patient } from "@/services/patientService";
-import { getStudies, Study } from "@/services/studyService";
-import { getPackages, Package as PackageType } from "@/services/packageService";
-import { getDoctors, Doctor } from "@/services/doctorService";
-import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
-import { createRecibo, ReciboCreation } from "@/services/reciboService";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import Link from "next/link";
+import {
+  Plus,
+  Search,
+  FlaskConical,
+  Pencil,
+  Trash2,
+  Filter,
+  Calendar,
+  User,
+  Hash,
+  Eye,
+} from "lucide-react"
+import { getRecibos, Recibo } from '@/services/reciboService';
+import { useRouter } from 'next/navigation';
+import { useToast } from '@/hooks/use-toast';
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
-type CartItem = {
-    id: string;
-    name: string;
-    price: number;
-    type: 'study' | 'package';
-};
-
-export default function TestRequestPage() {
-    const [patients, setPatients] = useState<Patient[]>([]);
-    const [studies, setStudies] = useState<Study[]>([]);
-    const [packages, setPackages] = useState<PackageType[]>([]);
-    const [doctors, setDoctors] = useState<Doctor[]>([]);
-
-    const [searchTerm, setSearchTerm] = useState('');
-    const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
-    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
-    const [cart, setCart] = useState<CartItem[]>([]);
-
-    const [selectedDoctor, setSelectedDoctor] = useState('');
-    const [deliveryDate, setDeliveryDate] = useState('');
-    const [loading, setLoading] = useState(false);
-    const { toast } = useToast();
+export default function TestRequestsPage() {
+    const [recibos, setRecibos] = useState<Recibo[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [filters, setFilters] = useState({ folio: '', patient: '', startDate: '', endDate: '', status: 'all' });
     const router = useRouter();
+    const { toast } = useToast();
 
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [patientsData, studiesData, doctorsData, packagesData] = await Promise.all([
-                    getPatients(),
-                    getStudies(),
-                    getDoctors(),
-                    getPackages(),
-                ]);
-                setPatients(patientsData);
-                setStudies(studiesData);
-                setDoctors(doctorsData);
-                setPackages(packagesData);
-            } catch (error) {
-                console.error("Error fetching initial data:", error);
-                toast({ title: "Error", description: "No se pudieron cargar los datos iniciales."});
-            }
-        };
-        fetchData();
-    }, [toast]);
-
-    const handleSearchPatient = () => {
-        const found = patients.filter(p =>
-            p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            String(p.id).toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setFilteredPatients(found);
-        if (found.length === 1) {
-            setSelectedPatient(found[0]);
-        } else {
-            setSelectedPatient(null);
-        }
-    };
-
-    const handleSelectPatient = (patientId: string) => {
-        const patient = patients.find(p => p.id === Number(patientId));
-        if(patient) {
-            setSelectedPatient(patient);
-            setFilteredPatients([]);
-        }
-    };
-
-    const handleAddItemToCart = (itemId: string) => {
-        if (!itemId) return;
-
-        const existingItem = cart.find(item => item.id === itemId);
-        if (existingItem) {
-            toast({ title: "Atención", description: "Este artículo ya está en la solicitud.", variant: "default" });
-            return;
-        }
-
-        const studyToAdd = studies.find(s => s.id === Number(itemId));
-        if (studyToAdd) {
-            setCart(prev => [...prev, {id: String(studyToAdd.id), name: studyToAdd.name, price: Number(studyToAdd.price), type: 'study'}]);
-            return;
-        }
-
-        const packageToAdd = packages.find(p => p.id === Number(itemId));
-        if (packageToAdd) {
-            setCart(prev => [...prev, {id: String(packageToAdd.id), name: packageToAdd.name, price: Number(packageToAdd.price), type: 'package'}]);
-        }
-    };
-
-
-    const handleRemoveFromCart = (itemId: string) => {
-        setCart(prev => prev.filter(item => item.id !== itemId));
-    };
-
-    const subtotal = useMemo(() => cart.reduce((acc, item) => acc + item.price, 0), [cart]);
-    const discount = 0; // Placeholder for discount logic based on convenio
-    const total = subtotal - discount;
-
-    const resetForm = () => {
-        setSearchTerm('');
-        setSelectedPatient(null);
-        setFilteredPatients([]);
-        setCart([]);
-        setSelectedDoctor('');
-        setDeliveryDate('');
-    };
-
-    const handleSaveRequest = async () => {
-        if (!selectedPatient || cart.length === 0 || !deliveryDate) {
-            toast({
-                title: "Faltan datos",
-                description: "Por favor, seleccione un paciente, añada estudios y elija una fecha de entrega.",
-                variant: "destructive"
-            });
-            return;
-        }
-        setLoading(true);
-
-        const studiesInCart = cart.filter(i => i.type === 'study').map(i => i.name);
-        const packagesInCart = cart.filter(i => i.type === 'package').map(i => i.name);
-
+    const fetchRecibos = async () => {
         try {
-            const newRecibo: ReciboCreation = {
-                patientCode: String(selectedPatient.id),
-                patientName: selectedPatient.name,
-                contract: selectedPatient.convenio,
-                subtotal,
-                discount,
-                total,
-                paid: 0,
-                due: total,
-                studies: studiesInCart,
-                packages: packagesInCart,
-                doctor: selectedDoctor,
-                deliveryDate,
-            };
-
-            await createRecibo(newRecibo);
-
-            toast({
-                title: "Éxito",
-                description: "La solicitud de examen ha sido guardada correctamente."
-            });
-            resetForm();
-
+            const data = await getRecibos();
+            setRecibos(data);
         } catch (error) {
-            console.error("Error saving request:", error);
-            toast({
-                title: "Error",
-                description: "No se pudo guardar la solicitud. Por favor, intente de nuevo.",
-                variant: "destructive"
-            });
+            console.error("Error fetching requests: ", error);
+            toast({ title: "Error", description: "No se pudieron cargar las solicitudes." });
         } finally {
             setLoading(false);
         }
     };
 
-    const availableItems = useMemo(() => {
-        const studyItems = studies.map(s => ({ value: s.id, label: `${s.name} ($${s.price})`, type: 'Estudio' }));
-        const packageItems = packages.map(p => ({ value: p.id, label: `${p.name} ($${p.price})`, type: 'Paquete' }));
-        return [...studyItems, ...packageItems];
-    }, [studies, packages]);
+    useEffect(() => {
+        fetchRecibos();
+    }, []);
 
-    return (
-        <div className="flex flex-col gap-6 py-8">
-            <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                    <FlaskConical className="h-8 w-8 text-primary" />
-                    <h1 className="text-2xl font-bold">Solicitud de Exámenes</h1>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                    <Link href="/" className="hover:text-primary">Hogar</Link> / Solicitud de Exámenes
-                </div>
+    const filteredRecibos = useMemo(() => {
+        return recibos.filter(recibo => {
+            const folioMatch = filters.folio ? recibo.barcode.toLowerCase().includes(filters.folio.toLowerCase()) : true;
+            const patientMatch = filters.patient ? recibo.patientName.toLowerCase().includes(filters.patient.toLowerCase()) : true;
+            const startDateMatch = filters.startDate ? new Date(recibo.date) >= new Date(filters.startDate) : true;
+            const endDateMatch = filters.endDate ? new Date(recibo.date) <= new Date(filters.endDate) : true;
+            const statusMatch = filters.status === 'all' ? true : recibo.status === filters.status;
+            return folioMatch && patientMatch && startDateMatch && endDateMatch && statusMatch;
+        });
+    }, [recibos, filters]);
+
+    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFilters(prev => ({ ...prev, [e.target.id]: e.target.value }));
+    };
+    
+    const handleStatusChange = (value: string) => {
+        setFilters(prev => ({...prev, status: value}));
+    }
+
+  return (
+    <div className="flex flex-col gap-8 py-8">
+        <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+                <FlaskConical className="h-8 w-8 text-primary" />
+                <h1 className="text-2xl font-bold">Solicitud de Exámenes</h1>
             </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-                <div className="lg:col-span-2 flex flex-col gap-6">
-                    <Card>
-                        <CardHeader className="bg-primary text-primary-foreground">
-                            <CardTitle className="flex items-center gap-2"><UserSearch /> Buscar Paciente</CardTitle>
-                        </CardHeader>
-                        <CardContent className="pt-6 space-y-4">
-                            <div className="flex items-end gap-4">
-                                <div className="flex-grow space-y-2">
-                                    <Label htmlFor="patient-search">Buscar por nombre o número de paciente</Label>
-                                    <Input
-                                        id="patient-search"
-                                        placeholder="Escriba aquí..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        onKeyDown={(e) => { if (e.key === 'Enter') handleSearchPatient(); }}
-                                    />
-                                </div>
-                                <Button onClick={handleSearchPatient}><Search className="mr-2"/> Buscar</Button>
-                                 <Button asChild variant="outline">
-                                    <Link href="/pacientes/crear">Nuevo Paciente</Link>
-                                </Button>
-                            </div>
-                            {filteredPatients.length > 1 && (
-                                <div className="space-y-2">
-                                    <Label>Se encontraron varios pacientes, seleccione uno:</Label>
-                                    <Select onValueChange={handleSelectPatient}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Seleccione un paciente" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {filteredPatients.map(p => (
-                                                <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            )}
-                             <div className="space-y-2">
-                                <Label>O seleccione de la lista</Label>
-                                <Select onValueChange={handleSelectPatient}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Seleccionar un paciente de la lista" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {patients.map(p => (
-                                            <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {selectedPatient && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Estudios en la Solicitud</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                 <div className="overflow-x-auto">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>Estudio/Paquete</TableHead>
-                                                <TableHead>Tipo</TableHead>
-                                                <TableHead className="text-right">Precio</TableHead>
-                                                <TableHead></TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {cart.length > 0 ? cart.map(item => (
-                                                <TableRow key={`${item.id}-${item.type}`}>
-                                                    <TableCell>{item.name}</TableCell>
-                                                    <TableCell className="capitalize">{item.type === 'study' ? 'Estudio' : 'Paquete'}</TableCell>
-                                                    <TableCell className="text-right">${Number(item.price).toFixed(2)}</TableCell>
-                                                    <TableCell className="text-right">
-                                                        <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleRemoveFromCart(item.id)}>
-                                                            <Trash2 className="h-4 w-4"/>
-                                                        </Button>
-                                                    </TableCell>
-                                                </TableRow>
-                                            )) : (
-                                                <TableRow>
-                                                    <TableCell colSpan={4} className="text-center text-muted-foreground">Añada estudios o paquetes a la solicitud</TableCell>
-                                                </TableRow>
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                                <div className="mt-4 flex items-end gap-4">
-                                    <div className="flex-grow space-y-2">
-                                        <Label>Añadir Estudio o Paquete</Label>
-                                        <Select onValueChange={handleAddItemToCart}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Buscar estudio o paquete por nombre" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {availableItems.map(item => (
-                                                    <SelectItem key={`${item.value}-${item.type}`} value={String(item.value)}>
-                                                        {item.label} ({item.type})
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-                </div>
-
-                <div className="lg:col-span-1 flex flex-col gap-6 sticky top-24">
-                     <Card>
-                        <CardHeader>
-                            <CardTitle>Detalles de la Solicitud</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                             {selectedPatient ? (
-                                <>
-                                    <div className="flex items-center gap-3">
-                                        <User className="text-primary"/>
-                                        <span>{selectedPatient.name}</span>
-                                    </div>
-                                    <div className="text-sm text-muted-foreground">
-                                        <p>Convenio: {selectedPatient.convenio || 'Ninguno'}</p>
-                                        <p>{selectedPatient.age} {selectedPatient.ageUnit}</p>
-                                        <p>{selectedPatient.email}</p>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Médico</Label>
-                                        <Select value={selectedDoctor} onValueChange={setSelectedDoctor}>
-                                            <SelectTrigger><SelectValue placeholder="Seleccionar Médico"/></SelectTrigger>
-                                            <SelectContent>
-                                                {doctors.map(doctor => (
-                                                    <SelectItem key={doctor.id} value={doctor.name}>{doctor.name}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                     <div className="space-y-2">
-                                        <Label>Fecha de Entrega</Label>
-                                        <div className="relative">
-                                            <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                            <Input type="date" className="pl-10" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)}/>
-                                        </div>
-                                    </div>
-                                </>
-                             ) : (
-                                <p className="text-muted-foreground text-center py-8">Seleccione un paciente para continuar</p>
-                             )}
-                        </CardContent>
-                    </Card>
-                    {selectedPatient && (
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Resumen Financiero</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="flex justify-between items-center text-lg">
-                                    <span className="flex items-center gap-2"><Microscope className="h-5 w-5"/> Subtotal</span>
-                                    <span>${Number(subtotal.toFixed(2))}</span>
-                                </div>
-                                 <div className="flex justify-between items-center text-lg">
-                                    <span className="flex items-center gap-2"><Tag className="h-5 w-5"/> Descuento</span>
-                                    <span>${Number(discount.toFixed(2))}</span>
-                                </div>
-                                <div className="flex justify-between items-center font-bold text-xl text-primary">
-                                    <span className="flex items-center gap-2"><DollarSign className="h-5 w-5"/> Total</span>
-                                    <span>${Number(total.toFixed(2))}</span>
-                                </div>
-                                <Button className="w-full" size="lg" disabled={cart.length === 0 || !deliveryDate || loading} onClick={handleSaveRequest}>
-                                    <Save className="mr-2"/> {loading ? 'Guardando...' : 'Guardar Solicitud'}
-                                </Button>
-                            </CardContent>
-                        </Card>
-                    )}
-                </div>
+            <div className="text-sm text-muted-foreground">
+                <Link href="/" className="hover:text-primary">Hogar</Link> / Solicitud de Exámenes
             </div>
         </div>
-    );
+      <Card>
+        <CardHeader className="bg-primary text-primary-foreground rounded-t-lg">
+          <CardTitle className="flex items-center gap-2">
+            <Filter /> Filtros de Búsqueda
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 items-end">
+            <div className="space-y-2">
+                <label htmlFor="folio">Folio</label>
+              <div className="relative">
+                 <Hash className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input id="folio" placeholder="Folio de la solicitud" className="pl-10" value={filters.folio} onChange={handleFilterChange} />
+              </div>
+            </div>
+             <div className="space-y-2">
+                <label htmlFor="patient">Paciente</label>
+                <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="patient" placeholder="Nombre del Paciente" className="pl-10" value={filters.patient} onChange={handleFilterChange} />
+                </div>
+            </div>
+            <div className="space-y-2">
+                <label htmlFor="startDate">Fecha Inicial</label>
+                <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="startDate" type="date" className="pl-10" value={filters.startDate} onChange={handleFilterChange} />
+                </div>
+            </div>
+            <div className="space-y-2">
+                <label htmlFor="endDate">Fecha Final</label>
+                <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input id="endDate" type="date" className="pl-10" value={filters.endDate} onChange={handleFilterChange} />
+                </div>
+            </div>
+             <div className="space-y-2">
+                <label htmlFor="status">Estado</label>
+                 <Select value={filters.status} onValueChange={handleStatusChange}>
+                     <SelectTrigger id="status"><SelectValue /></SelectTrigger>
+                     <SelectContent>
+                         <SelectItem value="all">Todos</SelectItem>
+                         <SelectItem value="pending">Pendiente</SelectItem>
+                         <SelectItem value="completed">Completado</SelectItem>
+                         <SelectItem value="cancelled">Cancelado</SelectItem>
+                     </SelectContent>
+                 </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="bg-primary text-primary-foreground rounded-t-lg">
+            <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <FlaskConical /> Listado de Solicitudes
+                </div>
+                <Button asChild className="bg-green-600 hover:bg-green-700">
+                    <Link href="/solicitud-examenes/crear">
+                        <Plus className="mr-2"/> Nueva Solicitud
+                    </Link>
+                </Button>
+            </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-6 flex flex-col gap-4">
+          <div className="overflow-x-auto">
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Folio</TableHead>
+                        <TableHead>Fecha</TableHead>
+                        <TableHead>Paciente</TableHead>
+                        <TableHead>Total</TableHead>
+                        <TableHead>Estado</TableHead>
+                        <TableHead className="text-right">Acciones</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {loading ? (
+                        <TableRow><TableCell colSpan={6} className="text-center">Cargando...</TableCell></TableRow>
+                    ) : filteredRecibos.length > 0 ? (
+                        filteredRecibos.map(recibo => (
+                            <TableRow key={recibo.id}>
+                                <TableCell>{recibo.barcode}</TableCell>
+                                <TableCell>{new Date(recibo.date).toLocaleDateString()}</TableCell>
+                                <TableCell>{recibo.patientName}</TableCell>
+                                <TableCell>${Number(recibo.total.toFixed(2))}</TableCell>
+                                <TableCell>
+                                    <span className={`px-2 py-1 rounded-full text-xs capitalize ${
+                                        recibo.status === 'pending' ? 'bg-yellow-200 text-yellow-800' : 
+                                        recibo.status === 'completed' ? 'bg-green-200 text-green-800' :
+                                        'bg-red-200 text-red-800'
+                                    }`}>
+                                        {recibo.status}
+                                    </span>
+                                </TableCell>
+                                <TableCell className="text-right flex gap-2 justify-end">
+                                    <Button variant="outline" size="icon" title="Ver Solicitud">
+                                        <Eye className="h-4 w-4"/>
+                                    </Button>
+                                    <Button variant="outline" size="icon" title="Editar Solicitud" disabled={recibo.status !== 'pending'}>
+                                        <Pencil className="h-4 w-4"/>
+                                    </Button>
+                                    <Button variant="destructive" size="icon" title="Eliminar Solicitud" disabled={recibo.status !== 'pending'}>
+                                        <Trash2 className="h-4 w-4"/>
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    ) : (
+                        <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-6">No se encontraron solicitudes.</TableCell></TableRow>
+                    )}
+                </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
