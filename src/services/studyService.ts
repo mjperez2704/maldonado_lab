@@ -1,3 +1,4 @@
+
 'use server';
 import { executeQuery } from '@/lib/db';
 
@@ -7,10 +8,14 @@ export interface StudyParameter {
     cost: number;
     factor: string;
     referenceType: string;
-    gender?: 'Ambos' | 'Masculino' | 'Femenino';
-    ageStart?: number;
-    ageEnd?: number;
-    ageUnit?: 'Anos' | 'Meses' | 'Dias';
+    gender: 'Hombre' | 'Mujer' | 'Ambos';
+    ageStart: number;
+    ageEnd: number;
+    ageUnit: 'Anos' | 'Meses' | 'Dias';
+    intervalFrom?: string;
+    intervalTo?: string;
+    conversionFactor?: number;
+    conversionUnit?: string;
 }
 
 export interface IntegratedStudyRef {

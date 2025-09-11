@@ -71,7 +71,11 @@ const initialNewParam: StudyParameter = {
     gender: 'Ambos',
     ageStart: 0,
     ageEnd: 0,
-    ageUnit: 'Anos'
+    ageUnit: 'Anos',
+    intervalFrom: '',
+    intervalTo: '',
+    conversionFactor: 0,
+    conversionUnit: '',
 };
 
 export default function CreateStudyPage() {
@@ -343,12 +347,10 @@ export default function CreateStudyPage() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>PARÁMETRO</TableHead>
-                                    <TableHead>UNIDAD DE MEDIDA</TableHead>
-                                    <TableHead>COSTO INDIVIDUAL</TableHead>
-                                    <TableHead>FACTOR DE CONVERSIÓN</TableHead>
-                                    <TableHead>VALOR DE REFERENCIA</TableHead>
-                                    <TableHead>ELIMINAR</TableHead>
+                                    <TableHead>Parámetro</TableHead>
+                                    <TableHead>Unidad</TableHead>
+                                    <TableHead>Ref.</TableHead>
+                                    <TableHead>Eliminar</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -356,14 +358,7 @@ export default function CreateStudyPage() {
                                     <TableRow key={index}>
                                         <TableCell>{param.name}</TableCell>
                                         <TableCell>{param.unit}</TableCell>
-                                        <TableCell>{param.cost}</TableCell>
-                                        <TableCell>{param.factor}</TableCell>
-                                        <TableCell>
-                                            {param.referenceType === 'Intervalo Biologico de Referencia'
-                                                ? `${param.gender}, ${param.ageStart}-${param.ageEnd} ${param.ageUnit}`
-                                                : param.referenceType
-                                            }
-                                        </TableCell>
+                                        <TableCell>{param.referenceType === 'Intervalo Biologico de Referencia' ? `${param.intervalFrom} - ${param.intervalTo}` : param.referenceType}</TableCell>
                                         <TableCell>
                                             <Button type="button" variant="destructive" size="icon" onClick={() => handleRemoveParameter(index)}><Trash2/></Button>
                                         </TableCell>
@@ -373,32 +368,27 @@ export default function CreateStudyPage() {
                         </Table>
                     </div>
                     <div className="p-4 border rounded-md space-y-4">
-                        <div className="space-y-2">
-                             <Label>Tipo de Valor de Referencia</Label>
-                            <RadioGroup value={newParam.referenceType} onValueChange={(v) => setNewParam({...newParam, referenceType: v})} className="flex flex-wrap gap-x-4 gap-y-2">
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo Biologico de Referencia" id="ref-intervalo" /><Label htmlFor="ref-intervalo">Intervalo Biologico de Referencia</Label></div>
+                        <div className="grid grid-cols-1 md:grid-cols-5 gap-x-4 gap-y-2 items-end">
+                            <div className="space-y-1 col-span-full md:col-span-1"><Label>Parámetro</Label><Input placeholder="Nombre" value={newParam.name} onChange={(e) => setNewParam({...newParam, name: e.target.value})}/></div>
+                            <div className="space-y-1 col-span-1"><Label>Unidad</Label><Input placeholder="ej. ml" value={newParam.unit} onChange={(e) => setNewParam({...newParam, unit: e.target.value})}/></div>
+                            <div className="space-y-1 col-span-1"><Label>Costo</Label><Input type="number" placeholder="0.00" value={newParam.cost} onChange={(e) => setNewParam({...newParam, cost: parseFloat(e.target.value) || 0})}/></div>
+                            <div className="space-y-1 col-span-1"><Label>FC</Label><Input type="number" placeholder="ej. 1.0" value={newParam.conversionFactor} onChange={(e) => setNewParam({...newParam, conversionFactor: parseFloat(e.target.value) || 0})}/></div>
+                            <div className="space-y-1 col-span-1"><Label>U.I</Label><Input placeholder="ej. mU/L" value={newParam.conversionUnit} onChange={(e) => setNewParam({...newParam, conversionUnit: e.target.value})}/></div>
+                            <div className="col-span-full md:col-span-5"><Label>Tipo de Valor de Referencia</Label><RadioGroup value={newParam.referenceType} onValueChange={(v) => setNewParam({...newParam, referenceType: v})} className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo Biologico de Referencia" id="ref-intervalo" /><Label htmlFor="ref-intervalo">Intervalo BR</Label></div>
                                 <div className="flex items-center space-x-2"><RadioGroupItem value="Mixto" id="ref-mixto" /><Label htmlFor="ref-mixto">Mixto</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Criterio" id="ref-criterio" /><Label htmlFor="ref-criterio">Criterio</Label></div>
+                                <div className="flex items-center space-x-2"><RadioGroupItem value="Criterio" id="ref-criterio" /><Label htmlFor="ref-criterio">Criterio R</Label></div>
                                 <div className="flex items-center space-x-2"><RadioGroupItem value="Sin valor de referencia" id="ref-sin-valor" /><Label htmlFor="ref-sin-valor">Sin valor de referencia</Label></div>
-                            </RadioGroup>
+                            </RadioGroup></div>
                         </div>
-                        
+
                         {newParam.referenceType === 'Intervalo Biologico de Referencia' && (
-                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-md">
-                                <div className="space-y-2"><Label>Género</Label><Select value={newParam.gender} onValueChange={(v) => setNewParam({...newParam, gender: v})}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="Ambos">Ambos</SelectItem><SelectItem value="Masculino">Masculino</SelectItem><SelectItem value="Femenino">Femenino</SelectItem></SelectContent></Select></div>
-                                <div className="space-y-2"><Label>Edad Inicio</Label><Input type="number" value={newParam.ageStart} onChange={(e) => setNewParam({...newParam, ageStart: Number(e.target.value)})} /></div>
-                                <div className="space-y-2"><Label>Edad Fin</Label><Input type="number" value={newParam.ageEnd} onChange={(e) => setNewParam({...newParam, ageEnd: Number(e.target.value)})}/></div>
-                                <div className="space-y-2"><Label>Tipo de Edad</Label><Select value={newParam.ageUnit} onValueChange={(v) => setNewParam({...newParam, ageUnit: v})}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="Anos">Años</SelectItem><SelectItem value="Meses">Meses</SelectItem><SelectItem value="Dias">Días</SelectItem></SelectContent></Select></div>
+                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-md">
+                                <div className="space-y-2"><Label>Intervalo</Label><div className="flex items-center gap-2"><Input placeholder="De:" value={newParam.intervalFrom} onChange={(e) => setNewParam({...newParam, intervalFrom: e.target.value})}/><span>A:</span><Input placeholder="A:" value={newParam.intervalTo} onChange={(e) => setNewParam({...newParam, intervalTo: e.target.value})}/></div></div>
+                                <div className="space-y-2"><Label>Género</Label><RadioGroup value={newParam.gender} onValueChange={(v) => setNewParam({...newParam, gender: v})} className="flex pt-2 gap-4"><div className="flex items-center space-x-2"><RadioGroupItem value="Hombre" id="gender-h"/><Label htmlFor="gender-h">Hombre</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Mujer" id="gender-m"/><Label htmlFor="gender-m">Mujer</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Ambos" id="gender-a"/><Label htmlFor="gender-a">Ambos</Label></div></RadioGroup></div>
+                                <div className="space-y-2"><Label>Edad</Label><div className="flex items-center gap-2"><Input placeholder="De:" type="number" value={newParam.ageStart} onChange={(e) => setNewParam({...newParam, ageStart: Number(e.target.value)})}/><span>A:</span><Input placeholder="A:" type="number" value={newParam.ageEnd} onChange={(e) => setNewParam({...newParam, ageEnd: Number(e.target.value)})}/></div><RadioGroup value={newParam.ageUnit} onValueChange={(v) => setNewParam({...newParam, ageUnit: v})} className="flex pt-2 gap-4"><div className="flex items-center space-x-2"><RadioGroupItem value="Dias" id="age-d"/><Label htmlFor="age-d">Días</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Meses" id="age-m"/><Label htmlFor="age-m">Meses</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Anos" id="age-a"/><Label htmlFor="age-a">Años</Label></div></RadioGroup></div>
                             </div>
                         )}
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div className="space-y-2"><Label>Parámetro</Label><Input placeholder="Nombre" value={newParam.name} onChange={(e) => setNewParam({...newParam, name: e.target.value})}/></div>
-                            <div className="space-y-2"><Label>Unidad</Label><Input placeholder="Unidad" value={newParam.unit} onChange={(e) => setNewParam({...newParam, unit: e.target.value})}/></div>
-                            <div className="space-y-2"><Label>Costo</Label><Input type="number" placeholder="0.00" value={newParam.cost} onChange={(e) => setNewParam({...newParam, cost: parseFloat(e.target.value) || 0})}/></div>
-                            <div className="space-y-2"><Label>Factor Conversión</Label><Input placeholder="U.I" value={newParam.factor} onChange={(e) => setNewParam({...newParam, factor: e.target.value})}/></div>
-                        </div>
-                        
                         <Button type="button" onClick={handleAddParameter}><Plus className="mr-2"/> Agregar Parametro</Button>
                     </div>
                 </CardContent>
@@ -537,7 +527,7 @@ export default function CreateStudyPage() {
                                         <TableCell>{sample.type}</TableCell>
                                         <TableCell>{sample.container}</TableCell>
                                         <TableCell>{sample.indications}</TableCell>
-                                        <TableCell>{Number(sample.cost.toFixed(2))}</TableCell>
+                                        <TableCell>{Number(sample.cost).toFixed(2)}</TableCell>
                                         <TableCell>
                                             <Button type="button" variant="destructive" size="icon" onClick={() => handleRemoveSample(index)}><Trash2/></Button>
                                         </TableCell>
