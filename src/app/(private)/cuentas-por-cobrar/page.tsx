@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogC
 import { CreditCard, Search, Calendar, FileText, User, DollarSign, HandCoins } from "lucide-react";
 import Link from "next/link";
 import React, { useState, useEffect, useMemo } from "react";
-import { getRecibos, Recibo } from "@/services/reciboService";
+import { getRecibos, Recibo, updateRecibo } from "@/services/reciboService";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AccountsReceivablePage() {
@@ -34,8 +35,7 @@ export default function AccountsReceivablePage() {
   const [commission, setCommission] = useState(0);
   const { toast } = useToast();
 
-  useEffect(() => {
-    const fetchReceivables = async () => {
+  const fetchReceivables = async () => {
       try {
         const allRecibos = await getRecibos();
         const receivables = allRecibos.filter(r => r.due > 0);
@@ -46,6 +46,8 @@ export default function AccountsReceivablePage() {
         setLoading(false);
       }
     };
+
+  useEffect(() => {
     fetchReceivables();
   }, []);
 
@@ -73,7 +75,7 @@ export default function AccountsReceivablePage() {
     setIsPaymentModalOpen(true);
   }
   
-  const handleProcessPayment = () => {
+  const handleProcessPayment = async () => {
     if (!selectedRecibo || paymentAmount <= 0 || !paymentMethod) {
         toast({
             title: "Datos incompletos",
@@ -83,22 +85,42 @@ export default function AccountsReceivablePage() {
         return;
     }
     
-    // Aquí iría la lógica para procesar el pago (llamada a un servicio, etc.)
-    console.log({
-        reciboId: selectedRecibo.id,
-        amount: paymentAmount,
-        method: paymentMethod,
-        plan: creditCardPlan,
-        commission
-    });
+    const newPaidAmount = selectedRecibo.paid + paymentAmount;
+    const newDueAmount = selectedRecibo.total - newPaidAmount;
 
-    toast({
-        title: "Pago Procesado (Simulación)",
-        description: `Se registró un pago de $${paymentAmount.toFixed(2)} para el folio ${selectedRecibo.barcode}.`
-    });
+    if (newDueAmount < 0) {
+        toast({
+            title: "Monto inválido",
+            description: `El pago excede el saldo pendiente de $${selectedRecibo.due.toFixed(2)}.`,
+            variant: "destructive"
+        });
+        return;
+    }
+    
+    try {
+        const updatedRecibo: Partial<Omit<Recibo, 'id'>> = {
+            paid: newPaidAmount,
+            due: newDueAmount,
+            status: newDueAmount === 0 ? 'completed' : selectedRecibo.status,
+        };
 
-    setIsPaymentModalOpen(false);
-    // Idealmente, se debería actualizar el registro en la base de datos y luego refrescar la lista.
+        await updateRecibo(selectedRecibo.id, updatedRecibo);
+
+        toast({
+            title: "Pago Procesado",
+            description: `Se registró un pago de $${paymentAmount.toFixed(2)} para el folio ${selectedRecibo.barcode}.`
+        });
+
+        setIsPaymentModalOpen(false);
+        fetchReceivables(); // Refresh the data
+    } catch (error) {
+        console.error("Error processing payment:", error);
+        toast({
+            title: "Error",
+            description: "No se pudo procesar el pago. Intente de nuevo.",
+            variant: "destructive"
+        });
+    }
   }
 
   return (
@@ -336,5 +358,7 @@ export default function AccountsReceivablePage() {
     </>
   );
 }
+
+    
 
     
