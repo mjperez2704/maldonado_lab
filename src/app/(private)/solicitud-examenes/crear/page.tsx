@@ -22,6 +22,7 @@ import { useToast } from "@/hooks/use-toast";
 import { createRecibo, ReciboCreation } from "@/services/reciboService";
 import Link from "next/link";
 import { SalesTicket } from "./SalesTicket";
+import { CreatePatientForm } from "../../pacientes/CreatePatientForm";
 
 type CartItem = {
     id: string;
@@ -52,6 +53,7 @@ export default function CreateTestRequestPage() {
     const [discountValue, setDiscountValue] = useState(0);
     const [discountReason, setDiscountReason] = useState('');
     const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
+    const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
 
     const [selectedDoctor, setSelectedDoctor] = useState('');
     const [deliveryDate, setDeliveryDate] = useState('');
@@ -63,25 +65,26 @@ export default function CreateTestRequestPage() {
     const router = useRouter();
 
 
+    const fetchAllData = async () => {
+        try {
+            const [patientsData, studiesData, doctorsData, packagesData] = await Promise.all([
+                getPatients(),
+                getStudies(),
+                getDoctors(),
+                getPackages(),
+            ]);
+            setPatients(patientsData);
+            setStudies(studiesData);
+            setDoctors(doctorsData);
+            setPackages(packagesData);
+        } catch (error) {
+            console.error("Error fetching initial data:", error);
+            toast({ title: "Error", description: "No se pudieron cargar los datos iniciales."});
+        }
+    };
+
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [patientsData, studiesData, doctorsData, packagesData] = await Promise.all([
-                    getPatients(),
-                    getStudies(),
-                    getDoctors(),
-                    getPackages(),
-                ]);
-                setPatients(patientsData);
-                setStudies(studiesData);
-                setDoctors(doctorsData);
-                setPackages(packagesData);
-            } catch (error) {
-                console.error("Error fetching initial data:", error);
-                toast({ title: "Error", description: "No se pudieron cargar los datos iniciales."});
-            }
-        };
-        fetchData();
+        fetchAllData();
     }, [toast]);
 
     const handleSearchPatient = () => {
@@ -104,6 +107,17 @@ export default function CreateTestRequestPage() {
             setFilteredPatients([]);
         }
     };
+
+    const handlePatientCreated = async (newPatient: Patient) => {
+      setIsPatientModalOpen(false);
+      toast({
+        title: "Éxito",
+        description: `Paciente ${newPatient.name} creado.`,
+      });
+      await fetchAllData(); // Refresh all data to get the new patient
+      setSelectedPatient(newPatient); // Automatically select the new patient
+    };
+
 
     const handleAddItemToCart = (itemId: string) => {
         if (!itemId) return;
@@ -283,9 +297,17 @@ export default function CreateTestRequestPage() {
                                         />
                                     </div>
                                     <Button onClick={handleSearchPatient}><Search className="mr-2"/> Buscar</Button>
-                                    <Button asChild variant="outline">
-                                        <Link href="/pacientes/crear">Nuevo Paciente</Link>
-                                    </Button>
+                                    <Dialog open={isPatientModalOpen} onOpenChange={setIsPatientModalOpen}>
+                                        <DialogTrigger asChild>
+                                            <Button variant="outline">Nuevo Paciente</Button>
+                                        </DialogTrigger>
+                                        <DialogContent className="sm:max-w-4xl">
+                                             <DialogHeader>
+                                                <DialogTitle>Crear Nuevo Paciente</DialogTitle>
+                                             </DialogHeader>
+                                             <CreatePatientForm onSuccess={handlePatientCreated} />
+                                        </DialogContent>
+                                    </Dialog>
                                 </div>
                                 {filteredPatients.length > 1 && (
                                     <div className="space-y-2">
@@ -304,7 +326,7 @@ export default function CreateTestRequestPage() {
                                 )}
                                 <div className="space-y-2">
                                     <Label>O seleccione de la lista</Label>
-                                    <Select onValueChange={handleSelectPatient}>
+                                    <Select onValueChange={handleSelectPatient} value={selectedPatient ? String(selectedPatient.id) : ""}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Seleccionar un paciente de la lista" />
                                         </SelectTrigger>
@@ -431,7 +453,7 @@ export default function CreateTestRequestPage() {
                                         <span className="flex items-center gap-2">
                                             <Dialog open={isDiscountModalOpen} onOpenChange={setIsDiscountModalOpen}>
                                                 <DialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 -ml-2">
+                                                     <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 -ml-2">
                                                         <Tag className="h-5 w-5"/>
                                                     </Button>
                                                 </DialogTrigger>
@@ -478,11 +500,11 @@ export default function CreateTestRequestPage() {
                                             </Dialog>
                                             Descuento
                                         </span>
-                                        <span>-${Number(calculatedDiscount).toFixed(2)}</span>
+                                        <span>-${Number(calculatedDiscount).toFixed(0)}</span>
                                     </div>
                                     <div className="flex justify-between items-center font-bold text-xl text-primary">
                                         <span className="flex items-center gap-2"><DollarSign className="h-5 w-5"/> Total</span>
-                                        <span>${Number(total.toFixed(2))}</span>
+                                        <span>${Number(total).toFixed(0)}</span>
                                     </div>
                                     <Button className="w-full" size="lg" disabled={cart.length === 0 || !deliveryDate || loading} onClick={handleSaveRequest}>
                                         <Save className="mr-2"/> {loading ? 'Guardando...' : 'Guardar Solicitud'}
