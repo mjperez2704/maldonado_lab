@@ -76,6 +76,9 @@ const initialNewParam: StudyParameter = {
     intervalTo: '',
     conversionFactor: 0,
     conversionUnit: '',
+    possibleValues: [],
+    defaultValue: '',
+    referenceValue: '',
 };
 
 export default function CreateStudyPage() {
@@ -88,6 +91,7 @@ export default function CreateStudyPage() {
     const [loading, setLoading] = useState(false);
 
     const [newParam, setNewParam] = useState<StudyParameter>(initialNewParam);
+    const [newPossibleValue, setNewPossibleValue] = useState('');
     const [newSample, setNewSample] = useState<StudySample>({ type: '', container: '', indications: '', cost: 0 });
     const [studySearchTerm, setStudySearchTerm] = useState('');
     const [selectedIntegratedStudy, setSelectedIntegratedStudy] = useState<string | null>(null);
@@ -136,6 +140,17 @@ export default function CreateStudyPage() {
             ...prev,
             parameters: (prev.parameters || []).filter((_, i) => i !== index)
         }));
+    };
+
+    const handleAddPossibleValue = () => {
+        if (newPossibleValue.trim()) {
+            setNewParam(prev => ({ ...prev, possibleValues: [...(prev.possibleValues || []), newPossibleValue.trim()] }));
+            setNewPossibleValue('');
+        }
+    };
+    
+    const handleRemovePossibleValue = (valueToRemove: string) => {
+        setNewParam(prev => ({ ...prev, possibleValues: (prev.possibleValues || []).filter(v => v !== valueToRemove) }));
     };
 
     // --- Integrated Studies Logic ---
@@ -387,6 +402,45 @@ export default function CreateStudyPage() {
                                 <div className="space-y-2"><Label>Intervalo</Label><div className="flex items-center gap-2"><Input placeholder="De:" value={newParam.intervalFrom} onChange={(e) => setNewParam({...newParam, intervalFrom: e.target.value})}/><span>A:</span><Input placeholder="A:" value={newParam.intervalTo} onChange={(e) => setNewParam({...newParam, intervalTo: e.target.value})}/></div></div>
                                 <div className="space-y-2"><Label>Género</Label><RadioGroup value={newParam.gender} onValueChange={(v) => setNewParam({...newParam, gender: v})} className="flex pt-2 gap-4"><div className="flex items-center space-x-2"><RadioGroupItem value="Hombre" id="gender-h"/><Label htmlFor="gender-h">Hombre</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Mujer" id="gender-m"/><Label htmlFor="gender-m">Mujer</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Ambos" id="gender-a"/><Label htmlFor="gender-a">Ambos</Label></div></RadioGroup></div>
                                 <div className="space-y-2"><Label>Edad</Label><div className="flex items-center gap-2"><Input placeholder="De:" type="number" value={newParam.ageStart} onChange={(e) => setNewParam({...newParam, ageStart: Number(e.target.value)})}/><span>A:</span><Input placeholder="A:" type="number" value={newParam.ageEnd} onChange={(e) => setNewParam({...newParam, ageEnd: Number(e.target.value)})}/></div><RadioGroup value={newParam.ageUnit} onValueChange={(v) => setNewParam({...newParam, ageUnit: v})} className="flex pt-2 gap-4"><div className="flex items-center space-x-2"><RadioGroupItem value="Dias" id="age-d"/><Label htmlFor="age-d">Días</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Meses" id="age-m"/><Label htmlFor="age-m">Meses</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Anos" id="age-a"/><Label htmlFor="age-a">Años</Label></div></RadioGroup></div>
+                            </div>
+                        )}
+                        {newParam.referenceType === 'Mixto' && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-md">
+                                <div className="space-y-2">
+                                    <Label>Valores Posibles</Label>
+                                    <div className="flex items-center gap-2">
+                                        <Input placeholder="Nombre del valor" value={newPossibleValue} onChange={(e) => setNewPossibleValue(e.target.value)} />
+                                        <Button type="button" size="sm" onClick={handleAddPossibleValue}>Agregar Valor</Button>
+                                    </div>
+                                    <div className="border rounded-md p-2 min-h-[100px]">
+                                        {(newParam.possibleValues || []).map((val, i) => (
+                                            <div key={i} className="flex justify-between items-center p-1 hover:bg-background rounded-md">
+                                                <span>{val}</span>
+                                                <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemovePossibleValue(val)}><Trash2 className="h-4 w-4 text-red-500"/></Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    <div className="space-y-2">
+                                        <Label>Valor Predeterminado</Label>
+                                        <Select value={newParam.defaultValue} onValueChange={(v) => setNewParam({...newParam, defaultValue: v})}>
+                                            <SelectTrigger><SelectValue placeholder="Seleccione un valor"/></SelectTrigger>
+                                            <SelectContent>
+                                                {(newParam.possibleValues || []).map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                     <div className="space-y-2">
+                                        <Label>Valor de Referencia</Label>
+                                        <Select value={newParam.referenceValue} onValueChange={(v) => setNewParam({...newParam, referenceValue: v})}>
+                                            <SelectTrigger><SelectValue placeholder="Seleccione un valor"/></SelectTrigger>
+                                            <SelectContent>
+                                                {(newParam.possibleValues || []).map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
                             </div>
                         )}
                         <Button type="button" onClick={handleAddParameter}><Plus className="mr-2"/> Agregar Parametro</Button>

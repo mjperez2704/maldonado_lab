@@ -16,6 +16,10 @@ export interface StudyParameter {
     intervalTo?: string;
     conversionFactor?: number;
     conversionUnit?: string;
+    // New fields for 'Mixto' type
+    possibleValues?: string[];
+    defaultValue?: string;
+    referenceValue?: string;
 }
 
 export interface IntegratedStudyRef {
