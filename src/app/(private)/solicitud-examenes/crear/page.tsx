@@ -429,13 +429,9 @@ export default function CreateTestRequestPage() {
                                     </div>
                                     <div className="flex justify-between items-center text-lg">
                                         <span className="flex items-center gap-2">
-                                            <Tag className="h-5 w-5"/> Descuento
-                                        </span>
-                                        <div className="flex items-center gap-2">
-                                          <span>-${Number(calculatedDiscount).toFixed(2)}</span>
-                                           <Dialog open={isDiscountModalOpen} onOpenChange={setIsDiscountModalOpen}>
+                                            <Dialog open={isDiscountModalOpen} onOpenChange={setIsDiscountModalOpen}>
                                                 <DialogTrigger asChild>
-                                                    <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600">
+                                                    <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-600 -ml-2">
                                                         <Tag className="h-5 w-5"/>
                                                     </Button>
                                                 </DialogTrigger>
@@ -480,7 +476,9 @@ export default function CreateTestRequestPage() {
                                                     </DialogFooter>
                                                 </DialogContent>
                                             </Dialog>
-                                        </div>
+                                            Descuento
+                                        </span>
+                                        <span>-${Number(calculatedDiscount).toFixed(2)}</span>
                                     </div>
                                     <div className="flex justify-between items-center font-bold text-xl text-primary">
                                         <span className="flex items-center gap-2"><DollarSign className="h-5 w-5"/> Total</span>
