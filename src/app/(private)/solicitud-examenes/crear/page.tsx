@@ -23,7 +23,8 @@ import { createRecibo, ReciboCreation } from "@/services/reciboService";
 import Link from "next/link";
 import { SalesTicket } from "./SalesTicket";
 import { CreatePatientForm } from "../../pacientes/CreatePatientForm";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, useForm } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
@@ -542,55 +543,53 @@ export default function CreateTestRequestPage() {
                                         <span>${Number(subtotal.toFixed(2))}</span>
                                     </div>
                                     <div className="flex justify-between items-center text-lg">
-                                        <span className="flex items-center gap-2">
-                                             <Dialog open={isDiscountModalOpen} onOpenChange={setIsDiscountModalOpen}>
-                                                <DialogTrigger asChild>
-                                                     <Button variant="ghost" className="text-red-500 hover:text-red-600 p-0 h-auto">
-                                                        <Tag className="h-5 w-5 mr-2"/> Descuento
-                                                    </Button>
-                                                </DialogTrigger>
-                                                <DialogContent>
-                                                    <DialogHeader>
-                                                        <DialogTitle>Gestionar Descuento</DialogTitle>
-                                                    </DialogHeader>
-                                                    <div className="space-y-4 py-4">
-                                                        {discount && (
-                                                          <div className="p-3 rounded-md bg-muted flex justify-between items-center">
-                                                              <div>
-                                                                  <p className="font-semibold">
-                                                                      {discount.type === 'monto' ? `$${discount.value}` : `${discount.value}%`} de descuento
-                                                                  </p>
-                                                                  <p className="text-sm text-muted-foreground">{discount.reason}</p>
-                                                              </div>
-                                                              <Button variant="destructive" size="sm" onClick={handleRemoveDiscount}>Eliminar</Button>
-                                                          </div>
-                                                        )}
-                                                        <div className="space-y-2">
-                                                            <Label>Tipo de Descuento</Label>
-                                                            <RadioGroup value={discountType} onValueChange={(v) => setDiscountType(v as any)} className="flex gap-4">
-                                                                <div className="flex items-center space-x-2"><RadioGroupItem value="monto" id="monto"/><Label htmlFor="monto">Por Monto</Label></div>
-                                                                <div className="flex items-center space-x-2"><RadioGroupItem value="porcentaje" id="porcentaje"/><Label htmlFor="porcentaje">Por Porcentaje</Label></div>
-                                                            </RadioGroup>
-                                                        </div>
-                                                        <div className="space-y-2">
-                                                            <Label>Valor</Label>
-                                                            <div className="relative">
-                                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{discountType === 'monto' ? '$' : '%'}</span>
-                                                                <Input type="number" value={discountValue} onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)} className="pl-8"/>
+                                        <Dialog open={isDiscountModalOpen} onOpenChange={setIsDiscountModalOpen}>
+                                            <DialogTrigger asChild>
+                                                    <Button variant="ghost" className="text-red-500 hover:text-red-600 p-0 h-auto justify-start">
+                                                    <Tag className="h-5 w-5 mr-2"/> Descuento
+                                                </Button>
+                                            </DialogTrigger>
+                                            <DialogContent>
+                                                <DialogHeader>
+                                                    <DialogTitle>Gestionar Descuento</DialogTitle>
+                                                </DialogHeader>
+                                                <div className="space-y-4 py-4">
+                                                    {discount && (
+                                                        <div className="p-3 rounded-md bg-muted flex justify-between items-center">
+                                                            <div>
+                                                                <p className="font-semibold">
+                                                                    {discount.type === 'monto' ? `$${discount.value}` : `${discount.value}%`} de descuento
+                                                                </p>
+                                                                <p className="text-sm text-muted-foreground">{discount.reason}</p>
                                                             </div>
+                                                            <Button variant="destructive" size="sm" onClick={handleRemoveDiscount}>Eliminar</Button>
                                                         </div>
-                                                         <div className="space-y-2">
-                                                            <Label>Motivo del Descuento</Label>
-                                                            <Textarea value={discountReason} onChange={(e) => setDiscountReason(e.target.value)} />
+                                                    )}
+                                                    <div className="space-y-2">
+                                                        <Label>Tipo de Descuento</Label>
+                                                        <RadioGroup value={discountType} onValueChange={(v) => setDiscountType(v as any)} className="flex gap-4">
+                                                            <div className="flex items-center space-x-2"><RadioGroupItem value="monto" id="monto"/><Label htmlFor="monto">Por Monto</Label></div>
+                                                            <div className="flex items-center space-x-2"><RadioGroupItem value="porcentaje" id="porcentaje"/><Label htmlFor="porcentaje">Por Porcentaje</Label></div>
+                                                        </RadioGroup>
+                                                    </div>
+                                                    <div className="space-y-2">
+                                                        <Label>Valor</Label>
+                                                        <div className="relative">
+                                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{discountType === 'monto' ? '$' : '%'}</span>
+                                                            <Input type="number" value={discountValue} onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)} className="pl-8"/>
                                                         </div>
                                                     </div>
-                                                    <DialogFooter>
-                                                        <Button variant="outline" onClick={() => setIsDiscountModalOpen(false)}>Cancelar</Button>
-                                                        <Button onClick={handleApplyDiscount}>Aplicar Descuento</Button>
-                                                    </DialogFooter>
-                                                </DialogContent>
-                                            </Dialog>
-                                        </span>
+                                                        <div className="space-y-2">
+                                                        <Label>Motivo del Descuento</Label>
+                                                        <Textarea value={discountReason} onChange={(e) => setDiscountReason(e.target.value)} />
+                                                    </div>
+                                                </div>
+                                                <DialogFooter>
+                                                    <Button variant="outline" onClick={() => setIsDiscountModalOpen(false)}>Cancelar</Button>
+                                                    <Button onClick={handleApplyDiscount}>Aplicar Descuento</Button>
+                                                </DialogFooter>
+                                            </DialogContent>
+                                        </Dialog>
                                         <span>-${Number(calculatedDiscount).toFixed(2)}</span>
                                     </div>
                                     <div className="flex justify-between items-center font-bold text-xl text-primary">
