@@ -16,21 +16,28 @@ import {
   Trash2,
   Calendar,
   BookOpen,
-  User,
-  CreditCard,
-  CircleHelp,
   DollarSign
 } from "lucide-react";
 import React, { useEffect, useState } from 'react';
 import { createOperation, getOperations, deleteOperation, Operation } from '@/services/operationService';
+import { getRecibos, Recibo } from "@/services/reciboService";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 
 type OperationFormData = Omit<Operation, 'id'>;
 
+type CombinedTransaction = {
+    id: string;
+    date: string;
+    concept: string;
+    type: 'ingress' | 'egress';
+    amount: number;
+    source: 'manual' | 'solicitud';
+};
+
 export default function IncomeAndExpensesPage() {
     const { toast } = useToast();
-    const [operations, setOperations] = useState<Operation[]>([]);
+    const [transactions, setTransactions] = useState<CombinedTransaction[]>([]);
     const [formData, setFormData] = useState<OperationFormData>({
         date: new Date().toISOString().slice(0, 16),
         concept: '',
@@ -44,30 +51,57 @@ export default function IncomeAndExpensesPage() {
         egress: 0,
         balance: 0,
     });
+    const [loading, setLoading] = useState(true);
 
-    const fetchOperations = async () => {
+    const fetchTransactions = async () => {
+        setLoading(true);
         try {
-            const ops = await getOperations();
-            setOperations(ops);
+            const [ops, recibos] = await Promise.all([getOperations(), getRecibos()]);
+            
+            const manualTransactions: CombinedTransaction[] = ops.map(op => ({
+                id: `op-${op.id}`,
+                date: op.date,
+                concept: op.concept,
+                type: op.type,
+                amount: op.amount,
+                source: 'manual'
+            }));
+
+            const automaticIncomes: CombinedTransaction[] = recibos
+                .filter(recibo => recibo.paid > 0)
+                .map(recibo => ({
+                    id: `rec-${recibo.id}`,
+                    date: recibo.date,
+                    concept: `Pago Solicitud Folio #${recibo.barcode}`,
+                    type: 'ingress',
+                    amount: recibo.paid,
+                    source: 'solicitud'
+                }));
+            
+            const allTransactions = [...manualTransactions, ...automaticIncomes].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+            setTransactions(allTransactions);
+
         } catch (error) {
-            console.error("Error fetching operations:", error);
+            console.error("Error fetching transactions:", error);
             toast({ title: "Error", description: "No se pudieron cargar las operaciones.", variant: "destructive" });
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        fetchOperations();
+        fetchTransactions();
     }, []);
 
     useEffect(() => {
-        const ingress = operations.filter(op => op.type === 'ingress').reduce((acc, op) => acc + op.amount, 0);
-        const egress = operations.filter(op => op.type === 'egress').reduce((acc, op) => acc + op.amount, 0);
+        const ingress = transactions.filter(t => t.type === 'ingress').reduce((acc, t) => acc + t.amount, 0);
+        const egress = transactions.filter(t => t.type === 'egress').reduce((acc, t) => acc + t.amount, 0);
         setSummary({
             ingress,
             egress,
             balance: ingress - egress,
         });
-    }, [operations]);
+    }, [transactions]);
 
 
     const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -95,19 +129,25 @@ export default function IncomeAndExpensesPage() {
                 paymentMethod: '',
                 type: 'ingress',
             });
-            fetchOperations(); // Refrescar la lista
+            fetchTransactions(); // Refrescar la lista
         } catch (error) {
              console.error("Error creating operation:", error);
              toast({ title: "Error", description: "No se pudo registrar la operación.", variant: "destructive"});
         }
     };
 
-    const handleDeleteOperation = async (id: string) => {
+    const handleDeleteOperation = async (id: string, source: 'manual' | 'solicitud') => {
+        if (source === 'solicitud') {
+            toast({ title: "Acción no permitida", description: "Los ingresos de solicitudes no se pueden eliminar desde esta pantalla.", variant: "default"});
+            return;
+        }
+
         if (confirm('¿Está seguro de que desea eliminar esta operación?')) {
             try {
-                await deleteOperation(id);
+                const operationId = id.replace('op-', '');
+                await deleteOperation(operationId);
                 toast({ title: "Éxito", description: "Operación eliminada." });
-                fetchOperations(); // Refrescar la lista
+                fetchTransactions(); // Refrescar la lista
             } catch (error) {
                 console.error("Error deleting operation:", error);
                 toast({ title: "Error", description: "No se pudo eliminar la operación.", variant: "destructive"});
@@ -135,7 +175,7 @@ export default function IncomeAndExpensesPage() {
       <Card>
         <CardHeader className="bg-primary text-primary-foreground rounded-t-lg">
           <CardTitle className="flex items-center gap-2">
-            <ClipboardPlus /> Registrar Nueva Operación
+            <ClipboardPlus /> Registrar Operación Manual
           </CardTitle>
         </CardHeader>
         <CardContent className="pt-6">
@@ -153,18 +193,6 @@ export default function IncomeAndExpensesPage() {
                 <BookOpen className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input id="concept" placeholder="Concepto" value={formData.concept} onChange={handleFormChange} className="pl-10" />
               </div>
-            </div>
-             <div className="space-y-2">
-                <Label htmlFor="employee">Empleado</Label>
-                <Select value={formData.employee} onValueChange={(value) => handleSelectChange('employee', value)}>
-                    <SelectTrigger id="employee">
-                        <SelectValue placeholder="Selecciona el/la empleado" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="emp1">Empleado 1</SelectItem>
-                        <SelectItem value="emp2">Empleado 2</SelectItem>
-                    </SelectContent>
-                </Select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="amount">Cantidad</Label>
@@ -221,14 +249,17 @@ export default function IncomeAndExpensesPage() {
                   <TableHead>Fecha</TableHead>
                   <TableHead>Concepto</TableHead>
                   <TableHead>Tipo</TableHead>
-                  <TableHead>Forma de Pago</TableHead>
                   <TableHead>Monto</TableHead>
                   <TableHead>Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {operations.length > 0 ? (
-                  operations.map((op) => (
+                {loading ? (
+                    <TableRow>
+                        <TableCell colSpan={5} className="text-center">Cargando...</TableCell>
+                    </TableRow>
+                ) : transactions.length > 0 ? (
+                  transactions.map((op) => (
                     <TableRow key={op.id}>
                         <TableCell>{new Date(op.date).toLocaleString()}</TableCell>
                         <TableCell>{op.concept}</TableCell>
@@ -239,10 +270,15 @@ export default function IncomeAndExpensesPage() {
                             }
                             <span className="capitalize">{op.type === 'ingress' ? 'Ingreso' : 'Egreso'}</span>
                         </TableCell>
-                        <TableCell>{op.paymentMethod}</TableCell>
                         <TableCell>${Number(op.amount.toFixed(2))}</TableCell>
                         <TableCell>
-                            <Button variant="destructive" size="icon" onClick={() => handleDeleteOperation(String(op.id))}>
+                            <Button 
+                                variant="destructive" 
+                                size="icon" 
+                                onClick={() => handleDeleteOperation(op.id, op.source)}
+                                disabled={op.source === 'solicitud'}
+                                title={op.source === 'solicitud' ? 'No se puede eliminar un ingreso automático' : 'Eliminar operación'}
+                            >
                                 <Trash2 className="h-4 w-4"/>
                             </Button>
                         </TableCell>
@@ -250,7 +286,7 @@ export default function IncomeAndExpensesPage() {
                   ))
                 ) : (
                     <TableRow>
-                        <TableCell colSpan={6} className="text-center text-muted-foreground py-4">No hay operaciones registradas.</TableCell>
+                        <TableCell colSpan={5} className="text-center text-muted-foreground py-4">No hay operaciones registradas.</TableCell>
                     </TableRow>
                 )}
               </TableBody>
