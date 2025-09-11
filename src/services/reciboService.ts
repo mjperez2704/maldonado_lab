@@ -99,3 +99,30 @@ export async function saveResults(id: number, results: TestResult[]): Promise<vo
     const query = 'UPDATE recibos SET results = ?, status = ? WHERE id = ?';
     await executeQuery(query, [JSON.stringify(results), 'completed', id]);
 }
+
+export async function updateRecibo(id: number, recibo: Partial<Omit<Recibo, 'id'| 'date' | 'createdBy'>>): Promise<void> {
+    const { 
+        patientCode, patientName, contract, subtotal, discount, total, paid, due, 
+        status, studies, packages, doctor, deliveryDate, results
+    } = recibo;
+    
+    const query = `UPDATE recibos SET 
+        patientCode = ?, patientName = ?, contract = ?, subtotal = ?, discount = ?, 
+        total = ?, paid = ?, due = ?, status = ?, studies = ?, packages = ?, 
+        doctor = ?, deliveryDate = ?, results = ? 
+        WHERE id = ?`;
+
+    const params = [
+        patientCode, patientName, contract, subtotal, discount, total, paid, due,
+        status, JSON.stringify(studies), JSON.stringify(packages), doctor, deliveryDate,
+        JSON.stringify(results), id
+    ];
+
+    await executeQuery(query, params);
+}
+
+
+export async function deleteRecibo(id: number): Promise<void> {
+    const query = 'DELETE FROM recibos WHERE id = ?';
+    await executeQuery(query, [id]);
+}
