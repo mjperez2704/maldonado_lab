@@ -70,7 +70,7 @@ export default function CaptureResultsPage() {
                                 if (param.referenceType === 'Intervalo Biologico de Referencia') {
                                     referenceValue = `${param.intervalFrom} - ${param.intervalTo}`;
                                 } else if (param.referenceType === 'Mixto') {
-                                    referenceValue = param.referenceValue || '';
+                                    referenceValue = `${param.defaultValue || ''} - ${param.referenceValue || ''}`;
                                 } else if (param.referenceType === 'Criterio R') {
                                     referenceValue = param.referenceText || '';
                                 }
