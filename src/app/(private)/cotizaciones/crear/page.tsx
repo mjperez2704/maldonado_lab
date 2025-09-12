@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { FlaskConical, UserSearch, Search, Trash2, Calendar, User, Microscope, DollarSign, Tag, Save, Package, Newspaper } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
 import { getPatients, Patient } from "@/services/patientService";
@@ -16,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { createQuote, QuoteCreation } from "@/services/quoteService";
 import Link from "next/link";
+import { CreatePatientForm } from "../../pacientes/CreatePatientForm";
 
 type CartItem = {
     id: string;
@@ -30,7 +32,6 @@ export default function CreateQuotePage() {
     const [packages, setPackages] = useState<PackageType[]>([]);
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
     const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
     const [cart, setCart] = useState<CartItem[]>([]);
 
@@ -38,46 +39,52 @@ export default function CreateQuotePage() {
     const { toast } = useToast();
     const router = useRouter();
 
+    const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
+
+
+    const fetchAllData = async () => {
+        try {
+            const [patientsData, studiesData, packagesData] = await Promise.all([
+                getPatients(),
+                getStudies(),
+                getPackages(),
+            ]);
+            setPatients(patientsData);
+            setStudies(studiesData);
+            setPackages(packagesData);
+        } catch (error) {
+            console.error("Error fetching initial data:", error);
+            toast({ title: "Error", description: "No se pudieron cargar los datos iniciales."});
+        }
+    };
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [patientsData, studiesData, packagesData] = await Promise.all([
-                    getPatients(),
-                    getStudies(),
-                    getPackages(),
-                ]);
-                setPatients(patientsData);
-                setStudies(studiesData);
-                setPackages(packagesData);
-            } catch (error) {
-                console.error("Error fetching initial data:", error);
-                toast({ title: "Error", description: "No se pudieron cargar los datos iniciales."});
-            }
-        };
-        fetchData();
+        fetchAllData();
     }, [toast]);
 
-    const handleSearchPatient = () => {
-        const found = patients.filter(p =>
+    const filteredPatients = useMemo(() => {
+        if (!searchTerm) return [];
+        return patients.filter(p =>
             p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             String(p.id).toLowerCase().includes(searchTerm.toLowerCase())
         );
-        setFilteredPatients(found);
-        if (found.length === 1) {
-            setSelectedPatient(found[0]);
-        } else {
-            setSelectedPatient(null);
-        }
+    }, [searchTerm, patients]);
+
+    const handleSelectPatient = (patient: Patient) => {
+        setSelectedPatient(patient);
+        setSearchTerm(''); // Clear search term after selection
+    };
+    
+    const handlePatientCreated = async (newPatient: Patient) => {
+      setIsPatientModalOpen(false);
+      toast({
+        title: "Éxito",
+        description: `Paciente ${newPatient.name} creado.`,
+      });
+      await fetchAllData(); // Refresh all data to get the new patient
+      setSelectedPatient(newPatient); // Automatically select the new patient
     };
 
-    const handleSelectPatient = (patientId: string) => {
-        const patient = patients.find(p => p.id === Number(patientId));
-        if(patient) {
-            setSelectedPatient(patient);
-            setFilteredPatients([]);
-        }
-    };
 
     const handleAddItemToCart = (itemId: string) => {
         if (!itemId) return;
@@ -90,13 +97,13 @@ export default function CreateQuotePage() {
 
         const studyToAdd = studies.find(s => String(s.id) === itemId);
         if (studyToAdd) {
-            setCart(prev => [...prev, {id: itemId, name: studyToAdd.name, price: studyToAdd.price, type: 'study'}]);
+            setCart(prev => [...prev, {id: itemId, name: studyToAdd.name, price: Number(studyToAdd.price), type: 'study'}]);
             return;
         }
 
         const packageToAdd = packages.find(p => String(p.id) === itemId);
         if (packageToAdd) {
-            setCart(prev => [...prev, {id: itemId, name: packageToAdd.name, price: packageToAdd.price, type: 'package'}]);
+            setCart(prev => [...prev, {id: itemId, name: packageToAdd.name, price: Number(packageToAdd.price), type: 'package'}]);
         }
     };
 
@@ -112,7 +119,6 @@ export default function CreateQuotePage() {
     const resetForm = () => {
         setSearchTerm('');
         setSelectedPatient(null);
-        setFilteredPatients([]);
         setCart([]);
     };
 
@@ -163,8 +169,8 @@ export default function CreateQuotePage() {
     };
 
     const availableItems = useMemo(() => {
-        const studyItems = studies.map(s => ({ value: s.id, label: `${s.name} ($${s.price})`, type: 'Estudio' }));
-        const packageItems = packages.map(p => ({ value: p.id, label: `${p.name} ($${p.price})`, type: 'Paquete' }));
+        const studyItems = studies.map(s => ({ value: String(s.id), label: `${s.name} ($${s.price})`, type: 'Estudio' }));
+        const packageItems = packages.map(p => ({ value: String(p.id), label: `${p.name} ($${p.price})`, type: 'Paquete' }));
         return [...studyItems, ...packageItems];
     }, [studies, packages]);
 
@@ -187,36 +193,40 @@ export default function CreateQuotePage() {
                             <CardTitle className="flex items-center gap-2"><UserSearch /> Buscar Paciente</CardTitle>
                         </CardHeader>
                         <CardContent className="pt-6 flex items-end gap-4">
-                            <div className="flex-grow space-y-2">
+                            <div className="flex-grow space-y-2 relative">
                                 <Label htmlFor="patient-search">Buscar por nombre o número de paciente</Label>
-                                <Input
-                                    id="patient-search"
-                                    placeholder="Escriba aquí..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    onKeyDown={(e) => { if (e.key === 'Enter') handleSearchPatient(); }}
-                                />
-                            </div>
-                            <Button onClick={handleSearchPatient}><Search className="mr-2"/> Buscar</Button>
-                             <Button asChild variant="outline">
-                                <Link href="/pacientes/crear">Nuevo Paciente</Link>
-                            </Button>
-                        </CardContent>
-                        {filteredPatients.length > 1 && (
-                            <CardContent>
-                                <Label>Se encontraron varios pacientes, seleccione uno:</Label>
-                                <Select onValueChange={handleSelectPatient}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Seleccione un paciente" />
-                                    </SelectTrigger>
-                                    <SelectContent>
+                                <div className="relative">
+                                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        id="patient-search"
+                                        placeholder="Escriba aquí para buscar..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="pl-10"
+                                    />
+                                </div>
+                                {searchTerm && filteredPatients.length > 0 && (
+                                    <div className="absolute z-10 w-full bg-card border rounded-md mt-1 shadow-lg max-h-60 overflow-y-auto">
                                         {filteredPatients.map(p => (
-                                            <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
+                                            <div key={p.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => handleSelectPatient(p)}>
+                                                {p.name}
+                                            </div>
                                         ))}
-                                    </SelectContent>
-                                </Select>
-                            </CardContent>
-                        )}
+                                    </div>
+                                )}
+                            </div>
+                            <Dialog open={isPatientModalOpen} onOpenChange={setIsPatientModalOpen}>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline">Nuevo Paciente</Button>
+                                </DialogTrigger>
+                                <DialogContent className="sm:max-w-4xl">
+                                     <DialogHeader>
+                                        <DialogTitle>Crear Nuevo Paciente</DialogTitle>
+                                     </DialogHeader>
+                                     <CreatePatientForm onSuccess={handlePatientCreated} />
+                                </DialogContent>
+                            </Dialog>
+                        </CardContent>
                     </Card>
 
                     {selectedPatient && (
@@ -307,7 +317,7 @@ export default function CreateQuotePage() {
                                 </div>
                                  <div className="flex justify-between items-center text-lg">
                                     <span className="flex items-center gap-2"><Tag className="h-5 w-5"/> Descuento</span>
-                                    <span>${Number(discount.toFixed(2))}</span>
+                                    <span>-${Number(discount.toFixed(2))}</span>
                                 </div>
                                 <div className="flex justify-between items-center font-bold text-xl text-primary">
                                     <span className="flex items-center gap-2"><DollarSign className="h-5 w-5"/> Total</span>
@@ -324,3 +334,4 @@ export default function CreateQuotePage() {
         </div>
     );
 }
+
