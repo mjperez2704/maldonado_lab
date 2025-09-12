@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -70,7 +71,6 @@ export default function CaptureResultsPage() {
                                 if (param.referenceType === 'Intervalo Biologico de Referencia') {
                                     referenceValue = `${param.intervalFrom} - ${param.intervalTo}`;
                                 } else if (param.referenceType === 'Mixto') {
-                                    // Show only the reference value, not the default one.
                                     referenceValue = param.referenceValue || '';
                                 } else if (param.referenceType === 'Criterio R') {
                                     referenceValue = param.referenceText || '';
@@ -205,8 +205,9 @@ export default function CaptureResultsPage() {
                                        </TableRow>
                                        {studyResults.map((result, index) => {
                                            const originalIndex = results.findIndex(r => r.studyName === studyName && r.parameterName === result.parameterName);
+                                           const uniqueKey = `${studyName}-${result.parameterName}-${originalIndex}`;
                                            return (
-                                           <TableRow key={originalIndex}>
+                                           <TableRow key={uniqueKey}>
                                                <TableCell className="pl-8">
                                                     {result.parameterName || studyName}
                                                </TableCell>
