@@ -115,7 +115,6 @@ export default function CreateTestRequestPage() {
     const [doctors, setDoctors] = useState<Doctor[]>([]);
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [filteredPatients, setFilteredPatients] = useState<Patient[]>([]);
     const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
     const [cart, setCart] = useState<CartItem[]>([]);
     
@@ -159,25 +158,17 @@ export default function CreateTestRequestPage() {
         fetchAllData();
     }, []);
 
-    const handleSearchPatient = () => {
-        const found = patients.filter(p =>
+    const filteredPatients = useMemo(() => {
+        if (!searchTerm) return [];
+        return patients.filter(p =>
             p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             String(p.id).toLowerCase().includes(searchTerm.toLowerCase())
         );
-        setFilteredPatients(found);
-        if (found.length === 1) {
-            setSelectedPatient(found[0]);
-        } else {
-            setSelectedPatient(null);
-        }
-    };
+    }, [searchTerm, patients]);
 
-    const handleSelectPatient = (patientId: string) => {
-        const patient = patients.find(p => p.id === Number(patientId));
-        if(patient) {
-            setSelectedPatient(patient);
-            setFilteredPatients([]);
-        }
+    const handleSelectPatient = (patient: Patient) => {
+        setSelectedPatient(patient);
+        setSearchTerm(''); // Clear search term after selection
     };
 
     const handlePatientCreated = async (newPatient: Patient) => {
@@ -258,7 +249,6 @@ export default function CreateTestRequestPage() {
     const resetForm = () => {
         setSearchTerm('');
         setSelectedPatient(null);
-        setFilteredPatients([]);
         setCart([]);
         setSelectedDoctor('A QUIEN CORRESPONDA');
         setDeliveryDate('');
@@ -365,17 +355,28 @@ export default function CreateTestRequestPage() {
                             </CardHeader>
                             <CardContent className="pt-6 space-y-4">
                                 <div className="flex items-end gap-4">
-                                    <div className="flex-grow space-y-2">
+                                    <div className="flex-grow space-y-2 relative">
                                         <Label htmlFor="patient-search">Buscar por nombre o número de paciente</Label>
-                                        <Input
-                                            id="patient-search"
-                                            placeholder="Escriba aquí..."
-                                            value={searchTerm}
-                                            onChange={(e) => setSearchTerm(e.target.value)}
-                                            onKeyDown={(e) => { if (e.key === 'Enter') handleSearchPatient(); }}
-                                        />
+                                        <div className="relative">
+                                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                id="patient-search"
+                                                placeholder="Escriba aquí para buscar..."
+                                                value={searchTerm}
+                                                onChange={(e) => setSearchTerm(e.target.value)}
+                                                className="pl-10"
+                                            />
+                                        </div>
+                                        {searchTerm && filteredPatients.length > 0 && (
+                                            <div className="absolute z-10 w-full bg-card border rounded-md mt-1 shadow-lg max-h-60 overflow-y-auto">
+                                                {filteredPatients.map(p => (
+                                                    <div key={p.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => handleSelectPatient(p)}>
+                                                        {p.name}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
-                                    <Button onClick={handleSearchPatient}><Search className="mr-2"/> Buscar</Button>
                                     <Dialog open={isPatientModalOpen} onOpenChange={setIsPatientModalOpen}>
                                         <DialogTrigger asChild>
                                             <Button variant="outline">Nuevo Paciente</Button>
@@ -387,34 +388,6 @@ export default function CreateTestRequestPage() {
                                              <CreatePatientForm onSuccess={handlePatientCreated} />
                                         </DialogContent>
                                     </Dialog>
-                                </div>
-                                {filteredPatients.length > 1 && (
-                                    <div className="space-y-2">
-                                        <Label>Se encontraron varios pacientes, seleccione uno:</Label>
-                                        <Select onValueChange={handleSelectPatient}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Seleccione un paciente" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {filteredPatients.map(p => (
-                                                    <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                )}
-                                <div className="space-y-2">
-                                    <Label>O seleccione de la lista</Label>
-                                    <Select onValueChange={handleSelectPatient} value={selectedPatient ? String(selectedPatient.id) : ""}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Seleccionar un paciente de la lista" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {patients.map(p => (
-                                                <SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
                                 </div>
                             </CardContent>
                         </Card>
