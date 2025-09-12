@@ -11,7 +11,7 @@ import { getStudies, Study } from "@/services/studyService";
 import { FileStack, Save, User, Calendar, Hash } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 type ResultInput = {
@@ -70,7 +70,8 @@ export default function CaptureResultsPage() {
                                 if (param.referenceType === 'Intervalo Biologico de Referencia') {
                                     referenceValue = `${param.intervalFrom} - ${param.intervalTo}`;
                                 } else if (param.referenceType === 'Mixto') {
-                                    referenceValue = `${param.defaultValue || ''} - ${param.referenceValue || ''}`;
+                                    // Show only the reference value, not the default one.
+                                    referenceValue = param.referenceValue || '';
                                 } else if (param.referenceType === 'Criterio R') {
                                     referenceValue = param.referenceText || '';
                                 }
