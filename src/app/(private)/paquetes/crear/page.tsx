@@ -5,23 +5,27 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Check, Package as PackageIcon } from "lucide-react";
+import { Check, Package as PackageIcon, X, Search } from "lucide-react";
 import { useRouter } from 'next/navigation';
 import { createPackage, Package } from "@/services/packageService";
 import Link from "next/link";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useLoader } from "@/hooks/useLoader";
+import { useEffect, useState, useMemo } from 'react';
+import { getStudies, Study } from "@/services/studyService";
+import { getCultures, Culture } from "@/services/cultureService";
+import { Badge } from "@/components/ui/badge";
 
 const packageSchema = z.object({
   name: z.string().min(1, { message: "El nombre es requerido." }),
   shortcut: z.string().optional(),
   price: z.coerce.number().min(0, "El precio no puede ser negativo."),
-  tests: z.string().optional(),
-  cultures: z.string().optional(),
+  tests: z.array(z.string()).optional(),
+  cultures: z.array(z.string()).optional(),
   precautions: z.string().optional(),
 });
 
@@ -31,6 +35,25 @@ export default function CreatePackagePage() {
     const router = useRouter();
     const { toast } = useToast();
     const loader = useLoader();
+    
+    const [allStudies, setAllStudies] = useState<Study[]>([]);
+    const [allCultures, setAllCultures] = useState<Culture[]>([]);
+    const [studySearch, setStudySearch] = useState('');
+    const [cultureSearch, setCultureSearch] = useState('');
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const [studiesData, culturesData] = await Promise.all([getStudies(), getCultures()]);
+                setAllStudies(studiesData);
+                setAllCultures(culturesData);
+            } catch (error) {
+                console.error("Error fetching studies/cultures", error);
+                toast({ title: "Error", description: "No se pudieron cargar estudios y cultivos." });
+            }
+        };
+        fetchData();
+    }, [toast]);
 
     const form = useForm<PackageFormValues>({
         resolver: zodResolver(packageSchema),
@@ -38,25 +61,47 @@ export default function CreatePackagePage() {
             name: '',
             shortcut: '',
             price: 0,
-            tests: '',
-            cultures: '',
+            tests: [],
+            cultures: [],
             precautions: '',
         }
     });
+
+    const selectedTests = form.watch('tests') || [];
+    const selectedCultures = form.watch('cultures') || [];
+
+    const filteredStudies = useMemo(() => 
+        studySearch ? allStudies.filter(s => s.name.toLowerCase().includes(studySearch.toLowerCase()) && !selectedTests.includes(s.name)) : [],
+    [studySearch, allStudies, selectedTests]);
+
+    const filteredCultures = useMemo(() =>
+        cultureSearch ? allCultures.filter(c => c.name.toLowerCase().includes(cultureSearch.toLowerCase()) && !selectedCultures.includes(c.name)) : [],
+    [cultureSearch, allCultures, selectedCultures]);
+
+
+    const addTest = (testName: string) => {
+        form.setValue('tests', [...selectedTests, testName]);
+        setStudySearch('');
+    };
+
+    const removeTest = (testName: string) => {
+        form.setValue('tests', selectedTests.filter(t => t !== testName));
+    };
+
+    const addCulture = (cultureName: string) => {
+        form.setValue('cultures', [...selectedCultures, cultureName]);
+        setCultureSearch('');
+    };
+
+    const removeCulture = (cultureName: string) => {
+        form.setValue('cultures', selectedCultures.filter(c => c !== cultureName));
+    };
 
     const onSubmit = async (data: PackageFormValues) => {
         let success = false;
         loader.start('create');
         try {
-            const packageData: Omit<Package, 'id'> = {
-                name: data.name,
-                shortcut: data.shortcut || '',
-                price: data.price,
-                precautions: data.precautions || '',
-                tests: data.tests?.split(',').map(t => t.trim()).filter(t => t) || [],
-                cultures: data.cultures?.split(',').map(c => c.trim()).filter(c => c) || [],
-            };
-            await createPackage(packageData);
+            await createPackage(data as Omit<Package, 'id'>);
             toast({
                 title: "Éxito",
                 description: "Paquete creado correctamente.",
@@ -113,12 +158,70 @@ export default function CreatePackagePage() {
                                 </div>
                             <FormMessage /></FormItem>
                         )}/>
-                         <FormField control={form.control} name="tests" render={({ field }) => (
-                            <FormItem className="md:col-span-3"><FormLabel>Pruebas (separadas por coma)</FormLabel><FormControl><Input placeholder="Pruebas" {...field} /></FormControl><FormMessage /></FormItem>
-                        )}/>
-                        <FormField control={form.control} name="cultures" render={({ field }) => (
-                            <FormItem className="md:col-span-3"><FormLabel>Cultivos (separados por coma)</FormLabel><FormControl><Input placeholder="Cultivos" {...field} /></FormControl><FormMessage /></FormItem>
-                        )}/>
+                         
+                         <div className="md:col-span-3 space-y-2">
+                            <FormLabel>Pruebas</FormLabel>
+                            <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                <Input 
+                                    placeholder="Buscar prueba para agregar..." 
+                                    value={studySearch}
+                                    onChange={(e) => setStudySearch(e.target.value)}
+                                    className="pl-10"
+                                />
+                                {filteredStudies.length > 0 && (
+                                    <div className="absolute z-10 w-full mt-1 bg-card border rounded-md shadow-lg max-h-48 overflow-y-auto">
+                                        {filteredStudies.map(study => (
+                                            <div key={study.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => addTest(study.name)}>
+                                                {study.name}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex flex-wrap gap-2 pt-2">
+                                {selectedTests.map(test => (
+                                    <Badge key={test} variant="secondary" className="flex items-center gap-1">
+                                        {test}
+                                        <button type="button" onClick={() => removeTest(test)} className="rounded-full hover:bg-muted-foreground/20">
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    </Badge>
+                                ))}
+                            </div>
+                         </div>
+                        
+                        <div className="md:col-span-3 space-y-2">
+                            <FormLabel>Cultivos</FormLabel>
+                             <div className="relative">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                <Input 
+                                    placeholder="Buscar cultivo para agregar..." 
+                                    value={cultureSearch}
+                                    onChange={(e) => setCultureSearch(e.target.value)}
+                                    className="pl-10"
+                                />
+                                {filteredCultures.length > 0 && (
+                                    <div className="absolute z-10 w-full mt-1 bg-card border rounded-md shadow-lg max-h-48 overflow-y-auto">
+                                        {filteredCultures.map(culture => (
+                                            <div key={culture.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => addCulture(culture.name)}>
+                                                {culture.name}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                            <div className="flex flex-wrap gap-2 pt-2">
+                                {selectedCultures.map(culture => (
+                                    <Badge key={culture} variant="secondary" className="flex items-center gap-1">
+                                        {culture}
+                                        <button type="button" onClick={() => removeCulture(culture)} className="rounded-full hover:bg-muted-foreground/20">
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    </Badge>
+                                ))}
+                            </div>
+                        </div>
                     </div>
 
                     <FormField control={form.control} name="precautions" render={({ field }) => (
