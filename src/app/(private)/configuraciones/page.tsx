@@ -9,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Settings, BarChart, Barcode, Mail, MessageSquare, KeyRound, Check, Globe, Copyright, Phone, MapPin, Clock, Pencil, Languages, Wallet, Info, FileText as FileTextIcon, Database } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Settings, BarChart, Barcode, Mail, MessageSquare, KeyRound, Check, Globe, Copyright, Phone, MapPin, Clock, Pencil, Languages, Wallet, Info, FileText as FileTextIcon, Database, Palette } from "lucide-react";
 import React, { useEffect, useState } from 'react';
 import { getReportSettings, saveReportSettings, ReportSettings, saveEmailSettings, getEmailSettings, EmailSettings, getDbSettings, saveDbSettings, testDbConnection, DbSettings, getGeneralSettings, saveGeneralSettings, GeneralSettings, getWhatsappSettings, saveWhatsappSettings, WhatsappSettings } from "@/services/settingsService";
 import { useToast } from "@/hooks/use-toast";
@@ -42,6 +43,14 @@ const initialEmailSettings: EmailSettings = {
     receipt: { active: false, subject: '', body: '' },
     report: { active: false, subject: '', body: '' },
 };
+
+const systemReports = [
+    { name: "Solicitudes del Día", description: "Muestra todas las solicitudes de exámenes generadas hoy." },
+    { name: "Corte de Caja Diario", description: "Detalle de ingresos y egresos para el cierre de caja." },
+    { name: "Estudios por Paciente", description: "Historial de estudios realizados por un paciente específico." },
+    { name: "Resultados Pendientes", description: "Lista de solicitudes cuyos resultados aún no han sido capturados." },
+    { name: "Inventario de Productos", description: "Estado actual del stock de productos y reactivos." },
+];
 
 
 export default function SettingsPage() {
@@ -303,6 +312,9 @@ export default function SettingsPage() {
                     <Button variant={activeTab === 'reports' ? 'default' : 'ghost'} onClick={() => setActiveTab('reports')} className="justify-start px-3">
                         <BarChart className="h-5 w-5 mr-2" /> {t('settings.tabs.reports')}
                     </Button>
+                    <Button variant={activeTab === 'report-design' ? 'default' : 'ghost'} onClick={() => setActiveTab('report-design')} className="justify-start px-3">
+                        <Palette className="h-5 w-5 mr-2" /> {t('settings.tabs.report_design')}
+                    </Button>
                     <Button variant={activeTab === 'templates' ? 'default' : 'ghost'} asChild className="justify-start px-3">
                         <Link href="/configuraciones/plantillas">
                             <FileTextIcon className="h-5 w-5 mr-2" /> {t('settings.tabs.report_templates')}
@@ -493,11 +505,40 @@ export default function SettingsPage() {
                   </Card>
               </div>
 
-
               <div className={activeTab === 'reports' ? '' : 'hidden'}>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Listado de Informes del Sistema</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Nombre del Informe</TableHead>
+                                    <TableHead>Descripción</TableHead>
+                                    <TableHead className="text-right">Acciones</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {systemReports.map((report) => (
+                                    <TableRow key={report.name}>
+                                        <TableCell className="font-medium">{report.name}</TableCell>
+                                        <TableCell>{report.description}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="outline" size="sm">Generar</Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                </Card>
+              </div>
+
+              <div className={activeTab === 'report-design' ? '' : 'hidden'}>
                   <Card>
                       <CardHeader>
-                          <CardTitle>Configuración de informes</CardTitle>
+                          <CardTitle>Configuración de Diseño de Informes</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-8">
                           <div className="space-y-4">
@@ -1031,9 +1072,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
-    
-
-    
-
-    
