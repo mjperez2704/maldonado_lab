@@ -14,6 +14,7 @@ import React, { useEffect, useState } from 'react';
 import { getReportSettings, saveReportSettings, ReportSettings, saveEmailSettings, getEmailSettings, EmailSettings, getDbSettings, saveDbSettings, testDbConnection, DbSettings, getGeneralSettings, saveGeneralSettings, GeneralSettings } from "@/services/settingsService";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
+import { useTranslation } from "@/hooks/useTranslation";
 
 const WhatsappIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-circle h-5 w-5 mr-2"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
@@ -21,6 +22,7 @@ const WhatsappIcon = () => (
 
 
 export default function SettingsPage() {
+    const { t, setLanguage, language } = useTranslation();
     const [activeTab, setActiveTab] = React.useState("general");
     const { toast } = useToast();
     const [generalSettings, setGeneralSettings] = useState<GeneralSettings>({
@@ -90,7 +92,10 @@ export default function SettingsPage() {
                 getEmailSettings(),
                 getDbSettings(),
             ]);
-            if (general) setGeneralSettings(general);
+            if (general) {
+                setGeneralSettings(general);
+                setLanguage(general.language as 'es' | 'en');
+            }
             if (reports) setReportSettings(reports);
             if (emails) setEmailSettings(emails);
             if (db) setDbSettings(db);
@@ -100,6 +105,9 @@ export default function SettingsPage() {
     
     const handleGeneralSettingChange = (field: keyof GeneralSettings, value: string) => {
         setGeneralSettings(prev => ({ ...prev, [field]: value }));
+        if (field === 'language') {
+            setLanguage(value as 'es' | 'en');
+        }
     };
 
     const handleReportSettingChange = (field: keyof ReportSettings, value: any) => {
@@ -138,14 +146,14 @@ export default function SettingsPage() {
         try {
             await saveGeneralSettings(generalSettings);
             toast({
-                title: "Éxito",
-                description: "La configuración general se ha guardado correctamente.",
+                title: t('settings.toast.success_title'),
+                description: t('settings.toast.general_saved_success'),
             });
         } catch (error) {
             console.error("Error saving general settings:", error);
             toast({
-                title: "Error",
-                description: "No se pudo guardar la configuración general.",
+                title: t('settings.toast.error_title'),
+                description: t('settings.toast.general_saved_error'),
                 variant: "destructive",
             });
         }
@@ -232,10 +240,10 @@ export default function SettingsPage() {
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
             <Settings className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold">Configuraciones</h1>
+            <h1 className="text-2xl font-bold">{t('settings.title')}</h1>
         </div>
         <div className="text-sm text-muted-foreground">
-            <Link href="/" className="hover:text-primary">Hogar</Link> / Configuraciones
+            <Link href="/" className="hover:text-primary">{t('breadcrumbs.home')}</Link> / {t('breadcrumbs.settings')}
         </div>
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -243,33 +251,33 @@ export default function SettingsPage() {
             <CardContent className="p-2">
                 <nav className="flex flex-col gap-1">
                     <Button variant={activeTab === 'general' ? 'default' : 'ghost'} onClick={() => setActiveTab('general')} className="justify-start px-3">
-                        <Settings className="h-5 w-5 mr-2" /> General
+                        <Settings className="h-5 w-5 mr-2" /> {t('settings.tabs.general')}
                     </Button>
                     <Button variant={activeTab === 'database' ? 'default' : 'ghost'} onClick={() => setActiveTab('database')} className="justify-start px-3">
-                        <Database className="h-5 w-5 mr-2" /> Base de Datos
+                        <Database className="h-5 w-5 mr-2" /> {t('settings.tabs.database')}
                     </Button>
                     <Button variant={activeTab === 'reports' ? 'default' : 'ghost'} onClick={() => setActiveTab('reports')} className="justify-start px-3">
-                        <BarChart className="h-5 w-5 mr-2" /> Informes
+                        <BarChart className="h-5 w-5 mr-2" /> {t('settings.tabs.reports')}
                     </Button>
                     <Button variant={activeTab === 'templates' ? 'default' : 'ghost'} asChild className="justify-start px-3">
                         <Link href="/configuraciones/plantillas">
-                            <FileTextIcon className="h-5 w-5 mr-2" /> Plantillas de Informes
+                            <FileTextIcon className="h-5 w-5 mr-2" /> {t('settings.tabs.report_templates')}
                         </Link>
                     </Button>
                     <Button variant={activeTab === 'barcode' ? 'default' : 'ghost'} onClick={() => setActiveTab('barcode')} className="justify-start px-3">
-                        <Barcode className="h-5 w-5 mr-2" /> Código de Barras
+                        <Barcode className="h-5 w-5 mr-2" /> {t('settings.tabs.barcode')}
                     </Button>
                     <Button variant={activeTab === 'emails' ? 'default' : 'ghost'} onClick={() => setActiveTab('emails')} className="justify-start px-3">
-                        <Mail className="h-5 w-5 mr-2" /> Correos
+                        <Mail className="h-5 w-5 mr-2" /> {t('settings.tabs.emails')}
                     </Button>
                      <Button variant={activeTab === 'sms' ? 'default' : 'ghost'} onClick={() => setActiveTab('sms')} className="justify-start px-3">
-                        <MessageSquare className="h-5 w-5 mr-2" /> SMS
+                        <MessageSquare className="h-5 w-5 mr-2" /> {t('settings.tabs.sms')}
                     </Button>
                     <Button variant={activeTab === 'whatsapp' ? 'default' : 'ghost'} onClick={() => setActiveTab('whatsapp')} className="justify-start px-3">
-                        <WhatsappIcon /> Whatsapp
+                        <WhatsappIcon /> {t('settings.tabs.whatsapp')}
                     </Button>
                     <Button variant={activeTab === 'apikeys' ? 'default' : 'ghost'} onClick={() => setActiveTab('apikeys')} className="justify-start px-3">
-                        <KeyRound className="h-5 w-5 mr-2" /> Claves de API
+                        <KeyRound className="h-5 w-5 mr-2" /> {t('settings.tabs.api_keys')}
                     </Button>
                 </nav>
             </CardContent>
@@ -278,46 +286,46 @@ export default function SettingsPage() {
             <div className={activeTab === 'general' ? '' : 'hidden'}>
                 <Card>
                     <CardHeader>
-                        <CardTitle>Configuraciones Generales</CardTitle>
+                        <CardTitle>{t('settings.general.title')}</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Tabs defaultValue="general">
                             <TabsList>
-                                <TabsTrigger value="general">General</TabsTrigger>
-                                <TabsTrigger value="social">Redes Sociales</TabsTrigger>
-                                <TabsTrigger value="images">Imágenes</TabsTrigger>
+                                <TabsTrigger value="general">{t('settings.general.tabs.general')}</TabsTrigger>
+                                <TabsTrigger value="social">{t('settings.general.tabs.social')}</TabsTrigger>
+                                <TabsTrigger value="images">{t('settings.general.tabs.images')}</TabsTrigger>
                             </TabsList>
                             <TabsContent value="general" className="pt-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <Label htmlFor="lab-name">Nombre del laboratorio</Label>
+                                        <Label htmlFor="lab-name">{t('settings.general.lab_name')}</Label>
                                         <div className="flex items-center border rounded-md">
                                             <span className="px-3 text-muted-foreground"><Pencil className="h-5 w-5"/></span>
                                             <Input id="lab-name" value={generalSettings.labName} onChange={(e) => handleGeneralSettingChange('labName', e.target.value)} className="border-0 focus-visible:ring-0" />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="currency">Moneda</Label>
+                                        <Label htmlFor="currency">{t('settings.general.currency')}</Label>
                                         <div className="flex items-center border rounded-md">
                                              <span className="px-3 text-muted-foreground"><Wallet className="h-5 w-5"/></span>
                                             <Select value={generalSettings.currency} onValueChange={(v) => handleGeneralSettingChange('currency', v)}>
                                                 <SelectTrigger id="currency" className="border-0 focus:ring-0">
-                                                    <SelectValue placeholder="Seleccione la moneda" />
+                                                    <SelectValue placeholder={t('settings.general.select_currency')} />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="MXN">Peso Mexicano (MXN)</SelectItem>
-                                                    <SelectItem value="USD">Dólar Estadounidense (USD)</SelectItem>
+                                                    <SelectItem value="MXN">{t('settings.general.currency_mxn')}</SelectItem>
+                                                    <SelectItem value="USD">{t('settings.general.currency_usd')}</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="timezone">Zona horaria</Label>
+                                        <Label htmlFor="timezone">{t('settings.general.timezone')}</Label>
                                         <div className="flex items-center border rounded-md">
                                             <span className="px-3 text-muted-foreground"><Clock className="h-5 w-5"/></span>
                                             <Select value={generalSettings.timezone} onValueChange={(v) => handleGeneralSettingChange('timezone', v)}>
                                                 <SelectTrigger id="timezone" className="border-0 focus:ring-0">
-                                                    <SelectValue placeholder="Seleccione la zona horaria" />
+                                                    <SelectValue placeholder={t('settings.general.select_timezone')} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectItem value="mexico_city">(GMT-6:00) America/Mexico_City</SelectItem>
@@ -326,50 +334,50 @@ export default function SettingsPage() {
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="language">Idioma</Label>
+                                        <Label htmlFor="language">{t('settings.general.language')}</Label>
                                          <div className="flex items-center border rounded-md">
                                             <span className="px-3 text-muted-foreground"><Languages className="h-5 w-5"/></span>
                                             <Select value={generalSettings.language} onValueChange={(v) => handleGeneralSettingChange('language', v)}>
                                                 <SelectTrigger id="language" className="border-0 focus:ring-0">
-                                                    <SelectValue placeholder="Seleccione el idioma" />
+                                                    <SelectValue placeholder={t('settings.general.select_language')} />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="es">Español</SelectItem>
-                                                    <SelectItem value="en">Inglés</SelectItem>
+                                                    <SelectItem value="es">{t('settings.general.language_es')}</SelectItem>
+                                                    <SelectItem value="en">{t('settings.general.language_en')}</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="location">Ubicación</Label>
+                                        <Label htmlFor="location">{t('settings.general.location')}</Label>
                                         <div className="flex items-center border rounded-md">
                                             <span className="px-3 text-muted-foreground"><MapPin className="h-5 w-5"/></span>
                                             <Input id="location" value={generalSettings.location} onChange={(e) => handleGeneralSettingChange('location', e.target.value)} className="border-0 focus-visible:ring-0" />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="phone">Teléfono</Label>
+                                        <Label htmlFor="phone">{t('settings.general.phone')}</Label>
                                         <div className="flex items-center border rounded-md">
                                             <span className="px-3 text-muted-foreground"><Phone className="h-5 w-5"/></span>
                                             <Input id="phone" value={generalSettings.phone} onChange={(e) => handleGeneralSettingChange('phone', e.target.value)} className="border-0 focus-visible:ring-0" />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="email">Correo Electrónico</Label>
+                                        <Label htmlFor="email">{t('settings.general.email')}</Label>
                                         <div className="flex items-center border rounded-md">
                                             <span className="px-3 text-muted-foreground"><Mail className="h-5 w-5"/></span>
                                             <Input id="email" type="email" value={generalSettings.email} onChange={(e) => handleGeneralSettingChange('email', e.target.value)} className="border-0 focus-visible:ring-0" />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="website">Sitio web</Label>
+                                        <Label htmlFor="website">{t('settings.general.website')}</Label>
                                         <div className="flex items-center border rounded-md">
                                             <span className="px-3 text-muted-foreground"><Globe className="h-5 w-5"/></span>
                                             <Input id="website" value={generalSettings.website} onChange={(e) => handleGeneralSettingChange('website', e.target.value)} className="border-0 focus-visible:ring-0" />
                                         </div>
                                     </div>
                                     <div className="space-y-2 md:col-span-2">
-                                        <Label htmlFor="rights">Derechos</Label>
+                                        <Label htmlFor="rights">{t('settings.general.rights')}</Label>
                                          <div className="flex items-center border rounded-md">
                                             <span className="px-3 text-muted-foreground"><Copyright className="h-5 w-5"/></span>
                                             <Input id="rights" value={generalSettings.rights} onChange={(e) => handleGeneralSettingChange('rights', e.target.value)} className="border-0 focus-visible:ring-0" />
@@ -378,16 +386,16 @@ export default function SettingsPage() {
                                 </div>
                             </TabsContent>
                             <TabsContent value="social">
-                                <p>Configuración de redes sociales aquí.</p>
+                                <p>{t('settings.general.social_placeholder')}</p>
                             </TabsContent>
                             <TabsContent value="images">
-                               <p>Configuración de imágenes aquí.</p>
+                               <p>{t('settings.general.images_placeholder')}</p>
                             </TabsContent>
                         </Tabs>
                     </CardContent>
                     <div className="flex justify-start p-6 pt-0">
                         <Button onClick={handleSaveGeneralSettings}>
-                            <Check className="mr-2"/> Guardar
+                            <Check className="mr-2"/> {t('settings.buttons.save')}
                         </Button>
                     </div>
                 </Card>

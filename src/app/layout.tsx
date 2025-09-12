@@ -1,3 +1,4 @@
+
 'use client';
 
 import './globals.css';
@@ -8,6 +9,7 @@ import { AppSidebar } from '@/components/layout/AppSidebar';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { usePathname } from 'next/navigation';
+import { LanguageProvider } from '@/context/LanguageContext';
 
 export default function RootLayout({
                                      children,
@@ -28,24 +30,26 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased flex flex-col min-h-screen bg-background">
-        <LoaderProvider>
-          {isPublicRoute ? (
-            children
-          ) : (
-            <SidebarProvider>
-              <div className="flex flex-1">
-                <AppSidebar />
-                <div className="flex flex-col flex-1">
-                  <Header />
-                  <main className="flex-grow container mx-auto px-4">
-                    {children}
-                  </main>
-                  <Footer />
+        <LanguageProvider>
+          <LoaderProvider>
+            {isPublicRoute ? (
+              children
+            ) : (
+              <SidebarProvider>
+                <div className="flex flex-1">
+                  <AppSidebar />
+                  <div className="flex flex-col flex-1">
+                    <Header />
+                    <main className="flex-grow container mx-auto px-4">
+                      {children}
+                    </main>
+                    <Footer />
+                  </div>
                 </div>
-              </div>
-            </SidebarProvider>
-          )}
-        </LoaderProvider>
+              </SidebarProvider>
+            )}
+          </LoaderProvider>
+        </LanguageProvider>
       <Toaster />
       </body>
       </html>

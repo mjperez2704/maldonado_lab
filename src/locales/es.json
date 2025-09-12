@@ -1,0 +1,56 @@
+
+{
+  "breadcrumbs": {
+    "home": "Hogar",
+    "settings": "Configuraciones"
+  },
+  "settings": {
+    "title": "Configuraciones",
+    "tabs": {
+      "general": "General",
+      "database": "Base de Datos",
+      "reports": "Informes",
+      "report_templates": "Plantillas de Informes",
+      "barcode": "Código de Barras",
+      "emails": "Correos",
+      "sms": "SMS",
+      "whatsapp": "Whatsapp",
+      "api_keys": "Claves de API"
+    },
+    "general": {
+      "title": "Configuraciones Generales",
+      "tabs": {
+        "general": "General",
+        "social": "Redes Sociales",
+        "images": "Imágenes"
+      },
+      "lab_name": "Nombre del laboratorio",
+      "currency": "Moneda",
+      "select_currency": "Seleccione la moneda",
+      "currency_mxn": "Peso Mexicano (MXN)",
+      "currency_usd": "Dólar Estadounidense (USD)",
+      "timezone": "Zona horaria",
+      "select_timezone": "Seleccione la zona horaria",
+      "language": "Idioma",
+      "select_language": "Seleccione el idioma",
+      "language_es": "Español",
+      "language_en": "Inglés",
+      "location": "Ubicación",
+      "phone": "Teléfono",
+      "email": "Correo Electrónico",
+      "website": "Sitio web",
+      "rights": "Derechos",
+      "social_placeholder": "Configuración de redes sociales aquí.",
+      "images_placeholder": "Configuración de imágenes aquí."
+    },
+    "buttons": {
+      "save": "Guardar"
+    },
+    "toast": {
+      "success_title": "Éxito",
+      "error_title": "Error",
+      "general_saved_success": "La configuración general se ha guardado correctamente.",
+      "general_saved_error": "No se pudo guardar la configuración general."
+    }
+  }
+}

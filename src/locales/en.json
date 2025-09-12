@@ -1,0 +1,56 @@
+
+{
+  "breadcrumbs": {
+    "home": "Home",
+    "settings": "Settings"
+  },
+  "settings": {
+    "title": "Settings",
+    "tabs": {
+      "general": "General",
+      "database": "Database",
+      "reports": "Reports",
+      "report_templates": "Report Templates",
+      "barcode": "Barcode",
+      "emails": "Emails",
+      "sms": "SMS",
+      "whatsapp": "Whatsapp",
+      "api_keys": "API Keys"
+    },
+    "general": {
+      "title": "General Settings",
+      "tabs": {
+        "general": "General",
+        "social": "Social Networks",
+        "images": "Images"
+      },
+      "lab_name": "Laboratory Name",
+      "currency": "Currency",
+      "select_currency": "Select currency",
+      "currency_mxn": "Mexican Peso (MXN)",
+      "currency_usd": "US Dollar (USD)",
+      "timezone": "Timezone",
+      "select_timezone": "Select timezone",
+      "language": "Language",
+      "select_language": "Select language",
+      "language_es": "Spanish",
+      "language_en": "English",
+      "location": "Location",
+      "phone": "Phone",
+      "email": "Email",
+      "website": "Website",
+      "rights": "Rights",
+      "social_placeholder": "Social media settings here.",
+      "images_placeholder": "Image settings here."
+    },
+    "buttons": {
+      "save": "Save"
+    },
+    "toast": {
+      "success_title": "Success",
+      "error_title": "Error",
+      "general_saved_success": "General settings have been saved successfully.",
+      "general_saved_error": "Could not save general settings."
+    }
+  }
+}
