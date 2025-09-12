@@ -44,15 +44,6 @@ const initialEmailSettings: EmailSettings = {
     report: { active: false, subject: '', body: '' },
 };
 
-const systemReports = [
-    { name: "Solicitudes del Día", description: "Muestra todas las solicitudes de exámenes generadas hoy." },
-    { name: "Corte de Caja Diario", description: "Detalle de ingresos y egresos para el cierre de caja." },
-    { name: "Estudios por Paciente", description: "Historial de estudios realizados por un paciente específico." },
-    { name: "Resultados Pendientes", description: "Lista de solicitudes cuyos resultados aún no han sido capturados." },
-    { name: "Inventario de Productos", description: "Estado actual del stock de productos y reactivos." },
-];
-
-
 export default function SettingsPage() {
     const { t, setLanguage, language } = useTranslation();
     const [activeTab, setActiveTab] = React.useState("general");
@@ -110,7 +101,7 @@ export default function SettingsPage() {
             }
         };
         loadSettings();
-    }, [setLanguage, toast]);
+    }, [toast, setLanguage]);
     
     const handleGeneralSettingChange = (field: keyof GeneralSettings, value: string) => {
         setGeneralSettings(prev => ({ ...prev, [field]: value }));
@@ -309,9 +300,6 @@ export default function SettingsPage() {
                     <Button variant={activeTab === 'database' ? 'default' : 'ghost'} onClick={() => setActiveTab('database')} className="justify-start px-3">
                         <Database className="h-5 w-5 mr-2" /> {t('settings.tabs.database')}
                     </Button>
-                    <Button variant={activeTab === 'reports' ? 'default' : 'ghost'} onClick={() => setActiveTab('reports')} className="justify-start px-3">
-                        <BarChart className="h-5 w-5 mr-2" /> {t('settings.tabs.reports')}
-                    </Button>
                     <Button variant={activeTab === 'report-design' ? 'default' : 'ghost'} onClick={() => setActiveTab('report-design')} className="justify-start px-3">
                         <Palette className="h-5 w-5 mr-2" /> {t('settings.tabs.report_design')}
                     </Button>
@@ -504,37 +492,7 @@ export default function SettingsPage() {
                       </div>
                   </Card>
               </div>
-
-              <div className={activeTab === 'reports' ? '' : 'hidden'}>
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Listado de Informes del Sistema</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Nombre del Informe</TableHead>
-                                    <TableHead>Descripción</TableHead>
-                                    <TableHead className="text-right">Acciones</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {systemReports.map((report) => (
-                                    <TableRow key={report.name}>
-                                        <TableCell className="font-medium">{report.name}</TableCell>
-                                        <TableCell>{report.description}</TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="outline" size="sm">Generar</Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </CardContent>
-                </Card>
-              </div>
-
+              
               <div className={activeTab === 'report-design' ? '' : 'hidden'}>
                   <Card>
                       <CardHeader>
@@ -1072,3 +1030,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    
