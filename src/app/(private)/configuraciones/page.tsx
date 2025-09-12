@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -22,6 +21,18 @@ const WhatsappIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-circle h-5 w-5 mr-2"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
 );
 
+const initialReportSettings: ReportSettings = {
+    showHeader: true, showPatientAvatar: true, showFooter: true, showSignature: true, showQr: true,
+    marginTop: "", marginRight: "", marginBottom: "", marginLeft: "", contentMarginTop: "",
+    contentMarginBg: "", qrcodeDimension: "", headerAlign: "center", headerBorderColor: "",
+    headerBorderWidth: 1, headerBgColor: "",
+    branchName: { color: "", font: "", size: "" },
+    branchInfo: { color: "", font: "", size: "" },
+    patientTitle: { color: "", font: "", size: "" },
+    patientData: { color: "", font: "", size: "" },
+    testTitle: { color: "", font: "", size: "" },
+    testName: { color: "", font: "", size: "" }
+};
 
 export default function SettingsPage() {
     const { t, setLanguage, language } = useTranslation();
@@ -33,18 +44,7 @@ export default function SettingsPage() {
         labName: '', currency: '', timezone: '', language: 'es', location: '',
         phone: '', email: '', website: '', rights: ''
     });
-    const [reportSettings, setReportSettings] = useState<ReportSettings>({
-        showHeader: true, showPatientAvatar: true, showFooter: true, showSignature: true, showQr: true,
-        marginTop: "", marginRight: "", marginBottom: "", marginLeft: "", contentMarginTop: "",
-        contentMarginBg: "", qrcodeDimension: "", headerAlign: "center", headerBorderColor: "",
-        headerBorderWidth: 1, headerBgColor: "",
-        branchName: { color: "", font: "", size: "" },
-        branchInfo: { color: "", font: "", size: "" },
-        patientTitle: { color: "", font: "", size: "" },
-        patientData: { color: "", font: "", size: "" },
-        testTitle: { color: "", font: "", size: "" },
-        testName: { color: "", font: "", size: "" }
-    });
+    const [reportSettings, setReportSettings] = useState<ReportSettings>(initialReportSettings);
      const [emailSettings, setEmailSettings] = useState<EmailSettings>({
         host: '', port: 0, username: '', password: '', encryption: 'ssl', fromAddress: '',
         fromName: '', headerColor: '', footerColor: '',
@@ -76,7 +76,9 @@ export default function SettingsPage() {
                     setGeneralSettings(general);
                     setLanguage(general.language as 'es' | 'en');
                 }
-                if (reports) setReportSettings(reports);
+                if (reports) {
+                    setReportSettings(prev => ({ ...initialReportSettings, ...reports }));
+                }
                 if (emails) setEmailSettings(emails);
                 if (db) setDbSettings(db);
                 if (whatsapp) setWhatsappSettings(whatsapp);
@@ -1018,3 +1020,5 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    
