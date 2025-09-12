@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Info, Plus, Trash2, Save, HelpCircle, ArrowUp, ArrowDown } from "lucide-react";
+import { Info, Plus, Trash2, Save, HelpCircle, ArrowUp, ArrowDown, Pencil } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from "next/navigation";
@@ -19,7 +19,132 @@ import { getCategories, Category } from "@/services/categoryService";
 import { getProviders, Provider } from "@/services/providerService";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
+const initialNewParam: StudyParameter = {
+    name: '',
+    unit: '',
+    cost: 0,
+    factor: '',
+    referenceType: 'Intervalo Biologico de Referencia',
+    gender: 'Ambos',
+    ageStart: 0,
+    ageEnd: 0,
+    ageUnit: 'Anos',
+    intervalFrom: '',
+    intervalTo: '',
+    conversionFactor: 0,
+    conversionUnit: '',
+    possibleValues: [],
+    defaultValue: '',
+    referenceValue: '',
+    referenceText: '',
+};
+
+function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (param: StudyParameter) => void, initialData?: StudyParameter }) {
+    const [param, setParam] = useState<StudyParameter>(initialData);
+    const [newPossibleValue, setNewPossibleValue] = useState('');
+
+    useEffect(() => {
+        setParam(initialData);
+    }, [initialData]);
+
+    const handleAddPossibleValue = () => {
+        if (newPossibleValue.trim()) {
+            setParam(prev => ({ ...prev, possibleValues: [...(prev.possibleValues || []), newPossibleValue.trim()] }));
+            setNewPossibleValue('');
+        }
+    };
+    
+    const handleRemovePossibleValue = (valueToRemove: string) => {
+        setParam(prev => ({ ...prev, possibleValues: (prev.possibleValues || []).filter(v => v !== valueToRemove) }));
+    };
+
+    const handleSave = () => {
+        onSave(param);
+    };
+
+    return (
+        <div className="space-y-4">
+             <div className="grid grid-cols-1 md:grid-cols-5 gap-x-4 gap-y-2 items-end">
+                <div className="space-y-1 col-span-full md:col-span-1"><Label>Parámetro</Label><Input placeholder="Nombre" value={param.name} onChange={(e) => setParam({...param, name: e.target.value})}/></div>
+                <div className="space-y-1 col-span-1"><Label>Unidad</Label><Input placeholder="ej. ml" value={param.unit} onChange={(e) => setParam({...param, unit: e.target.value})}/></div>
+                <div className="space-y-1 col-span-1"><Label>Costo</Label><Input type="number" placeholder="0.00" value={param.cost} onChange={(e) => setParam({...param, cost: parseFloat(e.target.value) || 0})}/></div>
+                <div className="space-y-1 col-span-1"><Label>FC</Label><Input type="number" placeholder="ej. 1.0" value={param.conversionFactor} onChange={(e) => setParam({...param, conversionFactor: parseFloat(e.target.value) || 0})}/></div>
+                <div className="space-y-1 col-span-1"><Label>U.I</Label><Input placeholder="ej. mU/L" value={param.conversionUnit} onChange={(e) => setParam({...param, conversionUnit: e.target.value})}/></div>
+                <div className="col-span-full md:col-span-5"><Label>Tipo de Valor de Referencia</Label><RadioGroup value={param.referenceType} onValueChange={(v) => setParam({...param, referenceType: v})} className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo Biologico de Referencia" id="ref-intervalo-edit" /><Label htmlFor="ref-intervalo-edit">Intervalo BR</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="Mixto" id="ref-mixto-edit" /><Label htmlFor="ref-mixto-edit">Mixto</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="Criterio R" id="ref-criterio-edit" /><Label htmlFor="ref-criterio-edit">Criterio R</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="Sin valor de referencia" id="ref-sin-valor-edit" /><Label htmlFor="ref-sin-valor-edit">Sin valor de referencia</Label></div>
+                </RadioGroup></div>
+            </div>
+
+            {param.referenceType === 'Intervalo Biologico de Referencia' && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-md">
+                    <div className="space-y-2"><Label>Intervalo</Label><div className="flex items-center gap-2"><Input placeholder="De:" value={param.intervalFrom} onChange={(e) => setParam({...param, intervalFrom: e.target.value})}/><span>A:</span><Input placeholder="A:" value={param.intervalTo} onChange={(e) => setParam({...param, intervalTo: e.target.value})}/></div></div>
+                    <div className="space-y-2"><Label>Género</Label><RadioGroup value={param.gender} onValueChange={(v) => setParam({...param, gender: v})} className="flex pt-2 gap-4"><div className="flex items-center space-x-2"><RadioGroupItem value="Hombre" id="gender-h-edit"/><Label htmlFor="gender-h-edit">Hombre</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Mujer" id="gender-m-edit"/><Label htmlFor="gender-m-edit">Mujer</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Ambos" id="gender-a-edit"/><Label htmlFor="gender-a-edit">Ambos</Label></div></RadioGroup></div>
+                    <div className="space-y-2"><Label>Edad</Label><div className="flex items-center gap-2"><Input placeholder="De:" type="number" value={param.ageStart} onChange={(e) => setParam({...param, ageStart: Number(e.target.value)})}/><span>A:</span><Input placeholder="A:" type="number" value={param.ageEnd} onChange={(e) => setParam({...param, ageEnd: Number(e.target.value)})}/></div><RadioGroup value={param.ageUnit} onValueChange={(v) => setParam({...param, ageUnit: v})} className="flex pt-2 gap-4"><div className="flex items-center space-x-2"><RadioGroupItem value="Dias" id="age-d-edit"/><Label htmlFor="age-d-edit">Días</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Meses" id="age-m-edit"/><Label htmlFor="age-m-edit">Meses</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Anos" id="age-a-edit"/><Label htmlFor="age-a-edit">Años</Label></div></RadioGroup></div>
+                </div>
+            )}
+             {param.referenceType === 'Mixto' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-md">
+                    <div className="space-y-2">
+                        <Label>Valores Posibles</Label>
+                        <div className="flex items-center gap-2">
+                            <Input placeholder="Nombre del valor" value={newPossibleValue} onChange={(e) => setNewPossibleValue(e.target.value)} />
+                            <Button type="button" size="sm" onClick={handleAddPossibleValue}>Agregar Valor</Button>
+                        </div>
+                        <div className="border rounded-md p-2 min-h-[100px]">
+                            {(param.possibleValues || []).map((val, i) => (
+                                <div key={i} className="flex justify-between items-center p-1 hover:bg-background rounded-md">
+                                    <span>{val}</span>
+                                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemovePossibleValue(val)}><Trash2 className="h-4 w-4 text-red-500"/></Button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Valor Predeterminado</Label>
+                            <Select value={param.defaultValue} onValueChange={(v) => setParam({...param, defaultValue: v})}>
+                                <SelectTrigger><SelectValue placeholder="Seleccione un valor"/></SelectTrigger>
+                                <SelectContent>
+                                    {(param.possibleValues || []).map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                            <div className="space-y-2">
+                            <Label>Valor de Referencia</Label>
+                            <Select value={param.referenceValue} onValueChange={(v) => setParam({...param, referenceValue: v})}>
+                                <SelectTrigger><SelectValue placeholder="Seleccione un valor"/></SelectTrigger>
+                                <SelectContent>
+                                    {(param.possibleValues || []).map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {param.referenceType === 'Criterio R' && (
+                <div className="p-4 bg-muted/50 rounded-md">
+                    <div className="space-y-2">
+                        <Label htmlFor="referenceText-edit">Introduce un texto que será el valor de referencia:</Label>
+                        <Textarea
+                            id="referenceText-edit"
+                            placeholder="Ej: Menor de 1.0"
+                            value={param.referenceText}
+                            onChange={(e) => setParam({...param, referenceText: e.target.value})}
+                        />
+                    </div>
+                </div>
+            )}
+            <DialogFooter>
+                <Button type="button" onClick={handleSave}>Guardar Parámetro</Button>
+            </DialogFooter>
+        </div>
+    );
+}
 
 export default function EditStudyPage() {
     const router = useRouter();
@@ -49,11 +174,10 @@ export default function EditStudyPage() {
     const [categories, setCategories] = useState<Category[]>([]);
     const [providers, setProviders] = useState<Provider[]>([]);
     const [allStudies, setAllStudies] = useState<Study[]>([]);
+    
+    const [isParamModalOpen, setIsParamModalOpen] = useState(false);
+    const [editingParamIndex, setEditingParamIndex] = useState<number | null>(null);
 
-    const [newParam, setNewParam] = useState<StudyParameter>({
-        name: '', unit: '', cost: 0, factor: '', referenceType: 'Intervalo Biologico de Referencia', gender: 'Ambos', ageStart: 0, ageEnd: 0, ageUnit: 'Anos', intervalFrom: '', intervalTo: '', conversionFactor: 0, conversionUnit: '', referenceText: '', possibleValues: [], defaultValue: '', referenceValue: ''
-    });
-    const [newPossibleValue, setNewPossibleValue] = useState('');
     const [newSample, setNewSample] = useState<StudySample>({ type: '', container: '', indications: '', cost: 0 });
     const [studySearchTerm, setStudySearchTerm] = useState('');
     const [selectedIntegratedStudy, setSelectedIntegratedStudy] = useState<string | null>(null);
@@ -72,8 +196,8 @@ export default function EditStudyPage() {
                     if (studyData) {
                         setFormData({
                           ...studyData,
-                          synonyms: studyData.synonyms || [''], // Ensure synonyms is an array
-                          samples: studyData.samples || [], // Ensure samples is an array
+                          synonyms: studyData.synonyms?.length ? studyData.synonyms : [''],
+                          samples: studyData.samples || [],
                           parameters: studyData.parameters || [],
                           integratedStudies: studyData.integratedStudies || [],
                         });
@@ -108,14 +232,21 @@ export default function EditStudyPage() {
         setFormData(prev => ({ ...prev, config: { ...prev.config, [id]: value } }));
     };
 
-    // --- Parameters Logic ---
-    const handleAddParameter = () => {
-        if (!newParam.name) {
-            toast({ title: "Error", description: "El nombre del parámetro no puede estar vacío.", variant: "destructive" });
-            return;
+    const handleSaveParameter = (param: StudyParameter) => {
+        if (editingParamIndex !== null) {
+            const updatedParameters = [...(formData.parameters || [])];
+            updatedParameters[editingParamIndex] = param;
+            setFormData(prev => ({ ...prev, parameters: updatedParameters }));
+        } else {
+            setFormData(prev => ({...prev, parameters: [...(prev.parameters || []), param]}));
         }
-        setFormData(prev => ({...prev, parameters: [...(prev.parameters || []), newParam]}));
-        setNewParam({ name: '', unit: '', cost: 0, factor: '', referenceType: 'Intervalo Biologico de Referencia', gender: 'Ambos', ageStart: 0, ageEnd: 0, ageUnit: 'Anos', intervalFrom: '', intervalTo: '', conversionFactor: 0, conversionUnit: '', referenceText: '', possibleValues: [], defaultValue: '', referenceValue: '' });
+        setIsParamModalOpen(false);
+        setEditingParamIndex(null);
+    };
+
+    const handleEditParameter = (index: number) => {
+        setEditingParamIndex(index);
+        setIsParamModalOpen(true);
     };
 
     const handleRemoveParameter = (index: number) => {
@@ -123,17 +254,6 @@ export default function EditStudyPage() {
             ...prev,
             parameters: (prev.parameters || []).filter((_, i) => i !== index)
         }));
-    };
-
-    const handleAddPossibleValue = () => {
-        if (newPossibleValue.trim()) {
-            setNewParam(prev => ({ ...prev, possibleValues: [...(prev.possibleValues || []), newPossibleValue.trim()] }));
-            setNewPossibleValue('');
-        }
-    };
-    
-    const handleRemovePossibleValue = (valueToRemove: string) => {
-        setNewParam(prev => ({ ...prev, possibleValues: (prev.possibleValues || []).filter(v => v !== valueToRemove) }));
     };
 
     // --- Integrated Studies Logic ---
@@ -262,23 +382,23 @@ export default function EditStudyPage() {
                 </CardHeader>
                 <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div className="space-y-2 lg:col-span-1"><Label htmlFor="area">Área*</Label><Select value={formData.area} onValueChange={(v) => handleSelectChange('area', v)} required><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent>{categories.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}</SelectContent></Select></div>
-                    <div className="space-y-2 lg:col-span-1"><Label htmlFor="code">Código</Label><Input id="code" value={formData.code} onChange={handleChange}/></div>
+                    <div className="space-y-2 lg:col-span-1"><Label htmlFor="code">Código</Label><Input id="code" value={formData.code || ''} onChange={handleChange}/></div>
                     <div className="space-y-2 lg:col-span-1"><Label htmlFor="name">Nombre*</Label><Input id="name" value={formData.name} onChange={handleChange} required/></div>
-                    <div className="space-y-2 lg:col-span-1"><Label htmlFor="method">Método</Label><Input id="method" value={formData.method} onChange={handleChange}/></div>
+                    <div className="space-y-2 lg:col-span-1"><Label htmlFor="method">Método</Label><Input id="method" value={formData.method || ''} onChange={handleChange}/></div>
                     <div className="space-y-2"><Label htmlFor="internalCost">Costo interno p/prueba</Label><Input id="internalCost" type="number" value={formData.internalCost} onChange={handleChange}/></div>
                     <div className="space-y-2"><Label>Tiempo de entrega</Label><div className="flex gap-2"><Input id="deliveryTime" type="number" className="w-1/2" value={formData.deliveryTime} onChange={handleChange}/><Select value={formData.deliveryUnit} onValueChange={(v) => handleSelectChange('deliveryUnit', v as 'dias' | 'horas')}><SelectTrigger className="w-1/2"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="horas">Horas</SelectItem><SelectItem value="dias">Días</SelectItem></SelectContent></Select></div></div>
                     <div className="space-y-2"><Label htmlFor="processTime">Tiempo de Proceso</Label><Select value={formData.processTime} onValueChange={(v) => handleSelectChange('processTime', v)}><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent><SelectItem value="mismo_dia">Mismo día</SelectItem></SelectContent></Select></div>
-                    <div className="space-y-2"><Label htmlFor="processDays">Días de Proceso</Label><Input id="processDays" value={formData.processDays} onChange={handleChange}/></div>
+                    <div className="space-y-2"><Label htmlFor="processDays">Días de Proceso</Label><Input id="processDays" value={formData.processDays || ''} onChange={handleChange}/></div>
 
                     <div className="space-y-2 lg:col-span-4 grid grid-cols-1 lg:grid-cols-6 gap-6 items-center border-t pt-4">
                         <div className="lg:col-span-1"><Label>¿Este es un estudio subrogado?</Label><RadioGroup value={formData.isOutsourced ? 'yes' : 'no'} onValueChange={(v) => handleSelectChange('isOutsourced', v === 'yes')} className="flex gap-4 mt-2"><RadioGroupItem value="yes" id="sub-yes-edit"/><Label htmlFor="sub-yes-edit">Si</Label><RadioGroupItem value="no" id="sub-no-edit"/><Label htmlFor="sub-no-edit">No</Label></RadioGroup></div>
                         <div className="space-y-2 lg:col-span-2"><Label htmlFor="outsourcedLabId">Lab. de Referencia</Label><Select value={formData.outsourcedLabId} onValueChange={(v) => handleSelectChange('outsourcedLabId', v)} disabled={!formData.isOutsourced}><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent>{providers.map(p=><SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>)}</SelectContent></Select></div>
-                        <div className="space-y-2 lg:col-span-1"><Label htmlFor="outsourcedCode">Código</Label><Input id="outsourcedCode" value={formData.outsourcedCode} onChange={handleChange} disabled={!formData.isOutsourced}/></div>
+                        <div className="space-y-2 lg:col-span-1"><Label htmlFor="outsourcedCode">Código</Label><Input id="outsourcedCode" value={formData.outsourcedCode || ''} onChange={handleChange} disabled={!formData.isOutsourced}/></div>
                         <div className="space-y-2 lg:col-span-1"><Label htmlFor="outsourcedCost">Costo</Label><Input id="outsourcedCost" type="number" value={formData.outsourcedCost} onChange={handleChange} disabled={!formData.isOutsourced}/></div>
                         <div className="space-y-2 lg:col-span-1"><Label htmlFor="outsourcedDeliveryTime">Tiempo de entrega</Label><Select value={formData.outsourcedDeliveryTime} onValueChange={(v) => handleSelectChange('outsourcedDeliveryTime', v)} disabled={!formData.isOutsourced}><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent><SelectItem value="3_dias">3 días</SelectItem></SelectContent></Select></div>
                     </div>
-                    <div className="lg:col-span-4 space-y-2"><Label htmlFor="legend">Leyenda/Observaciones del estudio</Label><Textarea id="legend" value={formData.legend} onChange={handleChange}/></div>
-                    <div className="lg:col-span-4 space-y-2"><Label htmlFor="scientificDescription">Descripción científica sobre la aplicación y funcionamiento del estudio</Label><Textarea id="scientificDescription" value={formData.scientificDescription} onChange={handleChange}/></div>
+                    <div className="lg:col-span-4 space-y-2"><Label htmlFor="legend">Leyenda/Observaciones del estudio</Label><Textarea id="legend" value={formData.legend || ''} onChange={handleChange}/></div>
+                    <div className="lg:col-span-4 space-y-2"><Label htmlFor="scientificDescription">Descripción científica sobre la aplicación y funcionamiento del estudio</Label><Textarea id="scientificDescription" value={formData.scientificDescription || ''} onChange={handleChange}/></div>
                 </CardContent>
             </Card>
 
@@ -293,8 +413,9 @@ export default function EditStudyPage() {
             </Card>
 
             <Card>
-                <CardHeader className="bg-primary/10">
+                <CardHeader className="bg-primary/10 flex flex-row items-center justify-between">
                     <CardTitle className="text-base text-primary">Parámetros del Estudio</CardTitle>
+                     <Button type="button" onClick={() => { setEditingParamIndex(null); setIsParamModalOpen(true); }}><Plus className="mr-2"/> Agregar Parámetro</Button>
                 </CardHeader>
                 <CardContent className="pt-6 space-y-4">
                      <div className="overflow-x-auto">
@@ -304,7 +425,7 @@ export default function EditStudyPage() {
                                     <TableHead>Parámetro</TableHead>
                                     <TableHead>Unidad</TableHead>
                                     <TableHead>Ref.</TableHead>
-                                    <TableHead>Eliminar</TableHead>
+                                    <TableHead className="text-right">Acciones</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -313,92 +434,30 @@ export default function EditStudyPage() {
                                         <TableCell>{param.name}</TableCell>
                                         <TableCell>{param.unit}</TableCell>
                                         <TableCell>{param.referenceType === 'Intervalo Biologico de Referencia' ? `${param.intervalFrom} - ${param.intervalTo}` : param.referenceType}</TableCell>
-                                        <TableCell>
-                                            <Button type="button" variant="destructive" size="icon" onClick={() => handleRemoveParameter(index)}><Trash2/></Button>
+                                        <TableCell className="text-right">
+                                            <Button type="button" variant="ghost" size="icon" onClick={() => handleEditParameter(index)}><Pencil className="h-4 w-4"/></Button>
+                                            <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveParameter(index)}><Trash2 className="h-4 w-4 text-red-500"/></Button>
                                         </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
                         </Table>
                     </div>
-                     <div className="p-4 border rounded-md space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-5 gap-x-4 gap-y-2 items-end">
-                            <div className="space-y-1 col-span-full md:col-span-1"><Label>Parámetro</Label><Input placeholder="Nombre" value={newParam.name} onChange={(e) => setNewParam({...newParam, name: e.target.value})}/></div>
-                            <div className="space-y-1 col-span-1"><Label>Unidad</Label><Input placeholder="ej. ml" value={newParam.unit} onChange={(e) => setNewParam({...newParam, unit: e.target.value})}/></div>
-                            <div className="space-y-1 col-span-1"><Label>Costo</Label><Input type="number" placeholder="0.00" value={newParam.cost} onChange={(e) => setNewParam({...newParam, cost: parseFloat(e.target.value) || 0})}/></div>
-                            <div className="space-y-1 col-span-1"><Label>FC</Label><Input type="number" placeholder="ej. 1.0" value={newParam.conversionFactor} onChange={(e) => setNewParam({...newParam, conversionFactor: parseFloat(e.target.value) || 0})}/></div>
-                            <div className="space-y-1 col-span-1"><Label>U.I</Label><Input placeholder="ej. mU/L" value={newParam.conversionUnit} onChange={(e) => setNewParam({...newParam, conversionUnit: e.target.value})}/></div>
-                            <div className="col-span-full md:col-span-5"><Label>Tipo de Valor de Referencia</Label><RadioGroup value={newParam.referenceType} onValueChange={(v) => setNewParam({...newParam, referenceType: v})} className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo Biologico de Referencia" id="ref-intervalo-edit" /><Label htmlFor="ref-intervalo-edit">Intervalo BR</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Mixto" id="ref-mixto-edit" /><Label htmlFor="ref-mixto-edit">Mixto</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Criterio R" id="ref-criterio-edit" /><Label htmlFor="ref-criterio-edit">Criterio R</Label></div>
-                                <div className="flex items-center space-x-2"><RadioGroupItem value="Sin valor de referencia" id="ref-sin-valor-edit" /><Label htmlFor="ref-sin-valor-edit">Sin valor de referencia</Label></div>
-                            </RadioGroup></div>
-                        </div>
-
-                        {newParam.referenceType === 'Intervalo Biologico de Referencia' && (
-                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-md">
-                                <div className="space-y-2"><Label>Intervalo</Label><div className="flex items-center gap-2"><Input placeholder="De:" value={newParam.intervalFrom} onChange={(e) => setNewParam({...newParam, intervalFrom: e.target.value})}/><span>A:</span><Input placeholder="A:" value={newParam.intervalTo} onChange={(e) => setNewParam({...newParam, intervalTo: e.target.value})}/></div></div>
-                                <div className="space-y-2"><Label>Género</Label><RadioGroup value={newParam.gender} onValueChange={(v) => setNewParam({...newParam, gender: v})} className="flex pt-2 gap-4"><div className="flex items-center space-x-2"><RadioGroupItem value="Hombre" id="gender-h-edit"/><Label htmlFor="gender-h-edit">Hombre</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Mujer" id="gender-m-edit"/><Label htmlFor="gender-m-edit">Mujer</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Ambos" id="gender-a-edit"/><Label htmlFor="gender-a-edit">Ambos</Label></div></RadioGroup></div>
-                                <div className="space-y-2"><Label>Edad</Label><div className="flex items-center gap-2"><Input placeholder="De:" type="number" value={newParam.ageStart} onChange={(e) => setNewParam({...newParam, ageStart: Number(e.target.value)})}/><span>A:</span><Input placeholder="A:" type="number" value={newParam.ageEnd} onChange={(e) => setNewParam({...newParam, ageEnd: Number(e.target.value)})}/></div><RadioGroup value={newParam.ageUnit} onValueChange={(v) => setNewParam({...newParam, ageUnit: v})} className="flex pt-2 gap-4"><div className="flex items-center space-x-2"><RadioGroupItem value="Dias" id="age-d-edit"/><Label htmlFor="age-d-edit">Días</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Meses" id="age-m-edit"/><Label htmlFor="age-m-edit">Meses</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Anos" id="age-a-edit"/><Label htmlFor="age-a-edit">Años</Label></div></RadioGroup></div>
-                            </div>
-                        )}
-                         {newParam.referenceType === 'Mixto' && (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-md">
-                                <div className="space-y-2">
-                                    <Label>Valores Posibles</Label>
-                                    <div className="flex items-center gap-2">
-                                        <Input placeholder="Nombre del valor" value={newPossibleValue} onChange={(e) => setNewPossibleValue(e.target.value)} />
-                                        <Button type="button" size="sm" onClick={handleAddPossibleValue}>Agregar Valor</Button>
-                                    </div>
-                                    <div className="border rounded-md p-2 min-h-[100px]">
-                                        {(newParam.possibleValues || []).map((val, i) => (
-                                            <div key={i} className="flex justify-between items-center p-1 hover:bg-background rounded-md">
-                                                <span>{val}</span>
-                                                <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemovePossibleValue(val)}><Trash2 className="h-4 w-4 text-red-500"/></Button>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label>Valor Predeterminado</Label>
-                                        <Select value={newParam.defaultValue} onValueChange={(v) => setNewParam({...newParam, defaultValue: v})}>
-                                            <SelectTrigger><SelectValue placeholder="Seleccione un valor"/></SelectTrigger>
-                                            <SelectContent>
-                                                {(newParam.possibleValues || []).map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                     <div className="space-y-2">
-                                        <Label>Valor de Referencia</Label>
-                                        <Select value={newParam.referenceValue} onValueChange={(v) => setNewParam({...newParam, referenceValue: v})}>
-                                            <SelectTrigger><SelectValue placeholder="Seleccione un valor"/></SelectTrigger>
-                                            <SelectContent>
-                                                {(newParam.possibleValues || []).map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                        {newParam.referenceType === 'Criterio R' && (
-                            <div className="p-4 bg-muted/50 rounded-md">
-                                <div className="space-y-2">
-                                    <Label htmlFor="referenceText-edit">Introduce un texto que será el valor de referencia:</Label>
-                                    <Textarea
-                                        id="referenceText-edit"
-                                        placeholder="Ej: Menor de 1.0"
-                                        value={newParam.referenceText}
-                                        onChange={(e) => setNewParam({...newParam, referenceText: e.target.value})}
-                                    />
-                                </div>
-                            </div>
-                        )}
-                        <Button type="button" onClick={handleAddParameter}><Plus className="mr-2"/> Agregar Parametro</Button>
-                    </div>
                 </CardContent>
             </Card>
+            
+            <Dialog open={isParamModalOpen} onOpenChange={setIsParamModalOpen}>
+                <DialogContent className="max-w-4xl">
+                    <DialogHeader>
+                        <DialogTitle>{editingParamIndex !== null ? 'Editar' : 'Agregar'} Parámetro</DialogTitle>
+                    </DialogHeader>
+                    <ParameterForm
+                        initialData={editingParamIndex !== null ? formData.parameters?.[editingParamIndex] : initialNewParam}
+                        onSave={handleSaveParameter}
+                    />
+                </DialogContent>
+            </Dialog>
+
         </TabsContent>
          <TabsContent value="integran" className="pt-4 space-y-6">
             <Card>

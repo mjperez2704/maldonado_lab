@@ -51,26 +51,34 @@ export default function CaptureResultsPage() {
 
                     studiesInRecibo.forEach(study => {
                         const existingMainResult = reciboData.results?.find(r => r.studyName === study.name && !r.parameterName);
-                        initialResults.push({
-                            studyName: study.name,
-                            parameterName: '',
-                            result: existingMainResult?.result || '',
-                            reference: '', // Main study might not have a direct reference value
-                            unit: existingMainResult?.unit || ''
-                        });
+                        // Don't add a row for the main study if it has parameters
+                        if (!study.parameters || study.parameters.length === 0) {
+                             initialResults.push({
+                                studyName: study.name,
+                                parameterName: '',
+                                result: existingMainResult?.result || '',
+                                reference: '', 
+                                unit: existingMainResult?.unit || ''
+                            });
+                        }
 
                         if (study.parameters && study.parameters.length > 0) {
                             study.parameters.forEach(param => {
                                 const existingParamResult = reciboData.results?.find(r => r.studyName === study.name && r.parameterName === param.name);
-                                let referenceValue = param.referenceType;
-                                if (param.referenceType === 'Intervalo Biologico de Referencia') {
-                                    referenceValue = `${param.gender}, ${param.ageStart}-${param.ageEnd} ${param.ageUnit}`;
-                                }
                                 
+                                let referenceValue = '';
+                                if (param.referenceType === 'Intervalo Biologico de Referencia') {
+                                    referenceValue = `${param.intervalFrom} - ${param.intervalTo}`;
+                                } else if (param.referenceType === 'Mixto') {
+                                    referenceValue = param.referenceValue || '';
+                                } else if (param.referenceType === 'Criterio R') {
+                                    referenceValue = param.referenceText || '';
+                                }
+
                                 initialResults.push({
                                     studyName: study.name,
                                     parameterName: param.name,
-                                    result: existingParamResult?.result || '',
+                                    result: existingParamResult?.result || param.defaultValue || '',
                                     reference: existingParamResult?.reference || referenceValue,
                                     unit: existingParamResult?.unit || param.unit || ''
                                 });
@@ -119,6 +127,16 @@ export default function CaptureResultsPage() {
             setLoading(false);
         }
     }
+
+    const groupedResults = useMemo(() => {
+        return results.reduce((acc, result) => {
+            if (!acc[result.studyName]) {
+                acc[result.studyName] = [];
+            }
+            acc[result.studyName].push(result);
+            return acc;
+        }, {} as Record<string, ResultInput[]>);
+    }, [results]);
 
     if (loading) {
         return <div>Cargando información de la solicitud...</div>
@@ -177,39 +195,45 @@ export default function CaptureResultsPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                               {results.map((result, index) => (
-                                   <TableRow key={index}>
-                                       <TableCell className="font-medium">
-                                           {result.parameterName ? (
-                                               <div className="pl-4">{result.parameterName}</div>
-                                           ) : (
-                                               <strong>{result.studyName}</strong>
-                                           )}
-                                       </TableCell>
-                                       <TableCell>
-                                           <Input
-                                               value={result.result}
-                                               onChange={(e) => handleResultChange(index, 'result', e.target.value)}
-                                               placeholder="Ingrese resultado"
-                                            />
-                                       </TableCell>
-                                       <TableCell>
-                                            <Input
-                                                value={result.unit}
-                                                onChange={(e) => handleResultChange(index, 'unit', e.target.value)}
-                                                placeholder="Unidad"
-                                                disabled={!result.parameterName}
-                                            />
-                                       </TableCell>
-                                       <TableCell>
-                                            <Input
-                                               value={result.reference}
-                                               placeholder="Ej. 70-110 mg/dL"
-                                               readOnly
-                                               className="bg-muted/50 cursor-not-allowed border-none"
-                                            />
-                                       </TableCell>
-                                   </TableRow>
+                               {Object.entries(groupedResults).map(([studyName, studyResults]) => (
+                                   <React.Fragment key={studyName}>
+                                       <TableRow>
+                                           <TableCell colSpan={4} className="font-bold bg-muted">
+                                               {studyName}
+                                           </TableCell>
+                                       </TableRow>
+                                       {studyResults.map((result, index) => {
+                                           const originalIndex = results.findIndex(r => r.studyName === studyName && r.parameterName === result.parameterName);
+                                           return (
+                                           <TableRow key={originalIndex}>
+                                               <TableCell className="pl-8">
+                                                    {result.parameterName || studyName}
+                                               </TableCell>
+                                               <TableCell>
+                                                   <Input
+                                                       value={result.result}
+                                                       onChange={(e) => handleResultChange(originalIndex, 'result', e.target.value)}
+                                                       placeholder="Ingrese resultado"
+                                                    />
+                                               </TableCell>
+                                               <TableCell>
+                                                    <Input
+                                                        value={result.unit}
+                                                        onChange={(e) => handleResultChange(originalIndex, 'unit', e.target.value)}
+                                                        placeholder="Unidad"
+                                                    />
+                                               </TableCell>
+                                               <TableCell>
+                                                    <Input
+                                                       value={result.reference}
+                                                       placeholder="Ej. 70-110 mg/dL"
+                                                       readOnly
+                                                       className="bg-muted/50 cursor-not-allowed border-none"
+                                                    />
+                                               </TableCell>
+                                           </TableRow>
+                                       )})}
+                                   </React.Fragment>
                                ))}
                             </TableBody>
                         </Table>
