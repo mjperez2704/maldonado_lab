@@ -120,7 +120,7 @@ const menuGroups = [
     {
         groupLabel: 'Sistema',
         items: [
-            { icon: BarChart, label: 'Informes', href: '#' },
+            { icon: BarChart, label: 'Informes', href: '/informes' },
             { icon: FileDown, label: 'Gestión de Calidad', href: '#' },
             { icon: FileKey, label: 'Permisos', href: '#' },
             { icon: Settings, label: 'Configuraciones', href: '/configuraciones' },
