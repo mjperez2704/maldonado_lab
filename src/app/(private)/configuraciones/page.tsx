@@ -77,13 +77,19 @@ export default function SettingsPage() {
                 ]);
                 if (general) {
                     setGeneralSettings(general);
-                    setLanguage(general.language as 'es' | 'en');
+                    if (general.language && (general.language === 'es' || general.language === 'en')) {
+                        setLanguage(general.language);
+                    }
                 }
                 if (reports) {
                     setReportSettings(prev => ({ ...initialReportSettings, ...reports }));
+                } else {
+                    setReportSettings(initialReportSettings);
                 }
                 if (emails) {
                     setEmailSettings(prev => ({...initialEmailSettings, ...emails}));
+                } else {
+                    setEmailSettings(initialEmailSettings);
                 }
                 if (db) setDbSettings(db);
                 if (whatsapp) setWhatsappSettings(whatsapp);
@@ -99,8 +105,8 @@ export default function SettingsPage() {
     
     const handleGeneralSettingChange = (field: keyof GeneralSettings, value: string) => {
         setGeneralSettings(prev => ({ ...prev, [field]: value }));
-        if (field === 'language') {
-            setLanguage(value as 'es' | 'en');
+        if (field === 'language' && (value === 'es' || value === 'en')) {
+            setLanguage(value);
         }
     };
 
@@ -1025,6 +1031,8 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    
 
     
 
