@@ -363,6 +363,11 @@ export default function CreateTestRequestPage() {
         const packageItems = packages.map(p => ({ value: p.id, label: `${p.name} ($${p.price})`, type: 'Paquete' }));
         return [...studyItems, ...packageItems];
     }, [studies, packages]);
+
+    const doctorOptions = useMemo(() => [
+        { id: 'default', name: 'A QUIEN CORRESPONDA' },
+        ...doctors
+    ], [doctors]);
     
     const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
 
@@ -503,10 +508,9 @@ export default function CreateTestRequestPage() {
                                             <Label>Médico</Label>
                                             <div className="flex gap-2">
                                                 <Select value={selectedDoctor} onValueChange={setSelectedDoctor}>
-                                                    <SelectTrigger><SelectValue/></SelectTrigger>
+                                                    <SelectTrigger><SelectValue placeholder="Seleccione un médico" /></SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="A QUIEN CORRESPONDA">A QUIEN CORRESPONDA</SelectItem>
-                                                        {doctors.map(doctor => (
+                                                        {doctorOptions.map(doctor => (
                                                             <SelectItem key={doctor.id} value={doctor.name}>{doctor.name}</SelectItem>
                                                         ))}
                                                     </SelectContent>
