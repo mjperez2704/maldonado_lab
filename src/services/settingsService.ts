@@ -1,4 +1,5 @@
 
+
 "use server";
 import { executeQuery } from '@/lib/db';
 
@@ -77,17 +78,33 @@ export interface GeneralSettings {
     rights: string;
 }
 
+export interface WhatsappTemplate {
+    active: boolean;
+    message: string;
+}
+
+export interface WhatsappSettings {
+    receiptLink: WhatsappTemplate;
+    reportLink: WhatsappTemplate;
+}
+
 
 const SETTINGS_KEY_REPORTS = 'reports';
 const SETTINGS_KEY_EMAIL = 'email';
 const SETTINGS_KEY_DB = 'db';
 const SETTINGS_KEY_GENERAL = 'general';
+const SETTINGS_KEY_WHATSAPP = 'whatsapp';
 
 
 async function getSetting<T>(key: string): Promise<T | null> {
     const results = await executeQuery<{ value: string }[]>('SELECT value FROM settings WHERE `key` = ?', [key]);
     if (results.length > 0) {
-        return JSON.parse(results[0].value);
+        try {
+            return JSON.parse(results[0].value);
+        } catch (e) {
+            console.error(`Failed to parse setting for key: ${key}`, e);
+            return null;
+        }
     }
     return null;
 }
@@ -113,6 +130,10 @@ export const saveDbSettings = async (settings: DbSettings) => saveSetting(SETTIN
 // General
 export const getGeneralSettings = async () => getSetting<GeneralSettings>(SETTINGS_KEY_GENERAL);
 export const saveGeneralSettings = async (settings: GeneralSettings) => saveSetting(SETTINGS_KEY_GENERAL, settings);
+
+// Whatsapp
+export const getWhatsappSettings = async () => getSetting<WhatsappSettings>(SETTINGS_KEY_WHATSAPP);
+export const saveWhatsappSettings = async (settings: WhatsappSettings) => saveSetting(SETTINGS_KEY_WHATSAPP, settings);
 
 
 export async function testDbConnection(settings: DbSettings): Promise<{ success: boolean; error?: string }> {

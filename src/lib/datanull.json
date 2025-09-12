@@ -18,6 +18,11 @@
   "purchases": [],
   "quotes": [],
   "recibos": [],
-  "settings": [],
+  "settings": [
+    {
+      "key": "whatsapp",
+      "value": "{\"receiptLink\":{\"active\":true,\"message\":\"Bienvenido {patient_name}, el enlace a su recibo es {receipt_link}\"},\"reportLink\":{\"active\":false,\"message\":\"Hola {patient_name}, el enlace a su informe de resultados es {report_link}\"}}"
+    }
+  ],
   "studies": []
 }

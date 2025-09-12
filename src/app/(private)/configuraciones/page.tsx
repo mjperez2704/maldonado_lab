@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -11,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Settings, BarChart, Barcode, Mail, MessageSquare, KeyRound, Check, Globe, Copyright, Phone, MapPin, Clock, Pencil, Languages, Wallet, Info, FileText as FileTextIcon, Database } from "lucide-react";
 import React, { useEffect, useState } from 'react';
-import { getReportSettings, saveReportSettings, ReportSettings, saveEmailSettings, getEmailSettings, EmailSettings, getDbSettings, saveDbSettings, testDbConnection, DbSettings, getGeneralSettings, saveGeneralSettings, GeneralSettings } from "@/services/settingsService";
+import { getReportSettings, saveReportSettings, ReportSettings, saveEmailSettings, getEmailSettings, EmailSettings, getDbSettings, saveDbSettings, testDbConnection, DbSettings, getGeneralSettings, saveGeneralSettings, GeneralSettings, getWhatsappSettings, saveWhatsappSettings, WhatsappSettings } from "@/services/settingsService";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -83,14 +84,19 @@ export default function SettingsPage() {
         password: '',
         ssl: false,
     });
+    const [whatsappSettings, setWhatsappSettings] = useState<WhatsappSettings>({
+        receiptLink: { active: true, message: 'Bienvenido {patient_name}, el enlace a su recibo es {receipt_link}' },
+        reportLink: { active: false, message: 'Hola {patient_name}, el enlace a su informe de resultados es {report_link}' },
+    });
 
     useEffect(() => {
         const loadSettings = async () => {
-            const [general, reports, emails, db] = await Promise.all([
+            const [general, reports, emails, db, whatsapp] = await Promise.all([
                 getGeneralSettings(),
                 getReportSettings(),
                 getEmailSettings(),
                 getDbSettings(),
+                getWhatsappSettings(),
             ]);
             if (general) {
                 setGeneralSettings(general);
@@ -99,6 +105,7 @@ export default function SettingsPage() {
             if (reports) setReportSettings(reports);
             if (emails) setEmailSettings(emails);
             if (db) setDbSettings(db);
+            if (whatsapp) setWhatsappSettings(whatsapp);
         };
         loadSettings();
     }, []);
@@ -131,6 +138,17 @@ export default function SettingsPage() {
             }
         }));
     };
+
+    const handleWhatsappTemplateChange = (template: keyof WhatsappSettings, field: 'active' | 'message', value: any) => {
+        setWhatsappSettings(prev => ({
+            ...prev,
+            [template]: {
+                ...(prev[template] as object),
+                [field]: value
+            }
+        }));
+    };
+
 
     const handleFontSettingChange = (section: keyof ReportSettings, field: 'color' | 'font' | 'size', value: any) => {
         setReportSettings(prev => ({
@@ -205,6 +223,23 @@ export default function SettingsPage() {
             toast({
                 title: "Error",
                 description: "No se pudo guardar la configuración de la base de datos.",
+                variant: "destructive",
+            });
+        }
+    };
+
+    const handleSaveWhatsappSettings = async () => {
+        try {
+            await saveWhatsappSettings(whatsappSettings);
+            toast({
+                title: "Éxito",
+                description: "La configuración de WhatsApp se ha guardado correctamente.",
+            });
+        } catch (error) {
+            console.error("Error saving WhatsApp settings:", error);
+            toast({
+                title: "Error",
+                description: "No se pudo guardar la configuración de WhatsApp.",
                 variant: "destructive",
             });
         }
@@ -911,27 +946,41 @@ export default function SettingsPage() {
                             <TabsContent value="receipt-link" className="pt-6">
                                 <div className="space-y-4">
                                     <div className="flex items-center gap-2">
-                                        <Switch id="whatsapp-active" defaultChecked />
-                                        <Label htmlFor="whatsapp-active" className="text-green-600 font-bold">Activo</Label>
+                                        <Switch id="whatsapp-receipt-active" checked={whatsappSettings.receiptLink.active} onCheckedChange={(c) => handleWhatsappTemplateChange('receiptLink', 'active', c)} />
+                                        <Label htmlFor="whatsapp-receipt-active" className={whatsappSettings.receiptLink.active ? "text-green-600 font-bold" : "text-gray-500"}>
+                                            {whatsappSettings.receiptLink.active ? 'Activo' : 'Inactivo'}
+                                        </Label>
                                     </div>
                                     <div className="text-red-500 text-sm">
-                                        <p>No cambiar las variables:</p>
-                                        <p>{`{patient_name}`}</p>
-                                        <p>{`{receipt_link}`}</p>
+                                        <p>No cambiar las variables: {`{patient_name}`} {`{receipt_link}`}</p>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="whatsapp-message">Mensaje</Label>
-                                        <Textarea id="whatsapp-message" defaultValue="Bienvenido {patient_name}, el enlace a su recibo es {receipt_link}" rows={4} />
+                                        <Label htmlFor="whatsapp-receipt-message">Mensaje</Label>
+                                        <Textarea id="whatsapp-receipt-message" value={whatsappSettings.receiptLink.message} onChange={(e) => handleWhatsappTemplateChange('receiptLink', 'message', e.target.value)} rows={4} />
                                     </div>
                                 </div>
                             </TabsContent>
-                            <TabsContent value="report-link">
-                                <p>Plantilla para enlace de informe aquí.</p>
+                             <TabsContent value="report-link" className="pt-6">
+                                <div className="space-y-4">
+                                    <div className="flex items-center gap-2">
+                                        <Switch id="whatsapp-report-active" checked={whatsappSettings.reportLink.active} onCheckedChange={(c) => handleWhatsappTemplateChange('reportLink', 'active', c)} />
+                                        <Label htmlFor="whatsapp-report-active" className={whatsappSettings.reportLink.active ? "text-green-600 font-bold" : "text-gray-500"}>
+                                            {whatsappSettings.reportLink.active ? 'Activo' : 'Inactivo'}
+                                        </Label>
+                                    </div>
+                                    <div className="text-red-500 text-sm">
+                                        <p>No cambiar las variables: {`{patient_name}`} {`{report_link}`}</p>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="whatsapp-report-message">Mensaje</Label>
+                                        <Textarea id="whatsapp-report-message" value={whatsappSettings.reportLink.message} onChange={(e) => handleWhatsappTemplateChange('reportLink', 'message', e.target.value)} rows={4} />
+                                    </div>
+                                </div>
                             </TabsContent>
                         </Tabs>
                     </CardContent>
                     <div className="flex justify-start p-6 pt-0">
-                        <Button>
+                        <Button onClick={handleSaveWhatsappSettings}>
                             <Check className="mr-2"/> Guardar
                         </Button>
                     </div>
