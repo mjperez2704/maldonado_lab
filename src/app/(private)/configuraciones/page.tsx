@@ -34,6 +34,16 @@ const initialReportSettings: ReportSettings = {
     testName: { color: "", font: "", size: "" }
 };
 
+const initialEmailSettings: EmailSettings = {
+    host: '', port: 0, username: '', password: '', encryption: 'ssl', fromAddress: '',
+    fromName: '', headerColor: '', footerColor: '',
+    patientCode: { active: true, subject: '', body: '' },
+    resetPassword: { active: false, subject: '', body: '' },
+    receipt: { active: false, subject: '', body: '' },
+    report: { active: false, subject: '', body: '' },
+};
+
+
 export default function SettingsPage() {
     const { t, setLanguage, language } = useTranslation();
     const [activeTab, setActiveTab] = React.useState("general");
@@ -45,14 +55,7 @@ export default function SettingsPage() {
         phone: '', email: '', website: '', rights: ''
     });
     const [reportSettings, setReportSettings] = useState<ReportSettings>(initialReportSettings);
-     const [emailSettings, setEmailSettings] = useState<EmailSettings>({
-        host: '', port: 0, username: '', password: '', encryption: 'ssl', fromAddress: '',
-        fromName: '', headerColor: '', footerColor: '',
-        patientCode: { active: true, subject: '', body: '' },
-        resetPassword: { active: false, subject: '', body: '' },
-        receipt: { active: false, subject: '', body: '' },
-        report: { active: false, subject: '', body: '' },
-    });
+    const [emailSettings, setEmailSettings] = useState<EmailSettings>(initialEmailSettings);
     const [dbSettings, setDbSettings] = useState<DbSettings>({
         host: '', port: 3306, database: '', user: '', password: '', ssl: false,
     });
@@ -79,7 +82,9 @@ export default function SettingsPage() {
                 if (reports) {
                     setReportSettings(prev => ({ ...initialReportSettings, ...reports }));
                 }
-                if (emails) setEmailSettings(emails);
+                if (emails) {
+                    setEmailSettings(prev => ({...initialEmailSettings, ...emails}));
+                }
                 if (db) setDbSettings(db);
                 if (whatsapp) setWhatsappSettings(whatsapp);
             } catch (error) {
@@ -1020,5 +1025,7 @@ export default function SettingsPage() {
     </div>
   );
 }
+
+    
 
     
