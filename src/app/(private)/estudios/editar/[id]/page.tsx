@@ -328,6 +328,19 @@ export default function EditStudyPage() {
             setLoading(false);
         }
     };
+    
+    const getParameterDisplayReference = (param: StudyParameter) => {
+        switch (param.referenceType) {
+            case 'Intervalo Biologico de Referencia':
+                return `${param.intervalFrom} - ${param.intervalTo}`;
+            case 'Mixto':
+                return param.referenceValue || 'N/A';
+            case 'Criterio R':
+                return param.referenceText || 'N/A';
+            default:
+                return 'N/A';
+        }
+    };
 
     const renderConfigRadio = (id: keyof Study['config'], label: string) => (
         <div className="flex items-center justify-between p-3 border-b">
@@ -433,7 +446,7 @@ export default function EditStudyPage() {
                                     <TableRow key={index}>
                                         <TableCell>{param.name}</TableCell>
                                         <TableCell>{param.unit}</TableCell>
-                                        <TableCell>{param.referenceType === 'Intervalo Biologico de Referencia' ? `${param.intervalFrom} - ${param.intervalTo}` : param.referenceType}</TableCell>
+                                        <TableCell>{getParameterDisplayReference(param)}</TableCell>
                                         <TableCell className="text-right">
                                             <Button type="button" variant="ghost" size="icon" onClick={() => handleEditParameter(index)}><Pencil className="h-4 w-4"/></Button>
                                             <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveParameter(index)}><Trash2 className="h-4 w-4 text-red-500"/></Button>
