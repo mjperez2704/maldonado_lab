@@ -65,6 +65,7 @@ export default function CreateCulturePage() {
         }
     };
 
+    const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
 
   return (
     <div className="flex flex-col gap-4 py-8">
@@ -109,7 +110,7 @@ export default function CreateCulturePage() {
                     <div className="space-y-2">
                         <Label htmlFor="price">Precio</Label>
                         <div className="flex items-center">
-                            <Input id="price" type="number" className="rounded-r-none" value={formData.price} onChange={handlePriceChange} />
+                            <Input id="price" type="number" className="rounded-r-none" value={formData.price} onChange={handlePriceChange} onFocus={handleFocus} />
                             <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 bg-muted text-muted-foreground">
                                 MXN
                             </span>

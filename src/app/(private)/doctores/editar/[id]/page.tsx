@@ -90,6 +90,8 @@ export default function EditDoctorPage() {
         }
     };
 
+    const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
+
   return (
     <div className="flex flex-col gap-4 py-8">
       <div className="flex justify-between items-center">
@@ -124,7 +126,7 @@ export default function EditDoctorPage() {
                         <FormField control={form.control} name="commission" render={({ field }) => (
                             <FormItem><FormLabel>Comisión</FormLabel>
                                 <div className="relative">
-                                    <FormControl><Input type="number" placeholder="0" {...field} disabled={loader.status !== 'idle'} /></FormControl>
+                                    <FormControl><Input type="number" placeholder="0" {...field} disabled={loader.status !== 'idle'} onFocus={handleFocus} /></FormControl>
                                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">%</span>
                                 </div>
                             <FormMessage /></FormItem>

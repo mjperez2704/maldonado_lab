@@ -74,6 +74,8 @@ export default function PriceListPage() {
     return sorted;
   }, [studies, searchTerm, sortOrder, selectedCategory]);
 
+  const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
+
   return (
     <div className="flex flex-col gap-4 py-8">
        <div className="flex justify-between items-center">
@@ -164,7 +166,7 @@ export default function PriceListPage() {
                 </CardHeader>
                 <CardContent className="flex flex-col gap-4">
                      <div className="space-y-2">
-                        <Input placeholder="Aumento/Disminución (%)" />
+                        <Input type="number" placeholder="Aumento/Disminución (%)" onFocus={handleFocus} />
                         <Button variant="outline" className="w-full">Aplicar a Lista Seleccionada</Button>
                     </div>
                 </CardContent>
@@ -198,10 +200,10 @@ export default function PriceListPage() {
                                         <TableCell>{study.name}</TableCell>
                                         <TableCell>{study.category}</TableCell>
                                         <TableCell>
-                                            <Input defaultValue={Number(study.price.toFixed(2))} className="w-24" />
+                                            <Input type="number" defaultValue={Number(study.price.toFixed(2))} className="w-24" onFocus={handleFocus} />
                                         </TableCell>
                                         <TableCell>
-                                            <Input defaultValue={Number((study.price * 0.9).toFixed(2))} className="w-24" />
+                                            <Input type="number" defaultValue={Number((study.price * 0.9).toFixed(2))} className="w-24" onFocus={handleFocus} />
                                         </TableCell>
                                     </TableRow>
                                 ))}

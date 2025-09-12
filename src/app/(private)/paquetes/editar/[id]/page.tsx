@@ -95,6 +95,8 @@ export default function EditPackagePage() {
         }
     };
     
+    const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
+
   return (
     <div className="flex flex-col gap-4 py-8">
       <div className="flex justify-between items-center">
@@ -124,7 +126,7 @@ export default function EditPackagePage() {
                             <FormItem><FormLabel>Precio</FormLabel>
                                 <div className="flex items-center">
                                     <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-muted-foreground">MXN</span>
-                                    <FormControl><Input type="number" placeholder="Precio" className="rounded-l-none" {...field} disabled={loader.status !== 'idle'} /></FormControl>
+                                    <FormControl><Input type="number" placeholder="Precio" className="rounded-l-none" {...field} disabled={loader.status !== 'idle'} onFocus={handleFocus} /></FormControl>
                                 </div>
                             <FormMessage /></FormItem>
                         )}/>

@@ -89,6 +89,8 @@ export default function EditCreditNotePage() {
     }
   };
 
+  const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
+
   if (loading) {
     return <div>Cargando...</div>
   }
@@ -143,7 +145,7 @@ export default function EditCreditNotePage() {
                         <Label htmlFor="amount">Importe</Label>
                         <div className="relative">
                             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input id="amount" type="number" placeholder="0.00" className="pl-10" value={formData.amount} onChange={handleChange} />
+                            <Input id="amount" type="number" placeholder="0.00" className="pl-10" value={formData.amount} onChange={handleChange} onFocus={handleFocus} />
                         </div>
                     </div>
                      <div className="space-y-2">

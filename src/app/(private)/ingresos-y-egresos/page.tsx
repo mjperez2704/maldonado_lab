@@ -155,6 +155,7 @@ export default function IncomeAndExpensesPage() {
         }
     };
 
+    const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
 
   return (
     <div className="flex flex-col gap-8 py-8">
@@ -198,7 +199,7 @@ export default function IncomeAndExpensesPage() {
               <Label htmlFor="amount">Cantidad</Label>
               <div className="relative">
                 <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input id="amount" type="number" placeholder="0.00" value={formData.amount} onChange={handleFormChange} className="pl-10" />
+                <Input id="amount" type="number" placeholder="0.00" value={formData.amount} onChange={handleFormChange} onFocus={handleFocus} className="pl-10" />
               </div>
             </div>
             <div className="space-y-2">

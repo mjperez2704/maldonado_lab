@@ -117,6 +117,8 @@ export default function EditConvenioPage() {
             description: "La búsqueda y adición de pruebas y paquetes se implementará en el futuro.",
         });
     }
+    
+    const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
 
   return (
     <div className="flex flex-col gap-4 py-8">
@@ -143,7 +145,7 @@ export default function EditConvenioPage() {
                         <FormField control={form.control} name="discount" render={({ field }) => (
                             <FormItem><FormLabel>Porcentaje de descuento</FormLabel>
                                 <div className="relative">
-                                    <FormControl><Input type="number" placeholder="0" {...field} /></FormControl>
+                                    <FormControl><Input type="number" placeholder="0" {...field} onFocus={handleFocus} /></FormControl>
                                     <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">%</span>
                                 </div>
                             <FormMessage /></FormItem>

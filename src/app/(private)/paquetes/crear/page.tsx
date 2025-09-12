@@ -77,6 +77,8 @@ export default function CreatePackagePage() {
             }
         }
     };
+    
+    const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
 
   return (
     <div className="flex flex-col gap-4 py-8">
@@ -107,7 +109,7 @@ export default function CreatePackagePage() {
                             <FormItem><FormLabel>Precio</FormLabel>
                                 <div className="flex items-center">
                                     <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-muted-foreground">MXN</span>
-                                    <FormControl><Input type="number" placeholder="Precio" className="rounded-l-none" {...field} /></FormControl>
+                                    <FormControl><Input type="number" placeholder="Precio" className="rounded-l-none" {...field} onFocus={handleFocus} /></FormControl>
                                 </div>
                             <FormMessage /></FormItem>
                         )}/>

@@ -151,6 +151,8 @@ export default function EditPatientPage() {
     }
   }
 
+  const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
+
   return (
     <div className="flex flex-col gap-4 py-8">
       <div className="flex justify-between items-center">
@@ -292,6 +294,7 @@ export default function EditPatientPage() {
                                     className="border-0 focus-visible:ring-0 bg-transparent read-only:cursor-not-allowed"
                                     {...field}
                                     readOnly // Campo de solo lectura
+                                    onFocus={handleFocus}
                                 />
                               </FormControl>
                             </FormItem>

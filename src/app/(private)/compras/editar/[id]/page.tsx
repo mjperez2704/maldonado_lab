@@ -136,6 +136,8 @@ export default function EditPurchasePage() {
             toast({ title: "Error", description: "No se pudo actualizar la compra.", variant: "destructive" });
         }
     };
+    
+    const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
 
     if (loading) {
         return <div>Cargando...</div>;
@@ -191,8 +193,8 @@ export default function EditPurchasePage() {
                                 return (
                                 <TableRow key={field.id}>
                                    <TableCell><FormField control={form.control} name={`products.${index}.name`} render={({ field }) => (<FormItem><FormControl><Input placeholder="Producto" {...field} /></FormControl><FormMessage/></FormItem>)}/></TableCell>
-                                   <TableCell><FormField control={form.control} name={`products.${index}.unitPrice`} render={({ field }) => (<FormItem><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl><FormMessage/></FormItem>)}/></TableCell>
-                                   <TableCell><FormField control={form.control} name={`products.${index}.quantity`} render={({ field }) => (<FormItem><FormControl><Input type="number" placeholder="0" {...field} /></FormControl><FormMessage/></FormItem>)}/></TableCell>
+                                   <TableCell><FormField control={form.control} name={`products.${index}.unitPrice`} render={({ field }) => (<FormItem><FormControl><Input type="number" placeholder="0.00" {...field} onFocus={handleFocus} /></FormControl><FormMessage/></FormItem>)}/></TableCell>
+                                   <TableCell><FormField control={form.control} name={`products.${index}.quantity`} render={({ field }) => (<FormItem><FormControl><Input type="number" placeholder="0" {...field} onFocus={handleFocus} /></FormControl><FormMessage/></FormItem>)}/></TableCell>
                                    <TableCell><Input type="number" placeholder="0.00" value={Number(totalPrice.toFixed(2))} readOnly /></TableCell>
                                    <TableCell>{productFields.length > 1 && (<Button type="button" variant="destructive" size="icon" onClick={() => removeProduct(index)}><Trash2 /></Button>)}</TableCell>
                                </TableRow>
@@ -214,7 +216,7 @@ export default function EditPurchasePage() {
                            {paymentFields.map((field, index) => (
                                <TableRow key={field.id}>
                                    <TableCell><FormField control={form.control} name={`payments.${index}.date`} render={({ field }) => (<FormItem><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>)}/></TableCell>
-                                   <TableCell><FormField control={form.control} name={`payments.${index}.amount`} render={({ field }) => (<FormItem><FormControl><Input type="number" placeholder="0.00" {...field} /></FormControl><FormMessage /></FormItem>)}/></TableCell>
+                                   <TableCell><FormField control={form.control} name={`payments.${index}.amount`} render={({ field }) => (<FormItem><FormControl><Input type="number" placeholder="0.00" {...field} onFocus={handleFocus} /></FormControl><FormMessage /></FormItem>)}/></TableCell>
                                    <TableCell><FormField control={form.control} name={`payments.${index}.method`} render={({ field }) => (<FormItem><Select onValueChange={field.onChange} value={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Seleccionar método" /></SelectTrigger></FormControl><SelectContent><SelectItem value="cash">Efectivo</SelectItem><SelectItem value="card">Tarjeta</SelectItem><SelectItem value="transfer">Transferencia</SelectItem></SelectContent></Select><FormMessage /></FormItem>)}/></TableCell>
                                    <TableCell>{paymentFields.length > 1 && (<Button type="button" variant="destructive" size="icon" onClick={() => removePayment(index)}><Trash2 /></Button>)}</TableCell>
                                </TableRow>
@@ -229,7 +231,7 @@ export default function EditPurchasePage() {
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <div className="flex items-center justify-between p-3 bg-background rounded-lg"><Label>Total parcial</Label><Input className="text-right border-0 bg-transparent w-24" value={Number(subtotal.toFixed(2))} readOnly/></div>
                      <FormField control={form.control} name="tax" render={({ field }) => (
-                        <FormItem className="flex items-center justify-between p-3 bg-background rounded-lg"><FormLabel>Impuestos</FormLabel><FormControl><Input type="number" className="text-right border-0 bg-transparent w-24" {...field} /></FormControl></FormItem>
+                        <FormItem className="flex items-center justify-between p-3 bg-background rounded-lg"><FormLabel>Impuestos</FormLabel><FormControl><Input type="number" className="text-right border-0 bg-transparent w-24" {...field} onFocus={handleFocus} /></FormControl></FormItem>
                      )}/>
                     <div className="flex items-center justify-between p-3 bg-background rounded-lg"><Label>Total</Label><Input className="text-right border-0 bg-transparent w-24" value={Number(total.toFixed(2))} readOnly/></div>
                     <div className="flex items-center justify-between p-3 bg-background rounded-lg"><Label>Pagado</Label><Input className="text-right border-0 bg-transparent w-24" value={Number(totalPaid.toFixed(2))} readOnly/></div>

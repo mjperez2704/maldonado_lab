@@ -128,6 +128,8 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
     }
   }
 
+  const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
+
   return (
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -226,6 +228,7 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
                                           className="border-0 focus-visible:ring-0 bg-transparent read-only:cursor-not-allowed"
                                           {...field}
                                           readOnly
+                                          onFocus={handleFocus}
                                       />
                                   </FormControl>
                               </FormItem>

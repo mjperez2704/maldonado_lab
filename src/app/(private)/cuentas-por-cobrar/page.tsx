@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -122,6 +121,8 @@ export default function AccountsReceivablePage() {
         });
     }
   }
+
+  const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
 
   return (
     <>
@@ -295,7 +296,7 @@ export default function AccountsReceivablePage() {
                         <Label htmlFor="payment-amount">Cantidad a Pagar</Label>
                         <div className="relative">
                              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                             <Input id="payment-amount" type="number" value={paymentAmount} onChange={(e) => setPaymentAmount(parseFloat(e.target.value) || 0)} className="pl-10" />
+                             <Input id="payment-amount" type="number" value={paymentAmount} onChange={(e) => setPaymentAmount(parseFloat(e.target.value) || 0)} className="pl-10" onFocus={handleFocus} />
                         </div>
                     </div>
                     <div className="space-y-2">
@@ -338,7 +339,7 @@ export default function AccountsReceivablePage() {
                                 {creditCardPlan !== '' && creditCardPlan !== 'none' && (
                                      <div className="space-y-2">
                                         <Label htmlFor="commission">Comisión (%)</Label>
-                                        <Input id="commission" type="number" value={commission} onChange={(e) => setCommission(parseFloat(e.target.value) || 0)} placeholder="0"/>
+                                        <Input id="commission" type="number" value={commission} onChange={(e) => setCommission(parseFloat(e.target.value) || 0)} placeholder="0" onFocus={handleFocus}/>
                                      </div>
                                 )}
                             </div>
@@ -358,7 +359,3 @@ export default function AccountsReceivablePage() {
     </>
   );
 }
-
-    
-
-    

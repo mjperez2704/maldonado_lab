@@ -89,6 +89,8 @@ export default function EditCulturePage() {
             console.error("Error updating culture: ", error);
         }
     };
+
+    const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
     
     if (loading) {
         return <div>Cargando...</div>;
@@ -138,7 +140,7 @@ export default function EditCulturePage() {
                     <div className="space-y-2">
                         <Label htmlFor="price">Precio</Label>
                         <div className="flex items-center">
-                            <Input id="price" type="number" className="rounded-r-none" value={formData.price} onChange={handlePriceChange} />
+                            <Input id="price" type="number" className="rounded-r-none" value={formData.price} onChange={handlePriceChange} onFocus={handleFocus} />
                             <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 bg-muted text-muted-foreground">
                                 MXN
                             </span>

@@ -83,6 +83,8 @@ export default function CreateCreditNotePage() {
         });
     }
   };
+  
+  const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
 
   return (
     <div className="flex flex-col gap-4 py-8">
@@ -145,7 +147,7 @@ export default function CreateCreditNotePage() {
                         <Label htmlFor="amount">Importe</Label>
                         <div className="relative">
                             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                            <Input id="amount" type="number" placeholder="0.00" className="pl-10" value={formData.amount} onChange={handleChange} />
+                            <Input id="amount" type="number" placeholder="0.00" className="pl-10" value={formData.amount} onChange={handleChange} onFocus={handleFocus} />
                         </div>
                     </div>
                     <div className="md:col-span-2 space-y-2">

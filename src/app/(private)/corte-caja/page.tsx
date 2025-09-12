@@ -64,6 +64,8 @@ export default function CashCutPage() {
         }).format(amount);
     };
 
+    const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
+
     return (
         <div className="flex flex-col gap-8 py-8">
             <div className="flex justify-between items-center">
@@ -100,7 +102,7 @@ export default function CashCutPage() {
                             <Label htmlFor="initial-cash">Efectivo inicial en Caja</Label>
                             <div className="relative">
                                 <IconWrapper><DollarSign /></IconWrapper>
-                                <Input id="initial-cash" placeholder="Efectivo inicial en Caja" className="pl-10"/>
+                                <Input id="initial-cash" type="number" placeholder="Efectivo inicial en Caja" className="pl-10" onFocus={handleFocus}/>
                             </div>
                         </div>
                         <div className="space-y-2">
@@ -114,14 +116,14 @@ export default function CashCutPage() {
                             <Label htmlFor="total-for-cut">Coloque el total para Corte</Label>
                             <div className="relative">
                                 <IconWrapper><DollarSign /></IconWrapper>
-                                <Input id="total-for-cut" placeholder="Coloque el total para Corte" className="pl-10"/>
+                                <Input id="total-for-cut" type="number" placeholder="Coloque el total para Corte" className="pl-10" onFocus={handleFocus}/>
                             </div>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="initial-for-next">Efectivo inicial para siguiente corte</Label>
                             <div className="relative">
                                <IconWrapper><RefreshCw /></IconWrapper>
-                                <Input id="initial-for-next" placeholder="Efectivo inicial para siguiente corte" className="pl-10"/>
+                                <Input id="initial-for-next" type="number" placeholder="Efectivo inicial para siguiente corte" className="pl-10" onFocus={handleFocus}/>
                             </div>
                         </div>
                         <div className="md:col-span-2 space-y-2">

@@ -44,6 +44,8 @@ export default function CreateExpensePage() {
             console.error("Error creating expense:", error);
         }
     };
+    
+    const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
 
   return (
     <div className="flex flex-col gap-4 py-8">
@@ -77,7 +79,7 @@ export default function CreateExpensePage() {
                     <div className="space-y-2">
                         <Label htmlFor="amount">Cantidad</Label>
                         <div className="relative">
-                            <Input id="amount" type="number" placeholder="0.00" value={formData.amount} onChange={handleChange}/>
+                            <Input id="amount" type="number" placeholder="0.00" value={formData.amount} onChange={handleChange} onFocus={handleFocus} />
                             <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         </div>
                     </div>

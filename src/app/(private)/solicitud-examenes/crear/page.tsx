@@ -46,6 +46,8 @@ function CreateDoctorForm({ onSuccess }: { onSuccess: (doctor: Doctor) => void }
         resolver: zodResolver(doctorSchema),
         defaultValues: { name: '', phone: '', email: '', address: '', commission: 0 },
     });
+    
+    const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
 
     const onSubmit = async (data: DoctorFormValues) => {
         try {
@@ -80,7 +82,7 @@ function CreateDoctorForm({ onSuccess }: { onSuccess: (doctor: Doctor) => void }
                         <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="commission" render={({ field }) => (
-                        <FormItem><FormLabel>Comisión (%)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
+                        <FormItem><FormLabel>Comisión (%)</FormLabel><FormControl><Input type="number" {...field} onFocus={handleFocus} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="address" render={({ field }) => (
                         <FormItem className="md:col-span-2"><FormLabel>Dirección</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
@@ -361,6 +363,8 @@ export default function CreateTestRequestPage() {
         const packageItems = packages.map(p => ({ value: p.id, label: `${p.name} ($${p.price})`, type: 'Paquete' }));
         return [...studyItems, ...packageItems];
     }, [studies, packages]);
+    
+    const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
 
     return (
         <>
@@ -577,7 +581,7 @@ export default function CreateTestRequestPage() {
                                                         <Label>Valor</Label>
                                                         <div className="relative">
                                                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{discountType === 'monto' ? '$' : '%'}</span>
-                                                            <Input type="number" value={discountValue} onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)} className="pl-8"/>
+                                                            <Input type="number" value={discountValue} onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)} className="pl-8" onFocus={handleFocus}/>
                                                         </div>
                                                     </div>
                                                         <div className="space-y-2">
