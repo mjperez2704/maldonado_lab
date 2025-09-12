@@ -245,6 +245,34 @@ export default function CreateTestRequestPage() {
     }, [discount, subtotal]);
 
     const total = subtotal - calculatedDiscount;
+    
+    useEffect(() => {
+        if (cart.length === 0) {
+            setDeliveryDate('');
+            return;
+        }
+    
+        const maxDeliveryDays = cart.reduce((maxDays, item) => {
+            let deliveryDays = 0;
+            const study = studies.find(s => s.id === Number(item.id));
+    
+            if (study) {
+                if (study.deliveryUnit === 'dias') {
+                    deliveryDays = study.deliveryTime;
+                } else if (study.deliveryUnit === 'horas') {
+                    deliveryDays = Math.ceil(study.deliveryTime / 24);
+                }
+            }
+    
+            return Math.max(maxDays, deliveryDays);
+        }, 0);
+    
+        const newDeliveryDate = new Date();
+        newDeliveryDate.setDate(newDeliveryDate.getDate() + maxDeliveryDays);
+        setDeliveryDate(newDeliveryDate.toISOString().split('T')[0]);
+    
+    }, [cart, studies]);
+
 
     const resetForm = () => {
         setSearchTerm('');
@@ -496,7 +524,7 @@ export default function CreateTestRequestPage() {
                                             <Label>Fecha de Entrega</Label>
                                             <div className="relative">
                                                 <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                <Input type="date" className="pl-10" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)}/>
+                                                <Input type="date" className="pl-10 bg-muted/50" value={deliveryDate} readOnly/>
                                             </div>
                                         </div>
                                     </>
