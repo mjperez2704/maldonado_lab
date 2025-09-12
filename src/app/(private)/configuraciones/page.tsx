@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Settings, BarChart, Barcode, Mail, MessageSquare, KeyRound, Check, Globe, Copyright, Phone, MapPin, Clock, Pencil, Languages, Wallet, Info, FileText as FileTextIcon, Database } from "lucide-react";
 import React, { useEffect, useState } from 'react';
-import { getReportSettings, saveReportSettings, ReportSettings, saveEmailSettings, getEmailSettings, EmailSettings, getDbSettings, saveDbSettings, testDbConnection, DbSettings } from "@/services/settingsService";
+import { getReportSettings, saveReportSettings, ReportSettings, saveEmailSettings, getEmailSettings, EmailSettings, getDbSettings, saveDbSettings, testDbConnection, DbSettings, getGeneralSettings, saveGeneralSettings, GeneralSettings } from "@/services/settingsService";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 
@@ -23,6 +23,17 @@ const WhatsappIcon = () => (
 export default function SettingsPage() {
     const [activeTab, setActiveTab] = React.useState("general");
     const { toast } = useToast();
+    const [generalSettings, setGeneralSettings] = useState<GeneralSettings>({
+        labName: 'Laboratorios Maldonado',
+        currency: 'MXN',
+        timezone: 'mexico_city',
+        language: 'es',
+        location: 'Ciudad de México, México',
+        phone: '+52 55 1234 5678',
+        email: 'contacto@maldonadolabs.com',
+        website: 'www.maldonadolabs.com',
+        rights: 'Todos los derechos reservados'
+    });
     const [reportSettings, setReportSettings] = useState<ReportSettings>({
         showHeader: true,
         showPatientAvatar: true,
@@ -73,17 +84,23 @@ export default function SettingsPage() {
 
     useEffect(() => {
         const loadSettings = async () => {
-            const [reports, emails, db] = await Promise.all([
+            const [general, reports, emails, db] = await Promise.all([
+                getGeneralSettings(),
                 getReportSettings(),
                 getEmailSettings(),
                 getDbSettings(),
             ]);
+            if (general) setGeneralSettings(general);
             if (reports) setReportSettings(reports);
             if (emails) setEmailSettings(emails);
             if (db) setDbSettings(db);
         };
         loadSettings();
     }, []);
+    
+    const handleGeneralSettingChange = (field: keyof GeneralSettings, value: string) => {
+        setGeneralSettings(prev => ({ ...prev, [field]: value }));
+    };
 
     const handleReportSettingChange = (field: keyof ReportSettings, value: any) => {
         setReportSettings(prev => ({ ...prev, [field]: value }));
@@ -115,6 +132,23 @@ export default function SettingsPage() {
                 [field]: value
             }
         }));
+    };
+
+    const handleSaveGeneralSettings = async () => {
+        try {
+            await saveGeneralSettings(generalSettings);
+            toast({
+                title: "Éxito",
+                description: "La configuración general se ha guardado correctamente.",
+            });
+        } catch (error) {
+            console.error("Error saving general settings:", error);
+            toast({
+                title: "Error",
+                description: "No se pudo guardar la configuración general.",
+                variant: "destructive",
+            });
+        }
     };
 
     const handleSaveReportSettings = async () => {
@@ -259,14 +293,14 @@ export default function SettingsPage() {
                                         <Label htmlFor="lab-name">Nombre del laboratorio</Label>
                                         <div className="flex items-center border rounded-md">
                                             <span className="px-3 text-muted-foreground"><Pencil className="h-5 w-5"/></span>
-                                            <Input id="lab-name" defaultValue="Laboratorios Maldonado" className="border-0 focus-visible:ring-0" />
+                                            <Input id="lab-name" value={generalSettings.labName} onChange={(e) => handleGeneralSettingChange('labName', e.target.value)} className="border-0 focus-visible:ring-0" />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="currency">Moneda</Label>
                                         <div className="flex items-center border rounded-md">
                                              <span className="px-3 text-muted-foreground"><Wallet className="h-5 w-5"/></span>
-                                            <Select defaultValue="MXN">
+                                            <Select value={generalSettings.currency} onValueChange={(v) => handleGeneralSettingChange('currency', v)}>
                                                 <SelectTrigger id="currency" className="border-0 focus:ring-0">
                                                     <SelectValue placeholder="Seleccione la moneda" />
                                                 </SelectTrigger>
@@ -281,7 +315,7 @@ export default function SettingsPage() {
                                         <Label htmlFor="timezone">Zona horaria</Label>
                                         <div className="flex items-center border rounded-md">
                                             <span className="px-3 text-muted-foreground"><Clock className="h-5 w-5"/></span>
-                                            <Select defaultValue="mexico_city">
+                                            <Select value={generalSettings.timezone} onValueChange={(v) => handleGeneralSettingChange('timezone', v)}>
                                                 <SelectTrigger id="timezone" className="border-0 focus:ring-0">
                                                     <SelectValue placeholder="Seleccione la zona horaria" />
                                                 </SelectTrigger>
@@ -295,7 +329,7 @@ export default function SettingsPage() {
                                         <Label htmlFor="language">Idioma</Label>
                                          <div className="flex items-center border rounded-md">
                                             <span className="px-3 text-muted-foreground"><Languages className="h-5 w-5"/></span>
-                                            <Select defaultValue="es">
+                                            <Select value={generalSettings.language} onValueChange={(v) => handleGeneralSettingChange('language', v)}>
                                                 <SelectTrigger id="language" className="border-0 focus:ring-0">
                                                     <SelectValue placeholder="Seleccione el idioma" />
                                                 </SelectTrigger>
@@ -310,35 +344,35 @@ export default function SettingsPage() {
                                         <Label htmlFor="location">Ubicación</Label>
                                         <div className="flex items-center border rounded-md">
                                             <span className="px-3 text-muted-foreground"><MapPin className="h-5 w-5"/></span>
-                                            <Input id="location" defaultValue="Ciudad de México, México" className="border-0 focus-visible:ring-0" />
+                                            <Input id="location" value={generalSettings.location} onChange={(e) => handleGeneralSettingChange('location', e.target.value)} className="border-0 focus-visible:ring-0" />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="phone">Teléfono</Label>
                                         <div className="flex items-center border rounded-md">
                                             <span className="px-3 text-muted-foreground"><Phone className="h-5 w-5"/></span>
-                                            <Input id="phone" defaultValue="+52 55 1234 5678" className="border-0 focus-visible:ring-0" />
+                                            <Input id="phone" value={generalSettings.phone} onChange={(e) => handleGeneralSettingChange('phone', e.target.value)} className="border-0 focus-visible:ring-0" />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="email">Correo Electrónico</Label>
                                         <div className="flex items-center border rounded-md">
                                             <span className="px-3 text-muted-foreground"><Mail className="h-5 w-5"/></span>
-                                            <Input id="email" type="email" defaultValue="contacto@maldonadolabs.com" className="border-0 focus-visible:ring-0" />
+                                            <Input id="email" type="email" value={generalSettings.email} onChange={(e) => handleGeneralSettingChange('email', e.target.value)} className="border-0 focus-visible:ring-0" />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="website">Sitio web</Label>
                                         <div className="flex items-center border rounded-md">
                                             <span className="px-3 text-muted-foreground"><Globe className="h-5 w-5"/></span>
-                                            <Input id="website" defaultValue="www.maldonadolabs.com" className="border-0 focus-visible:ring-0" />
+                                            <Input id="website" value={generalSettings.website} onChange={(e) => handleGeneralSettingChange('website', e.target.value)} className="border-0 focus-visible:ring-0" />
                                         </div>
                                     </div>
                                     <div className="space-y-2 md:col-span-2">
                                         <Label htmlFor="rights">Derechos</Label>
                                          <div className="flex items-center border rounded-md">
                                             <span className="px-3 text-muted-foreground"><Copyright className="h-5 w-5"/></span>
-                                            <Input id="rights" defaultValue="Todos los derechos reservados" className="border-0 focus-visible:ring-0" />
+                                            <Input id="rights" value={generalSettings.rights} onChange={(e) => handleGeneralSettingChange('rights', e.target.value)} className="border-0 focus-visible:ring-0" />
                                         </div>
                                     </div>
                                 </div>
@@ -352,7 +386,7 @@ export default function SettingsPage() {
                         </Tabs>
                     </CardContent>
                     <div className="flex justify-start p-6 pt-0">
-                        <Button>
+                        <Button onClick={handleSaveGeneralSettings}>
                             <Check className="mr-2"/> Guardar
                         </Button>
                     </div>

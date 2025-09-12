@@ -1,3 +1,4 @@
+
 "use server";
 import { executeQuery } from '@/lib/db';
 
@@ -64,9 +65,24 @@ export interface DbSettings {
     ssl: boolean;
 }
 
+export interface GeneralSettings {
+    labName: string;
+    currency: string;
+    timezone: string;
+    language: string;
+    location: string;
+    phone: string;
+    email: string;
+    website: string;
+    rights: string;
+}
+
+
 const SETTINGS_KEY_REPORTS = 'reports';
 const SETTINGS_KEY_EMAIL = 'email';
 const SETTINGS_KEY_DB = 'db';
+const SETTINGS_KEY_GENERAL = 'general';
+
 
 async function getSetting<T>(key: string): Promise<T | null> {
     const results = await executeQuery<{ value: string }[]>('SELECT value FROM settings WHERE `key` = ?', [key]);
@@ -93,6 +109,11 @@ export const saveEmailSettings = async (settings: EmailSettings) => saveSetting(
 // DB
 export const getDbSettings = async () => getSetting<DbSettings>(SETTINGS_KEY_DB);
 export const saveDbSettings = async (settings: DbSettings) => saveSetting(SETTINGS_KEY_DB, settings);
+
+// General
+export const getGeneralSettings = async () => getSetting<GeneralSettings>(SETTINGS_KEY_GENERAL);
+export const saveGeneralSettings = async (settings: GeneralSettings) => saveSetting(SETTINGS_KEY_GENERAL, settings);
+
 
 export async function testDbConnection(settings: DbSettings): Promise<{ success: boolean; error?: string }> {
     // This is a placeholder. In a real scenario, you would create a temporary
