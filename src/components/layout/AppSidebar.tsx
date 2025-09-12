@@ -178,6 +178,7 @@ export function AppSidebar() {
                       asChild
                       isActive={isActive}
                       className="gap-3"
+                      disabled={item.href === '#'}
                     >
                       <Link href={item.href}>
                         <item.icon className="h-5 w-5" />
