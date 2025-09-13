@@ -10,15 +10,38 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { usePathname } from 'next/navigation';
 import { LanguageProvider } from '@/context/LanguageContext';
+import { ReactNode } from "react";
+
+function AppLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const isPublicRoute = ['/login', '/'].includes(pathname) || pathname.startsWith('/splash');
+
+  if (isPublicRoute) {
+    return <>{children}</>;
+  }
+
+  return (
+    <SidebarProvider>
+      <div className="flex flex-1">
+        <AppSidebar />
+        <div className="flex flex-col flex-1">
+          <Header />
+          <main className="flex-grow container mx-auto px-4">
+            {children}
+          </main>
+          <Footer />
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}
+
 
 export default function RootLayout({
                                      children,
                                    }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = usePathname();
-  const isPublicRoute = ['/login', '/'].includes(pathname) || pathname.startsWith('/splash');
-
   return (
       <html lang="es" suppressHydrationWarning>
       <head>
@@ -32,22 +55,7 @@ export default function RootLayout({
       <body className="font-body antialiased flex flex-col min-h-screen bg-background">
         <LanguageProvider>
           <LoaderProvider>
-            {isPublicRoute ? (
-              children
-            ) : (
-              <SidebarProvider>
-                <div className="flex flex-1">
-                  <AppSidebar />
-                  <div className="flex flex-col flex-1">
-                    <Header />
-                    <main className="flex-grow container mx-auto px-4">
-                      {children}
-                    </main>
-                    <Footer />
-                  </div>
-                </div>
-              </SidebarProvider>
-            )}
+            <AppLayout>{children}</AppLayout>
           </LoaderProvider>
         </LanguageProvider>
       <Toaster />
