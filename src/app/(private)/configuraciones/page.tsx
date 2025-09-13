@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -832,6 +833,7 @@ export default function SettingsPage() {
                                           <SelectValue placeholder="Seleccione el tipo" />
                                       </SelectTrigger>
                                       <SelectContent>
+                                          <SelectItem value="QR">QR</SelectItem>
                                           <SelectItem value="CODE11">CODE11</SelectItem>
                                           <SelectItem value="I25+">I25+</SelectItem>
                                           <SelectItem value="C128">C128</SelectItem>
@@ -941,9 +943,9 @@ export default function SettingsPage() {
                               <TabsContent value="patient-code" className="pt-6">
                                   <div className="space-y-4">
                                       <div className="flex items-center gap-2">
-                                          <Switch id="patient-code-active" checked={emailSettings.patientCode.active} onCheckedChange={(c) => handleEmailTemplateChange('patientCode', 'active', c)} />
-                                          <Label htmlFor="patient-code-active" className={emailSettings.patientCode.active ? "text-green-600 font-bold" : "text-gray-500"}>
-                                              {emailSettings.patientCode.active ? 'Activo' : 'Inactivo'}
+                                          <Switch id="patient-code-active" checked={emailSettings.patientCode?.active} onCheckedChange={(c) => handleEmailTemplateChange('patientCode', 'active', c)} />
+                                          <Label htmlFor="patient-code-active" className={emailSettings.patientCode?.active ? "text-green-600 font-bold" : "text-gray-500"}>
+                                              {emailSettings.patientCode?.active ? 'Activo' : 'Inactivo'}
                                           </Label>
                                       </div>
                                       <div className="text-red-500 text-sm">
@@ -951,11 +953,11 @@ export default function SettingsPage() {
                                       </div>
                                       <div className="space-y-2">
                                           <Label htmlFor="patient-code-subject">Asunto</Label>
-                                          <Input id="patient-code-subject" value={emailSettings.patientCode.subject} onChange={(e) => handleEmailTemplateChange('patientCode', 'subject', e.target.value)} />
+                                          <Input id="patient-code-subject" value={emailSettings.patientCode?.subject} onChange={(e) => handleEmailTemplateChange('patientCode', 'subject', e.target.value)} />
                                       </div>
                                       <div className="space-y-2">
                                           <Label htmlFor="patient-code-body">Cuerpo del mensaje</Label>
-                                          <Textarea id="patient-code-body" value={emailSettings.patientCode.body} onChange={(e) => handleEmailTemplateChange('patientCode', 'body', e.target.value)} rows={4} />
+                                          <Textarea id="patient-code-body" value={emailSettings.patientCode?.body} onChange={(e) => handleEmailTemplateChange('patientCode', 'body', e.target.value)} rows={4} />
                                       </div>
                                   </div>
                               </TabsContent>
