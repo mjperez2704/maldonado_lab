@@ -37,16 +37,17 @@ type PatientFormValues = z.infer<typeof patientSchema>;
 
 interface CreatePatientFormProps {
     onSuccess?: (patient: Patient) => void;
+    initialName?: string;
 }
 
-export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
+export function CreatePatientForm({ onSuccess, initialName = '' }: CreatePatientFormProps) {
   const { toast } = useToast();
   const loader = useLoader();
 
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(patientSchema),
     defaultValues: {
-      name: '',
+      name: initialName,
       nationality: 'mexicana',
       ine: '',
       curp: '',
@@ -62,8 +63,12 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
     }
   });
 
-  const { setValue, watch } = form;
+  const { setValue, watch, reset } = form;
   const watchedBirthDate = watch('birthDate');
+    
+  useEffect(() => {
+    reset({ ...form.getValues(), name: initialName });
+  }, [initialName, reset, form]);
 
     useEffect(() => {
         const calculateAge = (birthDate: string): { age: number; ageUnit: 'anos' | 'meses' | 'dias' } => {
@@ -246,29 +251,29 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
                           className="h-5 w-5"/></span><FormControl><Input placeholder="Dirección"
                                                                           className="border-0 focus-visible:ring-0" {...field}
                                                                           disabled={loader.status !== 'idle'}/></FormControl>
-                      </div>
-                      <FormMessage/></FormItem>
-              )}/>
-              <FormField control={form.control} name="convenio" render={({field}) => (
-                  <FormItem><FormLabel>Convenio</FormLabel>
-                      <div className="flex items-center border rounded-md"><span
-                          className="px-3 text-muted-foreground"><FileSignature
-                          className="h-5 w-5"/></span><Select
-                          onValueChange={field.onChange} defaultValue={field.value}
-                          disabled={loader.status !== 'idle'}><FormControl><SelectTrigger
-                          className="border-0 focus:ring-0"><SelectValue
-                          placeholder="Seleccionar convenio"/></SelectTrigger></FormControl><SelectContent><SelectItem
-                          value="convenio1">Convenio 1</SelectItem><SelectItem value="convenio2">Convenio
-                          2</SelectItem></SelectContent></Select></div>
-                      <FormMessage/></FormItem>
-              )}/>
-            </div>
-          <div className="flex justify-end pt-4">
-            <Button type="submit" disabled={loader.status !== 'idle'}>
-                <Save className="mr-2" /> {loader.status === 'create' ? 'Guardando...' : 'Guardar Paciente'}
-            </Button>
-          </div>
-        </form>
-      </Form>
-  );
+                        </div>
+                        <FormMessage/></FormItem>
+                    )}/>
+                    <FormField control={form.control} name="convenio" render={({field}) => (
+                        <FormItem><FormLabel>Convenio</FormLabel>
+                            <div className="flex items-center border rounded-md"><span
+                                className="px-3 text-muted-foreground"><FileSignature
+                                className="h-5 w-5"/></span><Select
+                                onValueChange={field.onChange} defaultValue={field.value}
+                                disabled={loader.status !== 'idle'}><FormControl><SelectTrigger
+                                className="border-0 focus:ring-0"><SelectValue
+                                placeholder="Seleccionar convenio"/></SelectTrigger></FormControl><SelectContent><SelectItem
+                                value="convenio1">Convenio 1</SelectItem><SelectItem value="convenio2">Convenio
+                                2</SelectItem></SelectContent></Select></div>
+                            <FormMessage/></FormItem>
+                    )}/>
+                </div>
+              <div className="flex justify-end pt-4">
+                <Button type="submit" disabled={loader.status !== 'idle'}>
+                    <Save className="mr-2" /> {loader.status === 'create' ? 'Guardando...' : 'Guardar Paciente'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+      );
 }

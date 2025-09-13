@@ -190,6 +190,13 @@ export default function CreateTestRequestPage() {
         setSelectedDoctor(newDoctor.name); // Automatically select the new doctor
     };
 
+    const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && searchTerm && filteredPatients.length === 0) {
+            e.preventDefault();
+            setIsPatientModalOpen(true);
+        }
+    };
+
 
     const handleAddItemToCart = (itemId: string) => {
         if (!itemId) return;
@@ -401,6 +408,7 @@ export default function CreateTestRequestPage() {
                                                 placeholder="Escriba aquí para buscar..."
                                                 value={searchTerm}
                                                 onChange={(e) => setSearchTerm(e.target.value)}
+                                                onKeyDown={handleSearchKeyDown}
                                                 className="pl-10"
                                             />
                                         </div>
@@ -422,7 +430,7 @@ export default function CreateTestRequestPage() {
                                              <DialogHeader>
                                                 <DialogTitle>Crear Nuevo Paciente</DialogTitle>
                                              </DialogHeader>
-                                             <CreatePatientForm onSuccess={handlePatientCreated} />
+                                             <CreatePatientForm onSuccess={handlePatientCreated} initialName={searchTerm} />
                                         </DialogContent>
                                     </Dialog>
                                 </div>

@@ -69,6 +69,14 @@ export default function CreateQuotePage() {
             String(p.id).toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [searchTerm, patients]);
+    
+    const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && searchTerm && filteredPatients.length === 0) {
+            e.preventDefault();
+            setIsPatientModalOpen(true);
+        }
+    };
+
 
     const handleSelectPatient = (patient: Patient) => {
         setSelectedPatient(patient);
@@ -202,6 +210,7 @@ export default function CreateQuotePage() {
                                         placeholder="Escriba aquí para buscar..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
+                                        onKeyDown={handleSearchKeyDown}
                                         className="pl-10"
                                     />
                                 </div>
@@ -223,7 +232,7 @@ export default function CreateQuotePage() {
                                      <DialogHeader>
                                         <DialogTitle>Crear Nuevo Paciente</DialogTitle>
                                      </DialogHeader>
-                                     <CreatePatientForm onSuccess={handlePatientCreated} />
+                                     <CreatePatientForm onSuccess={handlePatientCreated} initialName={searchTerm} />
                                 </DialogContent>
                             </Dialog>
                         </CardContent>
