@@ -11,25 +11,28 @@ import { Footer } from '@/components/layout/Footer';
 import { usePathname } from 'next/navigation';
 import { LanguageProvider } from '@/context/LanguageContext';
 import { ReactNode } from "react";
+import { cn } from '@/lib/utils';
 
 function AppLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isPublicRoute = ['/login', '/'].includes(pathname) || pathname.startsWith('/splash');
 
-  if (isPublicRoute) {
-    return <>{children}</>;
-  }
-
   return (
     <SidebarProvider>
       <div className="flex flex-1">
-        <AppSidebar />
-        <div className="flex flex-col flex-1">
-          <Header />
-          <main className="flex-grow container mx-auto px-4">
+        <div className={cn(isPublicRoute && "hidden")}>
+          <AppSidebar />
+        </div>
+        <div className="flex flex-col flex-1 min-w-0">
+          <div className={cn(isPublicRoute && "hidden")}>
+            <Header />
+          </div>
+          <main className={cn("flex-grow", !isPublicRoute && "container mx-auto px-4")}>
             {children}
           </main>
-          <Footer />
+          <div className={cn(isPublicRoute && "hidden")}>
+            <Footer />
+          </div>
         </div>
       </div>
     </SidebarProvider>
