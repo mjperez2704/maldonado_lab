@@ -9,13 +9,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Settings, BarChart, Barcode, Mail, MessageSquare, KeyRound, Check, Globe, Copyright, Phone, MapPin, Clock, Pencil, Languages, Wallet, Info, FileText as FileTextIcon, Database, Palette, Facebook, Twitter, Instagram, Youtube } from "lucide-react";
-import React, { useEffect, useState } from 'react';
+import { Settings, BarChart, Barcode, Mail, MessageSquare, KeyRound, Check, Globe, Copyright, Phone, MapPin, Clock, Pencil, Languages, Wallet, Info, FileText as FileTextIcon, Database, Palette, Facebook, Twitter, Instagram, Youtube, Image as ImageIcon, Trash2, Eye } from "lucide-react";
+import React, { useEffect, useState, useRef } from 'react';
 import { getReportSettings, saveReportSettings, ReportSettings, saveEmailSettings, getEmailSettings, EmailSettings, getDbSettings, saveDbSettings, testDbConnection, DbSettings, getGeneralSettings, saveGeneralSettings, GeneralSettings, getWhatsappSettings, saveWhatsappSettings, WhatsappSettings } from "@/services/settingsService";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { useTranslation } from "@/hooks/useTranslation";
 import { Skeleton } from "@/components/ui/skeleton";
+import Image from "next/image";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 const WhatsappIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-message-circle h-5 w-5 mr-2"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
@@ -46,8 +48,69 @@ const initialEmailSettings: EmailSettings = {
 const initialGeneralSettings: GeneralSettings = {
     labName: '', currency: '', timezone: '', language: 'es', location: '',
     phone: '', email: '', website: '', rights: '',
-    facebook: '', twitter: '', instagram: '', youtube: ''
+    facebook: '', twitter: '', instagram: '', youtube: '',
+    reportLogoUrl: '', mainLogoUrl: ''
 };
+
+interface LogoInputProps {
+    label: string;
+    imageUrl: string | undefined;
+    onFileSelect: (file: File | null) => void;
+}
+
+function LogoInput({ label, imageUrl, onFileSelect }: LogoInputProps) {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [fileName, setFileName] = useState<string>("");
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setFileName(file.name);
+            onFileSelect(file);
+        } else {
+            setFileName("");
+            onFileSelect(null);
+        }
+    };
+
+    return (
+        <div className="space-y-2">
+            <Label>{label}</Label>
+            <div className="flex items-center gap-2">
+                <Input
+                    readOnly
+                    value={fileName || "Sin archivos seleccionados"}
+                    className="flex-1 cursor-pointer"
+                    onClick={() => fileInputRef.current?.click()}
+                />
+                <Button type="button" variant="outline" onClick={() => fileInputRef.current?.click()}>Browse</Button>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button type="button" variant="outline" size="icon" disabled={!imageUrl}>
+                            <Eye className="h-4 w-4" />
+                        </Button>
+                    </DialogTrigger>
+                    {imageUrl && (
+                        <DialogContent>
+                            <DialogHeader><DialogTitle>Vista Previa del Logo</DialogTitle></DialogHeader>
+                            <div className="flex justify-center p-4">
+                                <Image src={imageUrl} alt="Vista previa del logo" width={200} height={200} className="object-contain" />
+                            </div>
+                        </DialogContent>
+                    )}
+                </Dialog>
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept="image/png, image/jpeg, image/gif"
+                    onChange={handleFileChange}
+                />
+            </div>
+        </div>
+    );
+}
+
 
 export default function SettingsPage() {
     const { t, setLanguage, language } = useTranslation();
@@ -77,6 +140,7 @@ export default function SettingsPage() {
                     getDbSettings(),
                     getWhatsappSettings(),
                 ]);
+                
                 if (general) {
                     setGeneralSettings(prev => ({ ...prev, ...general }));
                      if (general.language && (general.language === 'es' || general.language === 'en')) {
@@ -103,12 +167,24 @@ export default function SettingsPage() {
             }
         };
         loadSettings();
-    }, [toast, setLanguage]);
+    }, []);
     
     const handleGeneralSettingChange = (field: keyof GeneralSettings, value: string) => {
         setGeneralSettings(prev => ({ ...prev, [field]: value }));
         if (field === 'language' && (value === 'es' || value === 'en')) {
             setLanguage(value);
+        }
+    };
+
+    const handleLogoSelect = (field: 'reportLogoUrl' | 'mainLogoUrl', file: File | null) => {
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setGeneralSettings(prev => ({ ...prev, [field]: reader.result as string }));
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setGeneralSettings(prev => ({ ...prev, [field]: '' }));
         }
     };
 
@@ -441,34 +517,43 @@ export default function SettingsPage() {
                                         <Label htmlFor="facebook">Facebook</Label>
                                         <div className="flex items-center border rounded-md">
                                             <span className="p-2 bg-muted rounded-l-md"><Facebook className="h-5 w-5 text-blue-600"/></span>
-                                            <Input id="facebook" placeholder="https://facebook.com" value={generalSettings.facebook} onChange={(e) => handleGeneralSettingChange('facebook', e.target.value)} className="border-0 focus-visible:ring-0" />
+                                            <Input id="facebook" placeholder="https://facebook.com" value={generalSettings.facebook || ''} onChange={(e) => handleGeneralSettingChange('facebook', e.target.value)} className="border-0 focus-visible:ring-0" />
                                         </div>
                                     </div>
                                      <div className="space-y-2">
                                         <Label htmlFor="twitter">Twitter</Label>
                                         <div className="flex items-center border rounded-md">
                                             <span className="p-2 bg-muted rounded-l-md"><Twitter className="h-5 w-5 text-sky-500"/></span>
-                                            <Input id="twitter" placeholder="https://twitter.com" value={generalSettings.twitter} onChange={(e) => handleGeneralSettingChange('twitter', e.target.value)} className="border-0 focus-visible:ring-0" />
+                                            <Input id="twitter" placeholder="https://twitter.com" value={generalSettings.twitter || ''} onChange={(e) => handleGeneralSettingChange('twitter', e.target.value)} className="border-0 focus-visible:ring-0" />
                                         </div>
                                     </div>
                                      <div className="space-y-2">
                                         <Label htmlFor="instagram">Instagram</Label>
                                         <div className="flex items-center border rounded-md">
                                             <span className="p-2 bg-muted rounded-l-md"><Instagram className="h-5 w-5 text-pink-500"/></span>
-                                            <Input id="instagram" placeholder="https://instagram.com" value={generalSettings.instagram} onChange={(e) => handleGeneralSettingChange('instagram', e.target.value)} className="border-0 focus-visible:ring-0" />
+                                            <Input id="instagram" placeholder="https://instagram.com" value={generalSettings.instagram || ''} onChange={(e) => handleGeneralSettingChange('instagram', e.target.value)} className="border-0 focus-visible:ring-0" />
                                         </div>
                                     </div>
                                      <div className="space-y-2">
                                         <Label htmlFor="youtube">Youtube</Label>
                                         <div className="flex items-center border rounded-md">
                                             <span className="p-2 bg-muted rounded-l-md"><Youtube className="h-5 w-5 text-red-600"/></span>
-                                            <Input id="youtube" placeholder="https://youtube.com" value={generalSettings.youtube} onChange={(e) => handleGeneralSettingChange('youtube', e.target.value)} className="border-0 focus-visible:ring-0" />
+                                            <Input id="youtube" placeholder="https://youtube.com" value={generalSettings.youtube || ''} onChange={(e) => handleGeneralSettingChange('youtube', e.target.value)} className="border-0 focus-visible:ring-0" />
                                         </div>
                                     </div>
                                 </div>
                               </TabsContent>
-                              <TabsContent value="images" className="pt-6">
-                                 <p className="text-center text-muted-foreground py-8">Configuración de logotipos aquí.</p>
+                              <TabsContent value="images" className="pt-6 space-y-6">
+                                <LogoInput 
+                                    label="Elija el logotipo del informe [100 X 100]"
+                                    imageUrl={generalSettings.reportLogoUrl}
+                                    onFileSelect={(file) => handleLogoSelect('reportLogoUrl', file)}
+                                />
+                                <LogoInput 
+                                    label="Elija Logo [100 X 100]"
+                                    imageUrl={generalSettings.mainLogoUrl}
+                                    onFileSelect={(file) => handleLogoSelect('mainLogoUrl', file)}
+                                />
                               </TabsContent>
                           </Tabs>
                       </CardContent>

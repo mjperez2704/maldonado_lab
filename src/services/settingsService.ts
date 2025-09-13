@@ -80,6 +80,8 @@ export interface GeneralSettings {
     twitter?: string;
     instagram?: string;
     youtube?: string;
+    reportLogoUrl?: string;
+    mainLogoUrl?: string;
 }
 
 export interface WhatsappTemplate {
