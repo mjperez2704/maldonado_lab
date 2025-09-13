@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Progress } from "@/components/ui/progress"; // Importamos el componente de progreso
+import Image from 'next/image';
 
 export default function SplashPage() {
   const router = useRouter();
@@ -33,39 +34,23 @@ export default function SplashPage() {
     };
   }, [router]);
 
-  // **IMPORTANTE**: Coloca tu video o gif en la carpeta `public`
-  const mediaFile = '/splash-video.mp4'; // <- Cambia esto por el nombre de tu archivo
-  const isVideo = mediaFile.endsWith('.mp4');
 
   return (
       <div className="fixed inset-0 bg-background flex flex-col items-center justify-center gap-8">
-        {/*<div className="w-full max-w-md h-auto">*/}
-        <div className="w-full h-full">
-          {/* Espacio para tu video o GIF */}
-          {isVideo ? (
-              <video
-                  src={mediaFile}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  className="w-full h-full object-cover rounded-lg shadow-lg"
-              >
-                Tu navegador no soporta videos.
-              </video>
-          ) : (
-              <img
-                  src={mediaFile} // Si es un GIF
-                  alt="Cargando..."
-                  className="w-full h-full object-cover rounded-lg shadow-lg"
-              />
-          )}
+        <div className="w-64 h-64 relative">
+          <Image
+              src="/logo_lims.png"
+              alt="Cargando MEGA LIMS"
+              layout="fill"
+              objectFit="contain"
+              priority
+          />
         </div>
 
         {/* Barra de Progreso */}
         <div className="w-full max-w-md">
           <Progress value={progress} className="w-full" />
-          <p className="text-center mt-2 text-primary font-semibold">C A R G A N D O   M E G A - S Y S T E M...</p>
+          <p className="text-center mt-2 text-primary font-semibold">CARGANDO   MEGA - LIMS...</p>
         </div>
       </div>
   );

@@ -138,7 +138,7 @@ export function AppSidebar() {
         <SidebarHeader>
           <div className="flex items-center justify-between p-2">
             <div className="flex items-center gap-2">
-               <Image src="https://firebasestorage.googleapis.com/v0/b/app-hosting-lab.appspot.com/o/2c0f1b23820a2f7c000c2838332155e828a25c7625debe32223a5932599d141e.png?alt=media&token=c11104e7-4f65-4a25-a131-419b48c68b75" alt="MEGA LIMS Logo" width={32} height={32} />
+               <Image src="/logo_lims.png" alt="MEGA LIMS Logo" width={32} height={32} />
                 <span className="font-bold text-lg">MEGA LIMS</span>
             </div>
           </div>
