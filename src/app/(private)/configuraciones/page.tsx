@@ -9,8 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Settings, BarChart, Barcode, Mail, MessageSquare, KeyRound, Check, Globe, Copyright, Phone, MapPin, Clock, Pencil, Languages, Wallet, Info, FileText as FileTextIcon, Database, Palette } from "lucide-react";
+import { Settings, BarChart, Barcode, Mail, MessageSquare, KeyRound, Check, Globe, Copyright, Phone, MapPin, Clock, Pencil, Languages, Wallet, Info, FileText as FileTextIcon, Database, Palette, Facebook, Twitter, Instagram, Youtube } from "lucide-react";
 import React, { useEffect, useState } from 'react';
 import { getReportSettings, saveReportSettings, ReportSettings, saveEmailSettings, getEmailSettings, EmailSettings, getDbSettings, saveDbSettings, testDbConnection, DbSettings, getGeneralSettings, saveGeneralSettings, GeneralSettings, getWhatsappSettings, saveWhatsappSettings, WhatsappSettings } from "@/services/settingsService";
 import { useToast } from "@/hooks/use-toast";
@@ -44,16 +43,19 @@ const initialEmailSettings: EmailSettings = {
     report: { active: false, subject: '', body: '' },
 };
 
+const initialGeneralSettings: GeneralSettings = {
+    labName: '', currency: '', timezone: '', language: 'es', location: '',
+    phone: '', email: '', website: '', rights: '',
+    facebook: '', twitter: '', instagram: '', youtube: ''
+};
+
 export default function SettingsPage() {
     const { t, setLanguage, language } = useTranslation();
     const [activeTab, setActiveTab] = React.useState("general");
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
 
-    const [generalSettings, setGeneralSettings] = useState<GeneralSettings>({
-        labName: '', currency: '', timezone: '', language: 'es', location: '',
-        phone: '', email: '', website: '', rights: ''
-    });
+    const [generalSettings, setGeneralSettings] = useState<GeneralSettings>(initialGeneralSettings);
     const [reportSettings, setReportSettings] = useState<ReportSettings>(initialReportSettings);
     const [emailSettings, setEmailSettings] = useState<EmailSettings>(initialEmailSettings);
     const [dbSettings, setDbSettings] = useState<DbSettings>({
@@ -76,8 +78,8 @@ export default function SettingsPage() {
                     getWhatsappSettings(),
                 ]);
                 if (general) {
-                    setGeneralSettings(general);
-                    if (general.language && (general.language === 'es' || general.language === 'en')) {
+                    setGeneralSettings(prev => ({ ...prev, ...general }));
+                     if (general.language && (general.language === 'es' || general.language === 'en')) {
                         setLanguage(general.language);
                     }
                 }
@@ -92,7 +94,7 @@ export default function SettingsPage() {
                     setEmailSettings(initialEmailSettings);
                 }
                 if (db) setDbSettings(db);
-                if (whatsapp) setWhatsappSettings(whatsapp);
+                if (whatsapp) setWhatsappSettings(prev => ({...prev, ...whatsapp}));
             } catch (error) {
                 console.error("Error loading settings:", error);
                 toast({ title: "Error", description: "No se pudieron cargar las configuraciones.", variant: "destructive"});
@@ -433,11 +435,40 @@ export default function SettingsPage() {
                                       </div>
                                   </div>
                               </TabsContent>
-                              <TabsContent value="social">
-                                  <p>{t('settings.general.social_placeholder')}</p>
+                              <TabsContent value="social" className="pt-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="facebook">Facebook</Label>
+                                        <div className="flex items-center border rounded-md">
+                                            <span className="p-2 bg-muted rounded-l-md"><Facebook className="h-5 w-5 text-blue-600"/></span>
+                                            <Input id="facebook" placeholder="https://facebook.com" value={generalSettings.facebook} onChange={(e) => handleGeneralSettingChange('facebook', e.target.value)} className="border-0 focus-visible:ring-0" />
+                                        </div>
+                                    </div>
+                                     <div className="space-y-2">
+                                        <Label htmlFor="twitter">Twitter</Label>
+                                        <div className="flex items-center border rounded-md">
+                                            <span className="p-2 bg-muted rounded-l-md"><Twitter className="h-5 w-5 text-sky-500"/></span>
+                                            <Input id="twitter" placeholder="https://twitter.com" value={generalSettings.twitter} onChange={(e) => handleGeneralSettingChange('twitter', e.target.value)} className="border-0 focus-visible:ring-0" />
+                                        </div>
+                                    </div>
+                                     <div className="space-y-2">
+                                        <Label htmlFor="instagram">Instagram</Label>
+                                        <div className="flex items-center border rounded-md">
+                                            <span className="p-2 bg-muted rounded-l-md"><Instagram className="h-5 w-5 text-pink-500"/></span>
+                                            <Input id="instagram" placeholder="https://instagram.com" value={generalSettings.instagram} onChange={(e) => handleGeneralSettingChange('instagram', e.target.value)} className="border-0 focus-visible:ring-0" />
+                                        </div>
+                                    </div>
+                                     <div className="space-y-2">
+                                        <Label htmlFor="youtube">Youtube</Label>
+                                        <div className="flex items-center border rounded-md">
+                                            <span className="p-2 bg-muted rounded-l-md"><Youtube className="h-5 w-5 text-red-600"/></span>
+                                            <Input id="youtube" placeholder="https://youtube.com" value={generalSettings.youtube} onChange={(e) => handleGeneralSettingChange('youtube', e.target.value)} className="border-0 focus-visible:ring-0" />
+                                        </div>
+                                    </div>
+                                </div>
                               </TabsContent>
-                              <TabsContent value="images">
-                                 <p>{t('settings.general.images_placeholder')}</p>
+                              <TabsContent value="images" className="pt-6">
+                                 <p className="text-center text-muted-foreground py-8">Configuración de logotipos aquí.</p>
                               </TabsContent>
                           </Tabs>
                       </CardContent>

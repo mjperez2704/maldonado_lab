@@ -76,6 +76,10 @@ export interface GeneralSettings {
     email: string;
     website: string;
     rights: string;
+    facebook?: string;
+    twitter?: string;
+    instagram?: string;
+    youtube?: string;
 }
 
 export interface WhatsappTemplate {

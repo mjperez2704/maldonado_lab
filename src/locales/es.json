@@ -9,7 +9,6 @@
     "tabs": {
       "general": "General",
       "database": "Base de Datos",
-      "reports": "Informes",
       "report_design": "Diseño de Informes",
       "report_templates": "Plantillas de Informes",
       "barcode": "Código de Barras",
@@ -22,8 +21,8 @@
       "title": "Configuraciones Generales",
       "tabs": {
         "general": "General",
-        "social": "Redes Sociales",
-        "images": "Imágenes"
+        "social": "Social",
+        "images": "Logotipos"
       },
       "lab_name": "Nombre del laboratorio",
       "currency": "Moneda",
