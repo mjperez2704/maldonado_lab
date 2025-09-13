@@ -16,8 +16,8 @@ export function SalesTicket({ recibo, items }: SalesTicketProps) {
         <div style={{ fontFamily: 'monospace', fontSize: '10px', width: '78mm', padding: '5px', color: 'black' }}>
             <div style={{ textAlign: 'center', marginBottom: '10px' }}>
                 {/* Logo */}
-                <Image src="https://maldonado.mega-spots-test.shop/storage/images/logo-maldonado.png" alt="Logo" width={100} height={30} style={{ margin: '0 auto' }} data-ai-hint="logo"/>
-                <h2 style={{ fontWeight: 'bold', margin: '5px 0 0' }}>MEGA LABORATORIO</h2>
+                <Image src="https://firebasestorage.googleapis.com/v0/b/app-hosting-lab.appspot.com/o/2c0f1b23820a2f7c000c2838332155e828a25c7625debe32223a5932599d141e.png?alt=media&token=c11104e7-4f65-4a25-a131-419b48c68b75" alt="Logo" width={100} height={30} style={{ margin: '0 auto' }} data-ai-hint="logo"/>
+                <h2 style={{ fontWeight: 'bold', margin: '5px 0 0' }}>MEGA LIMS</h2>
                 <p style={{ margin: 0, fontSize: '9px' }}>Av. De las Rosas 21, Col. Jardines, C.P. 50000</p>
                 <p style={{ margin: 0, fontSize: '9px' }}>Tel: (722) 123-4567</p>
                 <p style={{ margin: 0, fontSize: '9px' }}>Fecha: {new Date().toLocaleString()}</p>

@@ -20,7 +20,7 @@ Adjunto encontrarás tus resultados de laboratorio.
 Gracias por confiar en nosotros.
 
 Saludos cordiales,
-MEGA LABORATORIO`
+MEGA LIMS`
   };
 
   const subject = reportTemplate.subject.replace('{patient_name}', input.patientName);

@@ -20,7 +20,7 @@ export function Header() {
         <div className="flex items-center gap-4">
            <SidebarTrigger className="text-primary-foreground" />
           <h1 className="text-xl font-bold tracking-wider hidden sm:block">
-            Panel de Control - MEGA LABORATORIO
+            Panel de Control - MEGA LIMS
           </h1>
         </div>
         <Button variant="ghost" onClick={handleLogout} className="hover:bg-primary/80">

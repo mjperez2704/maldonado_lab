@@ -43,6 +43,7 @@ import {
   ShoppingCart,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 
 const HandshakeIcon = () => (
     <svg
@@ -137,8 +138,8 @@ export function AppSidebar() {
         <SidebarHeader>
           <div className="flex items-center justify-between p-2">
             <div className="flex items-center gap-2">
-               <div className="w-8 h-8 bg-primary rounded-full" />
-                <span className="font-bold text-lg">MEGA LABORATORIO</span>
+               <Image src="https://firebasestorage.googleapis.com/v0/b/app-hosting-lab.appspot.com/o/2c0f1b23820a2f7c000c2838332155e828a25c7625debe32223a5932599d141e.png?alt=media&token=c11104e7-4f65-4a25-a131-419b48c68b75" alt="MEGA LIMS Logo" width={32} height={32} />
+                <span className="font-bold text-lg">MEGA LIMS</span>
             </div>
           </div>
           <div className="flex items-center justify-between p-2 bg-white rounded-md shadow-sm border border-gray-200">
