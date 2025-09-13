@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Settings, BarChart, Barcode, Mail, MessageSquare, KeyRound, Check, Globe, Copyright, Phone, MapPin, Clock, Pencil, Languages, Wallet, Info, FileText as FileTextIcon, Database, Palette, Facebook, Twitter, Instagram, Youtube, Image as ImageIcon, Trash2, Eye } from "lucide-react";
 import React, { useEffect, useState, useRef } from 'react';
-import { getReportSettings, saveReportSettings, ReportSettings, saveEmailSettings, getEmailSettings, EmailSettings, getDbSettings, saveDbSettings, testDbConnection, DbSettings, getGeneralSettings, saveGeneralSettings, GeneralSettings, getWhatsappSettings, saveWhatsappSettings, WhatsappSettings } from "@/services/settingsService";
+import { getReportSettings, saveReportSettings, ReportSettings, saveEmailSettings, getEmailSettings, EmailSettings, getDbSettings, saveDbSettings, testDbConnection, DbSettings, getGeneralSettings, saveGeneralSettings, GeneralSettings, getWhatsappSettings, saveWhatsappSettings, WhatsappSettings, getSmsSettings, saveSmsSettings, SmsSettings, saveBarcodeSettings, getBarcodeSettings, BarcodeSettings, saveApiKeysSettings, getApiKeysSettings, ApiKeysSettings } from "@/services/settingsService";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -52,6 +52,31 @@ const initialGeneralSettings: GeneralSettings = {
     facebook: '', twitter: '', instagram: '', youtube: '',
     reportLogoUrl: '', mainLogoUrl: ''
 };
+
+const initialBarcodeSettings: BarcodeSettings = {
+    type: 'C128B',
+    width: 60,
+    height: 150
+};
+
+const initialSmsSettings: SmsSettings = {
+    activeGateway: 'nexmo',
+    gateways: {
+        nexmo: { apiKey: '', secretKey: '' },
+        twilio: { apiKey: '', secretKey: '' },
+        localtext: { apiKey: '', secretKey: '' },
+        infobip: { apiKey: '', secretKey: '' }
+    },
+    templates: {
+        patientCode: { active: false, message: 'welcome {patient_name}, your patient code is {patient_code}' },
+        testNotification: { active: false, message: '' }
+    }
+};
+
+const initialApiKeysSettings: ApiKeysSettings = {
+    googleMapsKey: ''
+};
+
 
 interface LogoInputProps {
     label: string;
@@ -129,17 +154,24 @@ export default function SettingsPage() {
         receiptLink: { active: true, message: '' },
         reportLink: { active: false, message: '' },
     });
+    const [barcodeSettings, setBarcodeSettings] = useState<BarcodeSettings>(initialBarcodeSettings);
+    const [smsSettings, setSmsSettings] = useState<SmsSettings>(initialSmsSettings);
+    const [apiKeysSettings, setApiKeysSettings] = useState<ApiKeysSettings>(initialApiKeysSettings);
+
 
     useEffect(() => {
         const loadSettings = async () => {
             setLoading(true);
             try {
-                const [general, reports, emails, db, whatsapp] = await Promise.all([
+                const [general, reports, emails, db, whatsapp, barcode, sms, apikeys] = await Promise.all([
                     getGeneralSettings(),
                     getReportSettings(),
                     getEmailSettings(),
                     getDbSettings(),
                     getWhatsappSettings(),
+                    getBarcodeSettings(),
+                    getSmsSettings(),
+                    getApiKeysSettings()
                 ]);
                 
                 if (general) {
@@ -148,18 +180,14 @@ export default function SettingsPage() {
                         setLanguage(general.language);
                     }
                 }
-                if (reports) {
-                    setReportSettings(prev => ({ ...initialReportSettings, ...reports }));
-                } else {
-                    setReportSettings(initialReportSettings);
-                }
-                if (emails) {
-                    setEmailSettings(prev => ({...initialEmailSettings, ...emails}));
-                } else {
-                    setEmailSettings(initialEmailSettings);
-                }
+                if (reports) setReportSettings(prev => ({ ...initialReportSettings, ...reports })); else setReportSettings(initialReportSettings);
+                if (emails) setEmailSettings(prev => ({...initialEmailSettings, ...emails})); else setEmailSettings(initialEmailSettings);
                 if (db) setDbSettings(db);
                 if (whatsapp) setWhatsappSettings(prev => ({...prev, ...whatsapp}));
+                if (barcode) setBarcodeSettings(barcode);
+                if (sms) setSmsSettings(prev => ({...prev, ...sms}));
+                if (apikeys) setApiKeysSettings(apikeys);
+
             } catch (error) {
                 console.error("Error loading settings:", error);
                 toast({ title: "Error", description: "No se pudieron cargar las configuraciones.", variant: "destructive"});
@@ -176,6 +204,35 @@ export default function SettingsPage() {
             setLanguage(value);
         }
     };
+    
+    const handleBarcodeSettingChange = (field: keyof BarcodeSettings, value: string | number) => {
+        setBarcodeSettings(prev => ({...prev, [field]: value}));
+    };
+
+    const handleSmsGatewayChange = (gateway: keyof SmsSettings['gateways'], field: 'apiKey' | 'secretKey', value: string) => {
+        setSmsSettings(prev => ({
+            ...prev,
+            gateways: {
+                ...prev.gateways,
+                [gateway]: { ...prev.gateways[gateway], [field]: value }
+            }
+        }));
+    };
+    
+    const handleSmsTemplateChange = (template: keyof SmsSettings['templates'], field: 'active' | 'message', value: boolean | string) => {
+        setSmsSettings(prev => ({
+            ...prev,
+            templates: {
+                ...prev.templates,
+                [template]: { ...prev.templates[template], [field]: value }
+            }
+        }));
+    };
+
+    const handleApiKeysSettingChange = (field: keyof ApiKeysSettings, value: string) => {
+        setApiKeysSettings(prev => ({ ...prev, [field]: value }));
+    };
+
 
     const handleLogoSelect = (field: 'reportLogoUrl' | 'mainLogoUrl', file: File | null) => {
         if (file) {
@@ -316,6 +373,37 @@ export default function SettingsPage() {
             });
         }
     };
+    
+    const handleSaveBarcodeSettings = async () => {
+        try {
+            await saveBarcodeSettings(barcodeSettings);
+            toast({ title: "Éxito", description: "Configuración del código de barras guardada." });
+        } catch (error) {
+            console.error("Error saving barcode settings:", error);
+            toast({ title: "Error", description: "No se pudo guardar la configuración del código de barras.", variant: "destructive" });
+        }
+    };
+
+    const handleSaveSmsSettings = async () => {
+        try {
+            await saveSmsSettings(smsSettings);
+            toast({ title: "Éxito", description: "Configuración de SMS guardada." });
+        } catch (error) {
+            console.error("Error saving SMS settings:", error);
+            toast({ title: "Error", description: "No se pudo guardar la configuración de SMS.", variant: "destructive" });
+        }
+    };
+
+    const handleSaveApiKeysSettings = async () => {
+        try {
+            await saveApiKeysSettings(apiKeysSettings);
+            toast({ title: "Éxito", description: "Claves de API guardadas." });
+        } catch (error) {
+            console.error("Error saving API keys settings:", error);
+            toast({ title: "Error", description: "No se pudieron guardar las claves de API.", variant: "destructive" });
+        }
+    };
+
 
     const handleTestDbConnection = async () => {
         try {
@@ -828,7 +916,7 @@ export default function SettingsPage() {
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                               <div className="space-y-2">
                                   <Label htmlFor="barcode-type">Tipo</Label>
-                                  <Select defaultValue="C128B">
+                                  <Select value={barcodeSettings.type} onValueChange={(v) => handleBarcodeSettingChange('type', v)}>
                                       <SelectTrigger id="barcode-type">
                                           <SelectValue placeholder="Seleccione el tipo" />
                                       </SelectTrigger>
@@ -859,16 +947,16 @@ export default function SettingsPage() {
                               </div>
                               <div className="space-y-2">
                                   <Label htmlFor="barcode-width">Ancho</Label>
-                                  <Input id="barcode-width" type="number" defaultValue="60" />
+                                  <Input id="barcode-width" type="number" value={barcodeSettings.width} onChange={(e) => handleBarcodeSettingChange('width', parseInt(e.target.value) || 0)} />
                               </div>
                               <div className="space-y-2">
                                   <Label htmlFor="barcode-height">Altura</Label>
-                                  <Input id="barcode-height" type="number" defaultValue="150" />
+                                  <Input id="barcode-height" type="number" value={barcodeSettings.height} onChange={(e) => handleBarcodeSettingChange('height', parseInt(e.target.value) || 0)} />
                               </div>
                           </div>
                       </CardContent>
                        <div className="flex justify-start p-6 pt-0">
-                          <Button>
+                          <Button onClick={handleSaveBarcodeSettings}>
                               <Check className="mr-2"/> Guardar
                           </Button>
                       </div>
@@ -988,10 +1076,8 @@ export default function SettingsPage() {
                       <CardContent className="space-y-6">
                           <div className="space-y-2">
                               <Label htmlFor="sms-gateway">Puerta de enlace activa</Label>
-                              <Select defaultValue="nexmo">
-                                  <SelectTrigger id="sms-gateway">
-                                      <SelectValue />
-                                  </SelectTrigger>
+                              <Select value={smsSettings.activeGateway} onValueChange={(v) => setSmsSettings(prev => ({...prev, activeGateway: v as any}))}>
+                                  <SelectTrigger id="sms-gateway"><SelectValue /></SelectTrigger>
                                   <SelectContent>
                                       <SelectItem value="nexmo">Nexmo</SelectItem>
                                       <SelectItem value="twilio">Twilio</SelectItem>
@@ -1014,11 +1100,11 @@ export default function SettingsPage() {
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                       <div className="space-y-2">
                                           <Label htmlFor="nexmo-api-key">API Key</Label>
-                                          <Input id="nexmo-api-key" />
+                                          <Input id="nexmo-api-key" value={smsSettings.gateways.nexmo.apiKey} onChange={e => handleSmsGatewayChange('nexmo', 'apiKey', e.target.value)} />
                                       </div>
                                       <div className="space-y-2">
                                           <Label htmlFor="nexmo-secret-key">Secret Key</Label>
-                                          <Input id="nexmo-secret-key" />
+                                          <Input id="nexmo-secret-key" value={smsSettings.gateways.nexmo.secretKey} onChange={e => handleSmsGatewayChange('nexmo', 'secretKey', e.target.value)}/>
                                       </div>
                                   </div>
                               </TabsContent>
@@ -1035,17 +1121,17 @@ export default function SettingsPage() {
                               <TabsContent value="patient-code-sms" className="pt-6">
                                   <div className="space-y-4">
                                       <div className="flex items-center gap-2">
-                                          <Switch id="sms-patient-code-inactive" />
-                                          <Label htmlFor="sms-patient-code-inactive" className="text-gray-500">Inactivo</Label>
+                                          <Switch id="sms-patient-code-inactive" checked={smsSettings.templates.patientCode.active} onCheckedChange={c => handleSmsTemplateChange('patientCode', 'active', c)} />
+                                          <Label htmlFor="sms-patient-code-inactive" className={smsSettings.templates.patientCode.active ? 'text-green-600' : 'text-gray-500'}>
+                                            {smsSettings.templates.patientCode.active ? 'Activo' : 'Inactivo'}
+                                          </Label>
                                       </div>
                                       <div className="text-red-500 text-sm">
-                                          <p>No cambie las variables:</p>
-                                          <p>{`{patient_name}`}</p>
-                                          <p>{`{patient_code}`}</p>
+                                          <p>No cambie las variables: {`{patient_name}`} {`{patient_code}`}</p>
                                       </div>
                                       <div className="space-y-2">
                                           <Label htmlFor="sms-patient-code-body">Mensaje</Label>
-                                          <Textarea id="sms-patient-code-body" defaultValue="welcome {patient_name}, your patient code is {patient_code}" rows={4} />
+                                          <Textarea id="sms-patient-code-body" value={smsSettings.templates.patientCode.message} onChange={e => handleSmsTemplateChange('patientCode', 'message', e.target.value)} rows={4} />
                                       </div>
                                   </div>
                               </TabsContent>
@@ -1056,7 +1142,7 @@ export default function SettingsPage() {
 
                       </CardContent>
                       <div className="flex justify-start p-6 pt-0">
-                          <Button>
+                          <Button onClick={handleSaveSmsSettings}>
                               <Check className="mr-2"/> Guardar
                           </Button>
                       </div>
@@ -1130,12 +1216,12 @@ export default function SettingsPage() {
                               </div>
                               <div className="space-y-2">
                                   <Label htmlFor="google-map-key">Clave de API de Google Maps</Label>
-                                  <Input id="google-map-key" placeholder="Ingrese su clave de API de Google Maps" />
+                                  <Input id="google-map-key" placeholder="Ingrese su clave de API de Google Maps" value={apiKeysSettings.googleMapsKey} onChange={e => handleApiKeysSettingChange('googleMapsKey', e.target.value)} />
                               </div>
                           </div>
                       </CardContent>
                       <div className="flex justify-start p-6 pt-0">
-                          <Button>
+                          <Button onClick={handleSaveApiKeysSettings}>
                               <Check className="mr-2"/> Guardar
                           </Button>
                       </div>
@@ -1150,3 +1236,4 @@ export default function SettingsPage() {
 }
 
     
+

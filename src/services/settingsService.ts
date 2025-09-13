@@ -94,12 +94,50 @@ export interface WhatsappSettings {
     reportLink: WhatsappTemplate;
 }
 
+export interface BarcodeSettings {
+    type: string;
+    width: number;
+    height: number;
+}
+
+export interface SmsGatewaySettings {
+    apiKey: string;
+    secretKey: string;
+}
+
+export interface SmsTemplate {
+    active: boolean;
+    message: string;
+}
+
+export interface SmsSettings {
+    activeGateway: 'nexmo' | 'twilio' | 'localtext' | 'infobip';
+    gateways: {
+        nexmo: SmsGatewaySettings;
+        twilio: SmsGatewaySettings;
+        localtext: SmsGatewaySettings;
+        infobip: SmsGatewaySettings;
+    };
+    templates: {
+        patientCode: SmsTemplate;
+        testNotification: SmsTemplate;
+    };
+}
+
+export interface ApiKeysSettings {
+    googleMapsKey: string;
+}
+
 
 const SETTINGS_KEY_REPORTS = 'reports';
 const SETTINGS_KEY_EMAIL = 'email';
 const SETTINGS_KEY_DB = 'db';
 const SETTINGS_KEY_GENERAL = 'general';
 const SETTINGS_KEY_WHATSAPP = 'whatsapp';
+const SETTINGS_KEY_BARCODE = 'barcode';
+const SETTINGS_KEY_SMS = 'sms';
+const SETTINGS_KEY_APIKEYS = 'apikeys';
+
 
 
 async function getSetting<T>(key: string): Promise<T | null> {
@@ -140,6 +178,18 @@ export const saveGeneralSettings = async (settings: GeneralSettings) => saveSett
 // Whatsapp
 export const getWhatsappSettings = async () => getSetting<WhatsappSettings>(SETTINGS_KEY_WHATSAPP);
 export const saveWhatsappSettings = async (settings: WhatsappSettings) => saveSetting(SETTINGS_KEY_WHATSAPP, settings);
+
+// Barcode
+export const getBarcodeSettings = async () => getSetting<BarcodeSettings>(SETTINGS_KEY_BARCODE);
+export const saveBarcodeSettings = async (settings: BarcodeSettings) => saveSetting(SETTINGS_KEY_BARCODE, settings);
+
+// SMS
+export const getSmsSettings = async () => getSetting<SmsSettings>(SETTINGS_KEY_SMS);
+export const saveSmsSettings = async (settings: SmsSettings) => saveSetting(SETTINGS_KEY_SMS, settings);
+
+// API Keys
+export const getApiKeysSettings = async () => getSetting<ApiKeysSettings>(SETTINGS_KEY_APIKEYS);
+export const saveApiKeysSettings = async (settings: ApiKeysSettings) => saveSetting(SETTINGS_KEY_APIKEYS, settings);
 
 
 export async function testDbConnection(settings: DbSettings): Promise<{ success: boolean; error?: string }> {
