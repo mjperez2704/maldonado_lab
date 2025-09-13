@@ -17,7 +17,7 @@ export function SalesTicket({ recibo, items }: SalesTicketProps) {
             <div style={{ textAlign: 'center', marginBottom: '10px' }}>
                 {/* Logo */}
                 <Image src="https://maldonado.mega-spots-test.shop/storage/images/logo-maldonado.png" alt="Logo" width={100} height={30} style={{ margin: '0 auto' }} data-ai-hint="logo"/>
-                <h2 style={{ fontWeight: 'bold', margin: '5px 0 0' }}>Laboratorios Maldonado</h2>
+                <h2 style={{ fontWeight: 'bold', margin: '5px 0 0' }}>MEGA LABORATORIO</h2>
                 <p style={{ margin: 0, fontSize: '9px' }}>Av. De las Rosas 21, Col. Jardines, C.P. 50000</p>
                 <p style={{ margin: 0, fontSize: '9px' }}>Tel: (722) 123-4567</p>
                 <p style={{ margin: 0, fontSize: '9px' }}>Fecha: {new Date().toLocaleString()}</p>
@@ -61,4 +61,3 @@ export function SalesTicket({ recibo, items }: SalesTicketProps) {
         </div>
     );
 }
-

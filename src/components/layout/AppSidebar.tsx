@@ -138,7 +138,7 @@ export function AppSidebar() {
           <div className="flex items-center justify-between p-2">
             <div className="flex items-center gap-2">
                <div className="w-8 h-8 bg-primary rounded-full" />
-                <span className="font-bold text-lg">Laboratorio Maldonado</span>
+                <span className="font-bold text-lg">MEGA LABORATORIO</span>
             </div>
           </div>
           <div className="flex items-center justify-between p-2 bg-white rounded-md shadow-sm border border-gray-200">

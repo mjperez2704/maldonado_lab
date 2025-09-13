@@ -1,3 +1,4 @@
+
 {
     "sqltools.connections": [
         {
@@ -10,10 +11,10 @@
             "server": "195.250.27.25",
             "port": 3306,
             "driver": "MariaDB",
-            "name": "maldonado",
-            "database": "megaspots_maldonado",
-            "username": "megaspots_maldonado",
-            "password": "megaspots_maldonado"
+            "name": "megalaboratorio",
+            "database": "megaspots_megalaboratorio",
+            "username": "megaspots_megalaboratorio",
+            "password": "megaspots_megalaboratorio"
         }
     ]
 }

@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview A flow for sending patient reports via email.
  * This is a mock implementation and does not actually send emails.
@@ -19,7 +20,7 @@ Adjunto encontrarás tus resultados de laboratorio.
 Gracias por confiar en nosotros.
 
 Saludos cordiales,
-Laboratorios Maldonado`
+MEGA LABORATORIO`
   };
 
   const subject = reportTemplate.subject.replace('{patient_name}', input.patientName);

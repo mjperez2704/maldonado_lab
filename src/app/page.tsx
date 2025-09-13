@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -64,7 +65,7 @@ export default function SplashPage() {
         {/* Barra de Progreso */}
         <div className="w-full max-w-md">
           <Progress value={progress} className="w-full" />
-          <p className="text-center mt-2 text-primary font-semibold">C A R G A N D O   M A L D O N A D O - S Y S T E M...</p>
+          <p className="text-center mt-2 text-primary font-semibold">C A R G A N D O   M E G A - S Y S T E M...</p>
         </div>
       </div>
   );

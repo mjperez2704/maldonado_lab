@@ -62,10 +62,10 @@ export default function ReportPreview({ reciboId }: { reciboId: string }) {
             {/* Header */}
             <header className="flex justify-between items-start border-b-2 border-black pb-4">
                 <div className="flex items-center gap-4">
-                    <Image src="https://maldonado.mega-spots-test.shop/storage/images/logo-maldonado.png" alt="Logo Laboratorio Maldonado" width={200} height={50} data-ai-hint="logo"/>
+                    <Image src="https://maldonado.mega-spots-test.shop/storage/images/logo-maldonado.png" alt="Logo MEGA LABORATORIO" width={200} height={50} data-ai-hint="logo"/>
                 </div>
                 <div className="text-right">
-                    <h1 className="font-bold text-lg">LABORATORIO CLÍNICO MALDONADO</h1>
+                    <h1 className="font-bold text-lg">MEGA LABORATORIO CLÍNICO</h1>
                     <p>Unidad Matriz</p>
                     <p>Dirección: José Martí No.229</p>
                     <p>Col. Centro C.P. 59033 Sahuayo, Michoacán</p>
