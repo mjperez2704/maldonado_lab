@@ -62,7 +62,7 @@ export default function ReportPreview({ reciboId }: { reciboId: string }) {
             {/* Header */}
             <header className="flex justify-between items-start border-b-2 border-black pb-4">
                 <div className="flex items-center gap-4">
-                    <Image src="https://firebasestorage.googleapis.com/v0/b/app-hosting-lab.appspot.com/o/2c0f1b23820a2f7c000c2838332155e828a25c7625debe32223a5932599d141e.png?alt=media&token=c11104e7-4f65-4a25-a131-419b48c68b75" alt="Logo MEGA LIMS" width={200} height={50} data-ai-hint="logo"/>
+                    <Image src="/logo_lims.png" alt="Logo MEGA LIMS" width={200} height={50} data-ai-hint="logo"/>
                 </div>
                 <div className="text-right">
                     <h1 className="font-bold text-lg">MEGA LIMS</h1>

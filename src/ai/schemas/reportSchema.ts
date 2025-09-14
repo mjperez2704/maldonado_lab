@@ -1,3 +1,4 @@
+
 /**
  * @fileOverview Schemas and types for patient report flows.
  */
@@ -7,8 +8,10 @@ export const SendEmailReportInputSchema = z.object({
   patientName: z.string().describe("The name of the patient."),
   results: z.array(z.object({
     studyName: z.string(),
+    parameterName: z.string().optional(),
     result: z.string(),
     reference: z.string(),
+    unit: z.string().optional(),
   })).describe("The list of test results for the patient."),
 });
 export type SendEmailReportInput = z.infer<typeof SendEmailReportInputSchema>;
