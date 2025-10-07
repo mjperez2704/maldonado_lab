@@ -62,7 +62,7 @@ export async function createRecibo(reciboData: ReciboCreation, usuario_id: numbe
 
     const query = `
         INSERT INTO recibos (
-            creado_por_id, codigoBarras, patientCode, patientName, contract, 
+            creado_por_id, codigoBarras, patientCode, nombrePaciente, contract, 
             subtotal, descuento, total, pagado, adeudo, fecha, estado, 
             estudios, paquetes, doctor, deliveryDate
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -108,7 +108,7 @@ export async function updateRecibo(id: number, recibo: Partial<Omit<Recibo, 'id'
     } = recibo;
     
     const query = `UPDATE recibos SET 
-        patientCode = ?, patientName = ?, contract = ?, subtotal = ?, descuento = ?, 
+        patientCode = ?, nombrePaciente = ?, contract = ?, subtotal = ?, descuento = ?, 
         total = ?, pagado = ?, adeudo = ?, estado = ?, estudios = ?, paquetes = ?, 
         doctor = ?, deliveryDate = ?, results = ? 
         WHERE id = ?`;

@@ -23,8 +23,8 @@ Saludos cordiales,
 MEGA LIMS`
   };
 
-  const subject = reportTemplate.subject.replace('{patient_name}', input.patientName);
-  let body = reportTemplate.body.replace('{patient_name}', input.patientName);
+  const subject = reportTemplate.subject.replace('{patient_name}', input.nombrePaciente);
+  let body = reportTemplate.body.replace('{patient_name}', input.nombrePaciente);
   
   const resultsText = input.results.map(r => `- ${r.studyName}: ${r.result} (Ref: ${r.reference})`).join('\n');
   

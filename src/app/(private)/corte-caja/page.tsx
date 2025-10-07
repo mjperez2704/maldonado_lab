@@ -172,7 +172,7 @@ export default function CashCutPage() {
                                             recibos.map(recibo => (
                                                 <TableRow key={recibo.id}>
                                                     <TableCell>{recibo.barcode}</TableCell>
-                                                    <TableCell>{recibo.patientName}</TableCell>
+                                                    <TableCell>{recibo.nombrePaciente}</TableCell>
                                                     <TableCell>{formatCurrency(recibo.total)}</TableCell>
                                                     <TableCell>{formatCurrency(recibo.pagado)}</TableCell>
                                                     <TableCell>{formatCurrency(recibo.adeudo)}</TableCell>

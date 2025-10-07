@@ -171,7 +171,7 @@ export default function CaptureResultsPage() {
                     </div>
                     <div className="flex items-center gap-2">
                         <User className="text-primary"/>
-                        <strong>Paciente:</strong> {recibo.patientName}
+                        <strong>Paciente:</strong> {recibo.nombrePaciente}
                     </div>
                     <div className="flex items-center gap-2">
                         <Calendar className="text-primary"/>

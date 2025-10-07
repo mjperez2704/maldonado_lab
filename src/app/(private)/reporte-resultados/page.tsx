@@ -59,7 +59,7 @@ export default function ResultsReportPage() {
     const filteredRecibos = useMemo(() => {
         return recibos.filter(recibo => {
             const folioMatch = filters.folio ? recibo.barcode.toLowerCase().includes(filters.folio.toLowerCase()) : true;
-            const patientMatch = filters.patient ? recibo.patientName.toLowerCase().includes(filters.patient.toLowerCase()) : true;
+            const patientMatch = filters.patient ? recibo.nombrePaciente.toLowerCase().includes(filters.patient.toLowerCase()) : true;
             const startDateMatch = filters.startDate ? new Date(recibo.date) >= new Date(filters.startDate) : true;
             const endDateMatch = filters.endDate ? new Date(recibo.date) <= new Date(filters.endDate) : true;
 
@@ -101,13 +101,13 @@ export default function ResultsReportPage() {
 
         try {
             const emailContent = await sendEmailReport({
-                patientName: recibo.patientName,
+                nombrePaciente: recibo.nombrePaciente,
                 results: recibo.results,
             });
 
             console.log("Generated Email:", emailContent);
 
-            toast({ title: "Correo Enviado", description: `El reporte para ${recibo.patientName} ha sido generado y enviado (simulado).`});
+            toast({ title: "Correo Enviado", description: `El reporte para ${recibo.nombrePaciente} ha sido generado y enviado (simulado).`});
         } catch (error) {
             console.error("Error sending email:", error);
             toast({ title: "Error", description: "No se pudo generar el correo.", variant: "destructive"});
@@ -191,7 +191,7 @@ export default function ResultsReportPage() {
                                         filteredRecibos.map((result) => (
                                             <TableRow key={result.id}>
                                                 <TableCell>{result.barcode}</TableCell>
-                                                <TableCell>{result.patientName}</TableCell>
+                                                <TableCell>{result.nombrePaciente}</TableCell>
                                                 <TableCell>{new Date(result.date).toLocaleDateString()}</TableCell>
                                                 <TableCell>
                                                     <span className={`px-2 py-1 rounded-full text-xs font-semibold ${

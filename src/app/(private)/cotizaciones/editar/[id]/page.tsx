@@ -27,7 +27,7 @@ export default function EditQuotePage() {
     const [estudios, setStudies] = useState<Study[]>([]);
     const [paquetes, setPackages] = useState<PackageType[]>([]);
     
-    const [patientName, setPatientName] = useState('');
+    const [nombrePaciente, setPatientName] = useState('');
     const [cart, setCart] = useState<CartItem[]>([]);
     
     const [loading, setLoading] = useState(true);
@@ -238,7 +238,7 @@ export default function EditQuotePage() {
                         <CardContent className="space-y-4">
                             <div className="flex items-center gap-3">
                                 <User className="text-primary"/>
-                                <span>{patientName}</span>
+                                <span>{nombrePaciente}</span>
                             </div>
                         </CardContent>
                     </Card>

@@ -67,7 +67,7 @@ export default function TestRequestsPage() {
     const filteredRecibos = useMemo(() => {
         return recibos.filter(recibo => {
             const folioMatch = filters.folio ? recibo.barcode.toLowerCase().includes(filters.folio.toLowerCase()) : true;
-            const patientMatch = filters.patient ? recibo.patientName.toLowerCase().includes(filters.patient.toLowerCase()) : true;
+            const patientMatch = filters.patient ? recibo.nombrePaciente.toLowerCase().includes(filters.patient.toLowerCase()) : true;
             const startDateMatch = filters.startDate ? new Date(recibo.date) >= new Date(filters.startDate) : true;
             const endDateMatch = filters.endDate ? new Date(recibo.date) <= new Date(filters.endDate) : true;
             const statusMatch = filters.status === 'all' ? true : recibo.status === filters.status;
@@ -223,7 +223,7 @@ export default function TestRequestsPage() {
                                 <TableRow key={recibo.id}>
                                     <TableCell>{recibo.barcode}</TableCell>
                                     <TableCell>{new Date(recibo.date).toLocaleDateString()}</TableCell>
-                                    <TableCell>{recibo.patientName}</TableCell>
+                                    <TableCell>{recibo.nombrePaciente}</TableCell>
                                     <TableCell>${Number(recibo.total).toFixed(2)}</TableCell>
                                     <TableCell>
                                         <span className={`px-2 py-1 rounded-full text-xs capitalize font-semibold ${

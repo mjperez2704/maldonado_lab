@@ -187,7 +187,7 @@ export default function BillingPage() {
                           <TableCell>{item.createdBy}</TableCell>
                           <TableCell>{item.barcode}</TableCell>
                           <TableCell>{item.patientCode}</TableCell>
-                          <TableCell>{item.patientName}</TableCell>
+                          <TableCell>{item.nombrePaciente}</TableCell>
                           <TableCell>{item.contract}</TableCell>
                           <TableCell>{item.subtotal}</TableCell>
                           <TableCell>{item.descuento}</TableCell>
@@ -251,7 +251,7 @@ export default function BillingPage() {
                 <p className="text-xs">{new Date(selectedRecibo.date).toLocaleString()}</p>
               </div>
               <div className="border-t border-dashed border-gray-400 pt-2">
-                <p><strong>Paciente:</strong> {selectedRecibo.patientName}</p>
+                <p><strong>Paciente:</strong> {selectedRecibo.nombrePaciente}</p>
                 <p><strong>Código:</strong> {selectedRecibo.patientCode}</p>
               </div>
               <div className="border-t border-dashed border-gray-400 my-2">

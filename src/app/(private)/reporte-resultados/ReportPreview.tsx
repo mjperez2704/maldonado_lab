@@ -76,7 +76,7 @@ export default function ReportPreview({ reciboId }: { reciboId: string }) {
             <section className="my-4 pb-2 text-xs">
                 <div className="grid grid-cols-2 gap-x-8 gap-y-1 p-2 border border-black rounded-md">
                     <div>
-                        <p><strong>Paciente:</strong> {recibo.patientName?.toUpperCase()}</p>
+                        <p><strong>Paciente:</strong> {recibo.nombrePaciente?.toUpperCase()}</p>
                         <p><strong>Edad:</strong> {patient?.age} {patient?.ageUnit}</p>
                         <p><strong>Sexo:</strong> {patient?.gender?.toUpperCase()}</p>
                     </div>

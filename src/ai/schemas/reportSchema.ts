@@ -5,7 +5,7 @@
 import { z } from 'zod';
 
 export const SendEmailReportInputSchema = z.object({
-  patientName: z.string().describe("The name of the patient."),
+  nombrePaciente: z.string().describe("The name of the patient."),
   results: z.array(z.object({
     studyName: z.string(),
     parameterName: z.string().optional(),

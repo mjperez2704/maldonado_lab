@@ -62,7 +62,7 @@ export default function QuotesPage() {
     const filteredQuotes = useMemo(() => {
         return quotes.filter(quote => {
             const folioMatch = filters.folio ? quote.id.toString().toLowerCase().includes(filters.folio.toLowerCase()) : true;
-            const patientMatch = filters.patient ? quote.patientName.toLowerCase().includes(filters.patient.toLowerCase()) : true;
+            const patientMatch = filters.patient ? quote.nombrePaciente.toLowerCase().includes(filters.patient.toLowerCase()) : true;
             return folioMatch && patientMatch;
         });
     }, [quotes, filters]);
@@ -93,7 +93,7 @@ export default function QuotesPage() {
         try {
             await createRecibo({
                 patientCode: quote.patientId,
-                patientName: quote.patientName,
+                nombrePaciente: quote.nombrePaciente,
                 estudios: quote.estudios,
                 paquetes: quote.paquetes,
                 subtotal: quote.subtotal,
@@ -190,7 +190,7 @@ export default function QuotesPage() {
                             <TableRow key={quote.id}>
                                 <TableCell>{quote.id.toString().substring(0, 8)}</TableCell>
                                 <TableCell>{new Date(quote.date).toLocaleDateString()}</TableCell>
-                                <TableCell>{quote.patientName}</TableCell>
+                                <TableCell>{quote.nombrePaciente}</TableCell>
                                 <TableCell>${Number(quote.total.toFixed(2))}</TableCell>
                                 <TableCell>
                                     <span className={`px-2 py-1 rounded-full text-xs capitalize ${quote.status === 'pending' ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800'}`}>

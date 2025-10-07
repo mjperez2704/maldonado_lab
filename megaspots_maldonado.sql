@@ -291,7 +291,7 @@ CREATE TABLE `purchases` (
 CREATE TABLE `quotes` (
   `id` int(11) NOT NULL,
   `patientId` int(11) NOT NULL,
-  `patientName` varchar(255) NOT NULL,
+  `nombrePaciente` varchar(255) NOT NULL,
   `subtotal` decimal(10,2) DEFAULT NULL,
   `descuento` decimal(10,2) DEFAULT NULL,
   `total` decimal(10,2) DEFAULT NULL,
@@ -312,7 +312,7 @@ CREATE TABLE `recibos` (
   `createdBy` varchar(255) DEFAULT NULL,
   `barcode` varchar(100) DEFAULT NULL,
   `patientCode` varchar(36) DEFAULT NULL,
-  `patientName` varchar(255) DEFAULT NULL,
+  `nombrePaciente` varchar(255) DEFAULT NULL,
   `contract` varchar(100) DEFAULT NULL,
   `subtotal` decimal(10,2) DEFAULT NULL,
   `descuento` decimal(10,2) DEFAULT NULL,

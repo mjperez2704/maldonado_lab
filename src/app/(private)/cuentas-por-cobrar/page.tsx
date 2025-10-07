@@ -58,7 +58,7 @@ export default function AccountsReceivablePage() {
   const filteredRecibos = useMemo(() => {
     return recibos.filter(recibo => {
         const folioMatch = filters.folio ? recibo.barcode.includes(filters.folio) : true;
-        const patientMatch = filters.patient ? recibo.patientName.toLowerCase().includes(filters.patient.toLowerCase()) : true;
+        const patientMatch = filters.patient ? recibo.nombrePaciente.toLowerCase().includes(filters.patient.toLowerCase()) : true;
         const startDateMatch = filters.startDate ? new Date(recibo.date) >= new Date(filters.startDate) : true;
         const endDateMatch = filters.endDate ? new Date(recibo.date) <= new Date(filters.endDate) : true;
         return folioMatch && patientMatch && startDateMatch && endDateMatch;
@@ -254,7 +254,7 @@ export default function AccountsReceivablePage() {
                                  <TableRow key={recibo.id}>
                                      <TableCell>{index + 1}</TableCell>
                                      <TableCell>{recibo.barcode}</TableCell>
-                                     <TableCell>{recibo.patientName}</TableCell>
+                                     <TableCell>{recibo.nombrePaciente}</TableCell>
                                      <TableCell>{new Date(recibo.date).toLocaleDateString()}</TableCell>
                                      <TableCell>${Number(recibo.total || 0).toFixed(2)}</TableCell>
                                      <TableCell className="font-bold text-red-600">${Number(recibo.adeudo || 0).toFixed(2)}</TableCell>

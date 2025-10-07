@@ -6,7 +6,7 @@ import { ReciboCreation } from "@/services/reciboService";
 
 interface SalesTicketProps {
     recibo: ReciboCreation;
-    items: { name: string; price: number; type: 'study' | 'package'}[];
+    items: { nombre: string; precio: number; tipo_estudio: 'study' | 'package'}[];
 }
 
 export function SalesTicket({ recibo, items }: SalesTicketProps) {
@@ -24,7 +24,7 @@ export function SalesTicket({ recibo, items }: SalesTicketProps) {
             </div>
             
             <div style={{ borderTop: '1px dashed black', paddingTop: '5px', marginTop: '5px' }}>
-                <p style={{ margin: 0 }}><strong>Paciente:</strong> {recibo.patientName}</p>
+                <p style={{ margin: 0 }}><strong>Paciente:</strong> {recibo.nombrePaciente}</p>
             </div>
             
             <div style={{ borderTop: '1px dashed black', paddingTop: '5px', marginTop: '5px' }}>
@@ -34,8 +34,8 @@ export function SalesTicket({ recibo, items }: SalesTicketProps) {
                 </div>
                 {items.map((item, index) => (
                     <div key={index} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span>{item.name}</span>
-                        <span>${Number(item.price).toFixed(2)}</span>
+                        <span>{item.nombre}</span>
+                        <span>${Number(item.precio).toFixed(2)}</span>
                     </div>
                 ))}
             </div>
