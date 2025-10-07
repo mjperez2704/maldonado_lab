@@ -48,7 +48,7 @@ const HandshakeIcon = () => (
 
 const convenioSchema = z.object({
   title: z.string().min(1, { message: "El título es requerido." }),
-  discount: z.coerce.number().min(0, "El descuento no puede ser negativo.").max(100, "El descuento no puede ser mayor a 100."),
+  descuento: z.coerce.number().min(0, "El descuento no puede ser negativo.").max(100, "El descuento no puede ser mayor a 100."),
   items: z.array(z.object({
     type: z.string(),
     id: z.number(),
@@ -67,7 +67,7 @@ export default function CreateConvenioPage() {
         resolver: zodResolver(convenioSchema),
         defaultValues: {
             title: '',
-            discount: 0,
+            descuento: 0,
             items: [],
         }
     });
@@ -123,7 +123,7 @@ export default function CreateConvenioPage() {
                         <FormField control={form.control} name="title" render={({ field }) => (
                             <FormItem><FormLabel>Título del convenio</FormLabel><FormControl><Input placeholder="Título del convenio" {...field} /></FormControl><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={form.control} name="discount" render={({ field }) => (
+                        <FormField control={form.control} name="descuento" render={({ field }) => (
                             <FormItem><FormLabel>Porcentaje de descuento</FormLabel>
                                 <div className="relative">
                                     <FormControl><Input type="number" placeholder="0" {...field} onFocus={handleFocus} /></FormControl>

@@ -190,10 +190,10 @@ export default function BillingPage() {
                           <TableCell>{item.patientName}</TableCell>
                           <TableCell>{item.contract}</TableCell>
                           <TableCell>{item.subtotal}</TableCell>
-                          <TableCell>{item.discount}</TableCell>
+                          <TableCell>{item.descuento}</TableCell>
                           <TableCell>{item.total}</TableCell>
-                          <TableCell>{item.paid}</TableCell>
-                          <TableCell>{item.due}</TableCell>
+                          <TableCell>{item.pagado}</TableCell>
+                          <TableCell>{item.adeudo}</TableCell>
                           <TableCell>{new Date(item.date).toLocaleDateString()}</TableCell>
                           <TableCell>
                               {item.status === 'completed' ? (
@@ -272,7 +272,7 @@ export default function BillingPage() {
                 </div>
                 <div className="flex justify-between">
                   <span>Descuento:</span>
-                  <span>${Number(selectedRecibo.discount.toFixed(2))}</span>
+                  <span>${Number(selectedRecibo.descuento.toFixed(2))}</span>
                 </div>
                 <div className="flex justify-between font-bold text-base">
                   <span>Total:</span>
@@ -280,11 +280,11 @@ export default function BillingPage() {
                 </div>
                  <div className="flex justify-between">
                   <span>Pagado:</span>
-                  <span>${Number(selectedRecibo.paid.toFixed(2))}</span>
+                  <span>${Number(selectedRecibo.pagado.toFixed(2))}</span>
                 </div>
                  <div className="flex justify-between">
                   <span>Debido:</span>
-                  <span>${Number(selectedRecibo.due.toFixed(2))}</span>
+                  <span>${Number(selectedRecibo.adeudo.toFixed(2))}</span>
                 </div>
               </div>
                <div className="text-center mt-4">

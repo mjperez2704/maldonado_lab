@@ -3,28 +3,28 @@ import { executeQuery } from '@/lib/db';
 
 export interface Quote {
     id: number;
-    patientId: string;
-    patientName: string;
-    date: string;
+    paciente_id: string;
+    paciente_nombre: string;
+    fecha: string;
     subtotal: number;
-    discount: number;
+    descuento: number;
     total: number;
-    studies: string[];
-    packages: string[];
-    status: 'pending' | 'converted';
+    estudios: string[];
+    paquetes: string[];
+    estado: 'generada' | 'enviada' | 'aprovada' | 'rechazada' | 'convertida' ;
 }
 
-export type QuoteCreation = Omit<Quote, 'id' | 'date' | 'status'>;
+export type QuoteCreation = Omit<Quote, 'id' | 'fecha' | 'estado'>;
 
 export async function getQuotes(): Promise<Quote[]> {
     try {
         // 1. Obtenemos los resultados como un tipo genérico 'any[]'
-        const results = await executeQuery<any[]>('SELECT * FROM quotes ORDER BY date DESC');
+        const results = await executeQuery<any[]>('SELECT * FROM cotizaciones ORDER BY fecha DESC');
         // 2. Mapeamos cada resultado, transformando los campos JSON string a arrays
         return results.map((q) => ({
             ...q,
-            studies: JSON.parse(q.studies || '[]'),
-            packages: JSON.parse(q.packages || '[]'),
+            estudios: JSON.parse(q.estudios || '[]'),
+            paquetes: JSON.parse(q.paquetes || '[]'),
         }));
     } catch (error) {
         console.error("Database query failed:", error);
@@ -32,51 +32,51 @@ export async function getQuotes(): Promise<Quote[]> {
     }
 }
 
-export async function createQuote(quote: QuoteCreation): Promise<void> {
-    const date = new Date().toISOString();
-    const status = 'pending';
-    const { patientId, patientName, subtotal, discount, total, studies, packages } = quote;
-    const query = 'INSERT INTO quotes (patientId, patientName, date, subtotal, discount, total, studies, packages, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    await executeQuery(query, [patientId, patientName, date, subtotal, discount, total, JSON.stringify(studies), JSON.stringify(packages), status]);
+export async function createQuote(cotizacion: QuoteCreation): Promise<void> {
+    const fecha = new Date().toISOString();
+    const estado = 'pending';
+    const { paciente_id, subtotal, descuento, total, estudios, paquetes } = cotizacion;
+    const query = 'INSERT INTO cotizaciones (paciente_id, , fecha, subtotal, descuento, total, estudios, paquetes, estado) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    await executeQuery(query, [paciente_id, , fecha, subtotal, descuento, total, JSON.stringify(estudios), JSON.stringify(paquetes), estado]);
 }
 
 export async function getQuoteById(id: string): Promise<Quote | null> {
     // 1. Obtenemos el resultado como un tipo genérico 'any[]'
-    const results = await executeQuery<any[]>('SELECT * FROM quotes WHERE id = ?', [id]);
+    const results = await executeQuery<any[]>('SELECT * FROM cotizaciones WHERE id = ?', [id]);
     if (results.length > 0) {
         const row = results[0];
         // 2. Transformamos el resultado individual
         return {
             ...row,
-            studies: JSON.parse(row.studies || '[]'),
-            packages: JSON.parse(row.packages || '[]'),
+            estudios: JSON.parse(row.estudios || '[]'),
+            paquetes: JSON.parse(row.paquetes || '[]'),
         };
     }
     return null;
 }
 
-export async function updateQuote(id: string, quote: Partial<Omit<Quote, 'id' | 'date' | 'patientId' | 'patientName'>>): Promise<void> {
-    const { subtotal, discount, total, studies, packages, status } = quote;
+export async function updateQuote(id: string, cotizacion: Partial<Omit<Quote, 'id' | 'fecha' | 'paciente_id' | ''>>): Promise<void> {
+    const { subtotal, descuento, total, estudios, paquetes, estado } = cotizacion;
 
     const fields: string[] = [];
     const values: any[] = [];
 
     if (subtotal !== undefined) { fields.push('subtotal = ?'); values.push(subtotal); }
-    if (discount !== undefined) { fields.push('discount = ?'); values.push(discount); }
+    if (descuento !== undefined) { fields.push('descuento = ?'); values.push(descuento); }
     if (total !== undefined) { fields.push('total = ?'); values.push(total); }
-    if (studies !== undefined) { fields.push('studies = ?'); values.push(JSON.stringify(studies)); }
-    if (packages !== undefined) { fields.push('packages = ?'); values.push(JSON.stringify(packages)); }
-    if (status !== undefined) { fields.push('status = ?'); values.push(status); }
+    if (estudios !== undefined) { fields.push('estudios = ?'); values.push(JSON.stringify(estudios)); }
+    if (paquetes !== undefined) { fields.push('paquetes = ?'); values.push(JSON.stringify(paquetes)); }
+    if (estado !== undefined) { fields.push('estado = ?'); values.push(estado); }
 
     if (fields.length === 0) return;
 
-    const query = `UPDATE quotes SET ${fields.join(', ')} WHERE id = ?`;
+    const query = `UPDATE cotizaciones SET ${fields.join(', ')} WHERE id = ?`;
     values.push(id);
 
     await executeQuery(query, values);
 }
 
 export async function deleteQuote(id: string): Promise<void> {
-    const query = 'DELETE FROM quotes WHERE id = ?';
+    const query = 'DELETE FROM cotizaciones WHERE id = ?';
     await executeQuery(query, [id]);
 }

@@ -44,7 +44,7 @@ import { useToast } from "@/hooks/use-toast";
 
 
 export default function StudiesPage() {
-    const [studies, setStudies] = useState<Study[]>([]);
+    const [estudios, setStudies] = useState<Study[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const router = useRouter();
@@ -57,7 +57,7 @@ export default function StudiesPage() {
                 const data = await getStudies();
                 setStudies(data);
             } catch (error) {
-                console.error("Error fetching studies: ", error);
+                console.error("Error fetching estudios: ", error);
                 toast({
                     title: "Error",
                     description: "No se pudieron cargar los estudios.",
@@ -73,20 +73,20 @@ export default function StudiesPage() {
 
     const filteredStudies = useMemo(() => {
         if (!searchTerm) {
-            return studies;
+            return estudios;
         }
-        return studies.filter(study =>
+        return estudios.filter(study =>
             study.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (study.code && study.code.toLowerCase().includes(searchTerm.toLowerCase()))
         );
-    }, [searchTerm, studies]);
+    }, [searchTerm, estudios]);
 
 
     const handleDelete = async (id: string) => {
         if (confirm('¿Estás seguro de que quieres eliminar este estudio? Esta acción no se puede deshacer.')) {
             try {
                 await deleteStudy(id);
-                setStudies(studies.filter(s => s.id !== Number(id)));
+                setStudies(estudios.filter(s => s.id !== Number(id)));
                 toast({
                     title: "Éxito",
                     description: "Estudio eliminado correctamente.",
@@ -234,7 +234,7 @@ export default function StudiesPage() {
             </div>
              <div className="flex justify-between items-center">
                 <div className="text-sm text-muted-foreground">
-                    Mostrando 1 a {filteredStudies.length} de {studies.length} registros
+                    Mostrando 1 a {filteredStudies.length} de {estudios.length} registros
                 </div>
                 <Pagination>
                     <PaginationContent>

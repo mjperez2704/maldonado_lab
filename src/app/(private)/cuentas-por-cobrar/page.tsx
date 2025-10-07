@@ -37,7 +37,7 @@ export default function AccountsReceivablePage() {
   const fetchReceivables = async () => {
       try {
         const allRecibos = await getRecibos();
-        const receivables = allRecibos.filter(r => r.due > 0);
+        const receivables = allRecibos.filter(r => r.adeudo > 0);
         setRecibos(receivables);
       } catch (error) {
         console.error("Error fetching accounts receivable:", error);
@@ -67,7 +67,7 @@ export default function AccountsReceivablePage() {
 
   const openPaymentModal = (recibo: Recibo) => {
     setSelectedRecibo(recibo);
-    setPaymentAmount(recibo.due); // Pre-fill with the due amount
+    setPaymentAmount(recibo.adeudo); // Pre-fill with the adeudo amount
     setPaymentMethod('');
     setCreditCardPlan('');
     setCommission(0);
@@ -84,13 +84,13 @@ export default function AccountsReceivablePage() {
         return;
     }
     
-    const newPaidAmount = selectedRecibo.paid + paymentAmount;
+    const newPaidAmount = selectedRecibo.pagado + paymentAmount;
     const newDueAmount = selectedRecibo.total - newPaidAmount;
 
     if (newDueAmount < 0) {
         toast({
             title: "Monto inválido",
-            description: `El pago excede el saldo pendiente de $${selectedRecibo.due.toFixed(2)}.`,
+            description: `El pago excede el saldo pendiente de $${selectedRecibo.adeudo.toFixed(2)}.`,
             variant: "destructive"
         });
         return;
@@ -98,8 +98,8 @@ export default function AccountsReceivablePage() {
     
     try {
         const updatedRecibo: Partial<Omit<Recibo, 'id'>> = {
-            paid: newPaidAmount,
-            due: newDueAmount,
+            pagado: newPaidAmount,
+            adeudo: newDueAmount,
             status: newDueAmount === 0 ? 'completed' : selectedRecibo.status,
         };
 
@@ -175,8 +175,8 @@ export default function AccountsReceivablePage() {
                       <Select>
                           <SelectTrigger><SelectValue placeholder="Estado de Pago" /></SelectTrigger>
                           <SelectContent>
-                             <SelectItem value="paid">Pagado</SelectItem>
-                             <SelectItem value="unpaid">No Pagado</SelectItem>
+                             <SelectItem value="pagado">Pagado</SelectItem>
+                             <SelectItem value="unpagado">No Pagado</SelectItem>
                           </SelectContent>
                       </Select>
                   </div>
@@ -257,7 +257,7 @@ export default function AccountsReceivablePage() {
                                      <TableCell>{recibo.patientName}</TableCell>
                                      <TableCell>{new Date(recibo.date).toLocaleDateString()}</TableCell>
                                      <TableCell>${Number(recibo.total || 0).toFixed(2)}</TableCell>
-                                     <TableCell className="font-bold text-red-600">${Number(recibo.due || 0).toFixed(2)}</TableCell>
+                                     <TableCell className="font-bold text-red-600">${Number(recibo.adeudo || 0).toFixed(2)}</TableCell>
                                      <TableCell className="text-center">
                                          <Button onClick={() => openPaymentModal(recibo)} size="sm">
                                             <HandCoins className="mr-2 h-4 w-4"/>
@@ -290,7 +290,7 @@ export default function AccountsReceivablePage() {
                 <div className="space-y-4">
                     <div className="p-4 bg-muted rounded-md text-center">
                         <Label>Saldo Pendiente</Label>
-                        <p className="text-2xl font-bold">${Number(selectedRecibo.due).toFixed(2)}</p>
+                        <p className="text-2xl font-bold">${Number(selectedRecibo.adeudo).toFixed(2)}</p>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="payment-amount">Cantidad a Pagar</Label>

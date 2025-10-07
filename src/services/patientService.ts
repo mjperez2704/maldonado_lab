@@ -3,26 +3,26 @@ import { executeQuery } from '@/lib/db';
 
 
 
-export interface Patient {
+export interface Paciente {
   id: number;
-  name: string;
-  nationality: string;
+  nombre: string;
+  nacionalidad: string;
   ine: string;
   curp?: string;
   email?: string;
-  phone?: string;
-  gender: string;
-  birthDate: string;
-  age: number;
-  ageUnit: 'anos' | 'meses' | 'dias';
-  address?: string;
-  convenio?: string;
-  avatarUrl?: string;
+  telefono?: string;
+  genero: string;
+  fechaNacimiento: string;
+  edad: number;
+  unidad_edad: 'anios' | 'meses' ;
+  direccion?: string;
+  convenio_id?: number;
+  url_avatar?: string;
 }
 
-export async function getPatients(): Promise<Patient[]> {
+export async function getPatients(): Promise<Paciente[]> {
     try {
-        const results = await executeQuery<any[]>('SELECT * FROM patients');
+        const results = await executeQuery<any[]>('SELECT * FROM pacientes');
         // Purificamos los resultados para Next.js
         return JSON.parse(JSON.stringify(results));
     } catch (error) {
@@ -31,28 +31,28 @@ export async function getPatients(): Promise<Patient[]> {
     }
 }
 
-export async function createPatient(patient: Omit<Patient, 'id'>): Promise<void> {
-    const { name, nationality, ine, curp, email, phone, gender, birthDate, age, ageUnit, address, convenio, avatarUrl } = patient;
-    const query = 'INSERT INTO patients (name, nationality, ine, curp, email, phone, gender, birthDate, age, ageUnit, address, convenio, avatarUrl) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    await executeQuery(query, [name, nationality, ine, curp, email, phone, gender, birthDate, age, ageUnit, address, convenio, avatarUrl]);
+export async function createPatient(paciente: Omit<Paciente, 'id'>): Promise<void> {
+    const { nombre, nacionalidad, ine, curp, email, telefono, genero, fechaNacimiento, edad, unidad_edad, direccion, convenio_id, url_avatar } = paciente;
+    const query = 'INSERT INTO pacientes (nombre, nacionalidad, ine, curp, email, telefono, genero, fechaNacimiento, edad, unidad_edad, direccion, convenio_id, url_avatar) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    await executeQuery(query, [nombre, nacionalidad, ine, curp, email, telefono, genero, fechaNacimiento, edad, unidad_edad, direccion, convenio_id, url_avatar]);
 }
 
-export async function getPatientById(id: number): Promise<Patient | null> {
-    const results = await executeQuery<Patient[]>('SELECT * FROM patients WHERE id = ?', [id]);
+export async function getPatientById(id: number): Promise<Paciente | null> {
+    const results = await executeQuery<Paciente[]>('SELECT * FROM pacientes WHERE id = ?', [id]);
     if (results.length > 0) {
         return JSON.parse(JSON.stringify(results[0]));
     }
     return null;
 }
 
-export async function updatePatient(id: number, patient: Omit<Patient, "id">): Promise<void> {
-    const { name, nationality, ine, curp, email, phone, gender, birthDate, age, ageUnit, address, convenio, avatarUrl } = patient;
-    const query = 'UPDATE patients SET name = ?, nationality = ?, ine = ?, curp = ?, email = ?, phone = ?, gender = ?, birthDate = ?, age = ?, ageUnit = ?, address = ?, convenio = ?, avatarUrl = ? WHERE id = ?';
-    await executeQuery(query, [name, nationality, ine, curp, email, phone, gender, birthDate, age, ageUnit, address, convenio, avatarUrl, id]);
+export async function updatePatient(id: number, paciente: Omit<Paciente, "id">): Promise<void> {
+    const { nombre, nacionalidad, ine, curp, email, telefono, genero, fechaNacimiento, edad, unidad_edad, direccion, convenio_id, url_avatar } = paciente;
+    const query = 'UPDATE pacientes SET nombre = ?, nacionalidad = ?, ine = ?, curp = ?, email = ?, telefono = ?, genero = ?, fechaNacimiento = ?, edad = ?, unidad_edad = ?, direccion = ?, convenio_id = ?, url_avatar = ? WHERE id = ?';
+    await executeQuery(query, [nombre, nacionalidad, ine, curp, email, telefono, genero, fechaNacimiento, edad, unidad_edad, direccion, convenio_id, url_avatar, id]);
 }
 
 
 export async function deletePatient(id: number): Promise<void> {
-  const query = 'DELETE FROM patients WHERE id = ?';
+  const query = 'DELETE FROM pacientes WHERE id = ?';
   await executeQuery(query, [id]);
 }

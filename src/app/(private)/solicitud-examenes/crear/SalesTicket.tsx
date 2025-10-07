@@ -47,7 +47,7 @@ export function SalesTicket({ recibo, items }: SalesTicketProps) {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                     <span>Descuento:</span>
-                    <span>${Number(recibo.discount).toFixed(2)}</span>
+                    <span>${Number(recibo.descuento).toFixed(2)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '11px' }}>
                     <span>Total:</span>

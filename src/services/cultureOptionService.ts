@@ -3,8 +3,8 @@ import { executeQuery } from '@/lib/db';
 
 export interface CultureOption {
   id: number;
-  title: string;
-  options: string[];
+  titulo: string;
+  opciones: string[];
 }
 
 export async function getCultureOptions(): Promise<CultureOption[]> {
@@ -12,7 +12,7 @@ export async function getCultureOptions(): Promise<CultureOption[]> {
         const results = await executeQuery<CultureOption[]>('SELECT * FROM culture_options');
         return results.map(row => ({
             ...row,
-            options: Array.isArray(row.options) ? row.options : JSON.parse(row.options ?? '[]') as string[]
+            options: Array.isArray(row.opciones) ? row.opciones : JSON.parse(row.opciones ?? '[]') as string[]
         }));
     } catch (error) {
         console.error("Database query failed:", error);
@@ -21,9 +21,9 @@ export async function getCultureOptions(): Promise<CultureOption[]> {
 }
 
 export async function createCultureOption(option: Omit<CultureOption, 'id'>): Promise<void> {
-    const { title, options } = option;
+    const { titulo, opciones } = option;
     const query = 'INSERT INTO culture_options (title, options) VALUES (?, ?)';
-    await executeQuery(query, [title, JSON.stringify(options)]);
+    await executeQuery(query, [titulo, JSON.stringify(opciones)]);
 }
 
 

@@ -3,28 +3,28 @@ import { executeQuery } from '@/lib/db';
 
 export interface CreditNote {
   id: number;
-  branch: string;
-  date: string;
-  patient: string;
-  amount: number;
-  reason: string;
-  status: 'active' | 'cancelled';
+  sucursal_id: number;
+  fecha: string;
+  paciente_id: string;
+  monto: number;
+  razon: string;
+  estatus: 'activo' | 'cancelado';
 }
 
 export async function getCreditNotes(): Promise<CreditNote[]> {
     try {
-        const results = await executeQuery<CreditNote[]>('SELECT * FROM credit_notes ORDER BY date DESC');
+        const results = await executeQuery<CreditNote[]>('SELECT * FROM notas_credito ORDER BY fecha DESC');
         return JSON.parse(JSON.stringify(results)) as CreditNote[];
     } catch (error) {
-        console.error("Database query failed:", error);
+        console.error("Error en la consulta a la base de datos:", error);
         return [];
     }
 }
 
-export async function createCreditNote(note: Omit<CreditNote, 'id' | 'status'>): Promise<void> {
-    const { branch, date, patient, amount, reason } = note;
-    const query = 'INSERT INTO credit_notes (branch, date, patient, amount, reason, status) VALUES (?, ?, ?, ?, ?, ?)';
-    await executeQuery(query, [branch, date, patient, amount, reason, 'active']);
+export async function createCreditNote(note: Omit<CreditNote, 'id' | 'estatus'>): Promise<void> {
+    const { sucursal_id, fecha, paciente_id, monto, razon } = note;
+    const query = 'INSERT INTO notes_credito (sucursal_id, fecha, paciente_id, monto, razon, estado) VALUES (?, ?, ?, ?, ?, ?)';
+    await executeQuery(query, [sucursal_id, fecha, paciente_id, monto, razon, 'active']);
 }
 
 export async function getCreditNoteById(id: string): Promise<CreditNote | null> {
@@ -36,9 +36,9 @@ export async function getCreditNoteById(id: string): Promise<CreditNote | null> 
 }
 
 export async function updateCreditNote(id: string, note: Partial<Omit<CreditNote, 'id'>>): Promise<void> {
-    const { branch, date, patient, amount, reason, status } = note;
+    const { sucursal_id, fecha, paciente_id, monto, razon, estatus } = note;
     const query = 'UPDATE credit_notes SET branch = ?, date = ?, patient = ?, amount = ?, reason = ?, status = ? WHERE id = ?';
-    await executeQuery(query, [branch, date, patient, amount, reason, status, id]);
+    await executeQuery(query, [sucursal_id, fecha, paciente_id, monto, razon, estatus, id]);
 }
 
 export async function deleteCreditNote(id: string): Promise<void> {

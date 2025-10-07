@@ -17,7 +17,7 @@ export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [email, setEmail] = useState('admin@megaspots.com');
-  const [password, setPassword] = useState('supersecretpassword');
+  const [contrasena, setContrasena] = useState('supersecretpassword');
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -25,7 +25,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const user = await login({ email, password });
+      const user = await login({ email, contrasena });
 
       if (user) {
         // --- Manejo de Sesión y Permisos (Básico) ---
@@ -93,8 +93,8 @@ export default function LoginPage() {
                 <Input
                     id="password"
                     type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    value={contrasena}
+                    onChange={(e) => setContrasena(e.target.value)}
                     required
                     disabled={loading}
                 />

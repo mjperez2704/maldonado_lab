@@ -152,8 +152,8 @@ export default function DoctorsTable({ initialDoctors }: { initialDoctors: Docto
                         <TableCell>{item.address}</TableCell>
                         <TableCell>{item.commission}%</TableCell>
                         <TableCell>{item.total} MXN</TableCell>
-                        <TableCell>{item.paid} MXN</TableCell>
-                        <TableCell className="text-red-500">{item.due} MXN</TableCell>
+                        <TableCell>{item.pagado} MXN</TableCell>
+                        <TableCell className="text-red-500">{item.adeudo} MXN</TableCell>
                         <TableCell>
                             <div className="flex items-center justify-end gap-2">
                                 <Button variant="outline" size="icon" onClick={() => handleEdit(item.id)}>

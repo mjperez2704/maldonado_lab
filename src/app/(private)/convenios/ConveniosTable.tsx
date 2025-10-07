@@ -118,7 +118,7 @@ export default function ConveniosTable({ initialConvenios }: { initialConvenios:
                   </TableCell>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{item.title}</TableCell>
-                  <TableCell>{item.discount || 0}%</TableCell>
+                  <TableCell>{item.descuento || 0}%</TableCell>
                   <TableCell>
                       <div className="flex items-center justify-end gap-2">
                       <Button variant="outline" size="icon" onClick={() => handleEdit(item.id)}>

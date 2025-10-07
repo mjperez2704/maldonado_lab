@@ -44,7 +44,7 @@ export default function CashCutPage() {
                 setRecibos(recibosData);
                 setExpenses(expensesData);
 
-                const totalIncome = recibosData.reduce((acc, recibo) => acc + recibo.paid, 0);
+                const totalIncome = recibosData.reduce((acc, recibo) => acc + recibo.pagado, 0);
                 const totalExpenses = expensesData.reduce((acc, expense) => acc + expense.amount, 0);
                 setCashInBox(totalIncome - totalExpenses);
 
@@ -147,7 +147,7 @@ export default function CashCutPage() {
                     <Tabs defaultValue="requests">
                         <TabsList className="grid w-full grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
                             <TabsTrigger value="requests"><FileText className="mr-2"/>Solicitudes</TabsTrigger>
-                            <TabsTrigger value="discounts"><BadgePercent className="mr-2"/>Descuentos Posteriores</TabsTrigger>
+                            <TabsTrigger value="descuentos"><BadgePercent className="mr-2"/>Descuentos Posteriores</TabsTrigger>
                             <TabsTrigger value="refunds"><ArrowRightLeft className="mr-2"/>Reembolsos</TabsTrigger>
                             <TabsTrigger value="expenses"><ArrowDown className="mr-2"/>Gastos</TabsTrigger>
                             <TabsTrigger value="income"><ArrowUp className="mr-2"/>Ingresos</TabsTrigger>
@@ -174,8 +174,8 @@ export default function CashCutPage() {
                                                     <TableCell>{recibo.barcode}</TableCell>
                                                     <TableCell>{recibo.patientName}</TableCell>
                                                     <TableCell>{formatCurrency(recibo.total)}</TableCell>
-                                                    <TableCell>{formatCurrency(recibo.paid)}</TableCell>
-                                                    <TableCell>{formatCurrency(recibo.due)}</TableCell>
+                                                    <TableCell>{formatCurrency(recibo.pagado)}</TableCell>
+                                                    <TableCell>{formatCurrency(recibo.adeudo)}</TableCell>
                                                 </TableRow>
                                             ))
                                         ) : (
@@ -185,7 +185,7 @@ export default function CashCutPage() {
                                 </Table>
                            </div>
                         </TabsContent>
-                        <TabsContent value="discounts" className="pt-4">
+                        <TabsContent value="descuentos" className="pt-4">
                            <p className="text-center text-muted-foreground">No hay descuentos para mostrar.</p>
                         </TabsContent>
                         <TabsContent value="refunds" className="pt-4">

@@ -17,7 +17,7 @@ import PaquetesTable from './PaquetesTable';
 
 
 export default async function PackagesPage() {
-  const packages = await getPackages();
+  const paquetes = await getPackages();
 
   return (
     <div className="flex flex-col gap-4 py-8">
@@ -40,7 +40,7 @@ export default async function PackagesPage() {
           </Button>
         </CardHeader>
         <CardContent className="p-6">
-          <PaquetesTable initialPackages={packages} />
+          <PaquetesTable initialPackages={paquetes} />
         </CardContent>
       </Card>
     </div>

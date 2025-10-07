@@ -58,7 +58,7 @@ export default function EditPackagePage() {
                 getPackageById(packageId),
                 getStudies(),
                 getCultures()
-            ]).then(([pkg, studiesData, culturesData]) => {
+            ]).then(([pkg, estudiosData, culturesData]) => {
                 if (pkg) {
                     form.reset({
                         name: pkg.name,
@@ -72,7 +72,7 @@ export default function EditPackagePage() {
                      toast({ title: "Error", description: "Paquete no encontrado.", variant: "destructive" });
                      router.push('/paquetes');
                 }
-                setAllStudies(studiesData);
+                setAllStudies(estudiosData);
                 setAllCultures(culturesData);
             }).catch(error => {
                 console.error("Error fetching data:", error);

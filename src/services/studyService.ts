@@ -2,31 +2,36 @@
 'use server';
 import { executeQuery } from '@/lib/db';
 
-export interface StudyParameter {
-    name: string;
-    unit: string;
-    cost: number;
+export interface ParametroEstudio {
+    estudio_id: number;
+    nombre: string;
+    unidad_medida: string;
+    costo: number;
     factor: string;
-    referenceType: string;
-    gender: 'Hombre' | 'Mujer' | 'Ambos';
-    ageStart: number;
-    ageEnd: number;
-    ageUnit: 'Anos' | 'Meses' | 'Dias';
-    intervalFrom?: string;
-    intervalTo?: string;
-    conversionFactor?: number;
-    conversionUnit?: string;
+    tipo_referencia: string;
+    sexo: 'Hombre' | 'Mujer' | 'Ambos';
+    edad_inicio: number;
+    edad_fin: number;
+    unidad_edad: 'Anos' | 'Meses' | 'Dias';
+    referencia_inicio_f?: string;
+    referencia_fin_f?: string;
+    referencia_inicio_m?: string;
+    referencia_fin_m?: string;
+    referencia_inicio_a?: string; 
+    texto_referencia?: string;
+    factorConversion?: number;
+    unidadConversion?: string;
     // New fields for 'Mixto' type
-    possibleValues?: string[];
-    defaultValue?: string;
-    referenceValue?: string;
+    posibleaValores?: string[];
+    valorDefault?: string;
+    valorReferencia?: string;
     // New field for 'Criterio R' type
     referenceText?: string;
 }
 
 export interface IntegratedStudyRef {
     id: number;
-    name: string;
+    nombre: string;
 }
 
 export interface StudySample {
@@ -39,25 +44,25 @@ export interface StudySample {
 export interface Study {
     id: number;
     area: string;
-    code: string;
-    name: string;
-    method: string;
-    internalCost: number;
-    deliveryTime: number;
-    deliveryUnit: 'dias' | 'horas';
-    processTime: string;
-    processDays: string;
-    isOutsourced: boolean;
-    outsourcedLabId: string;
-    outsourcedCode: string;
-    outsourcedCost: number;
-    outsourcedDeliveryTime: string;
-    legend: string;
-    scientificDescription: string;
-    satServiceKey: string;
-    satUnitKey: string;
-    parameters: StudyParameter[];
-    config: {
+    codigo: string;
+    nombre: string;
+    metodo: string;
+    costoInterno: number;
+    tiempoEntrega: number;
+    unidadEntrega: 'dias' | 'horas';
+    tiempoProceso: string;
+    diasProceso: string;
+    esSubcontratado: boolean;
+    laboratorio_externo_id: string;
+    coidgoExterno: string;
+    costoExterno: number;
+    tiempoEntregaExterno: string;
+    leyenda: string;
+    descripcionCientifica: string;
+    claveServiciSat: string;
+    claveUnidadSat: string;
+    parameters: ParametroEstudio[];
+    configuracion: {
         showInRequest: boolean;
         canUploadDocuments: boolean;
         printLabSignature: boolean;
@@ -69,21 +74,21 @@ export interface Study {
     hasSubStudies: boolean;
     isPackage: boolean;
     integratedStudies: IntegratedStudyRef[];
-    synonyms: string[];
-    samples: StudySample[];
-    price: number;
-    sampleType: string;
-    category: string;
-    shortcut: string;
+    sinonimo: string[];
+    muestras: StudySample[];
+    precio: number;
+    tipo_muestra_id: string;
+    categoria: string;
+    abreviatura: string;
 }
 
 export async function getStudies(): Promise<Study[]> {
     try {
-        const results = await executeQuery('SELECT * FROM studies');
+        const results = await executeQuery('SELECT * FROM estudios');
         const plainResults = JSON.parse(JSON.stringify(results)) as any[];
         return plainResults.map((row: any) => ({
             ...row,
-            price: Number(row.price) || Number(row.internalCost) || 0,
+            precio: Number(row.precio) || Number(row.costoInterno) || 0,
             parameters: JSON.parse(row.parameters || '[]'),
             config: JSON.parse(row.config || '{}'),
             integratedStudies: JSON.parse(row.integratedStudies || '[]'),
@@ -91,41 +96,41 @@ export async function getStudies(): Promise<Study[]> {
             samples: JSON.parse(row.samples || '[]'),
         }));
     } catch (error) {
-        console.error("Database query failed:", error);
+        console.error("Error en la consulta a la base de datos:", error);
         return [];
     }
 }
 
 export async function createStudy(study: Omit<Study, 'id'>): Promise<void> {
     const query = `
-        INSERT INTO studies (
-            area, code, name, method, internalCost, deliveryTime, deliveryUnit,
-            processTime, processDays, isOutsourced, outsourcedLabId, outsourcedCode,
-            outsourcedCost, outsourcedDeliveryTime, legend, scientificDescription,
-            satServiceKey, satUnitKey, parameters, config, hasSubStudies, isPackage,
+        INSERT INTO estudios (
+            area, codigo, nombre, metodo, costoInterno, tiempoEntrega, unidadEntrega,
+            tiempoProceso, diasProceso, esSubcontratado, laboratorio_externo_id, coidgoExterno,
+            costoExterno, tiempoEntregaExterno, leyenda, descripcionCientifica,
+            claveServiciSat, claveUnidadSat, parameters, config, hasSubStudies, isPackage,
             integratedStudies, synonyms, samples, price, sampleType, category, shortcut
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const params = [
-        study.area, study.code, study.name, study.method, study.internalCost,
-        study.deliveryTime, study.deliveryUnit, study.processTime, study.processDays,
-        study.isOutsourced, study.outsourcedLabId, study.outsourcedCode, study.outsourcedCost,
-        study.outsourcedDeliveryTime, study.legend, study.scientificDescription,
-        study.satServiceKey, study.satUnitKey, JSON.stringify(study.parameters),
-        JSON.stringify(study.config), study.hasSubStudies, study.isPackage,
-        JSON.stringify(study.integratedStudies), JSON.stringify(study.synonyms),
-        JSON.stringify(study.samples), study.price, study.sampleType, study.category, study.shortcut,
+        study.area, study.codigo, study.nombre, study.metodo, study.costoInterno,
+        study.tiempoEntrega, study.unidadEntrega, study.tiempoProceso, study.diasProceso,
+        study.esSubcontratado, study.laboratorio_externo_id, study.coidgoExterno, study.costoExterno,
+        study.tiempoEntregaExterno, study.leyenda, study.descripcionCientifica,
+        study.claveServiciSat, study.claveUnidadSat, JSON.stringify(study.parameters),
+        JSON.stringify(study.configuracion), study.hasSubStudies, study.isPackage,
+        JSON.stringify(study.integratedStudies), JSON.stringify(study.sinonimo),
+        JSON.stringify(study.muestras), study.precio, study.tipo_muestra_id, study.categoria, study.abreviatura,
     ];
     await executeQuery(query, params);
 }
 
 export async function getStudyById(id: string): Promise<Study | null> {
-    const results = await executeQuery('SELECT * FROM studies WHERE id = ?', [id]) as any[];
+    const results = await executeQuery('SELECT * FROM estudios WHERE id = ?', [id]) as any[];
     if (results.length > 0) {
         const row = JSON.parse(JSON.stringify(results[0]));
         return {
             ...row,
-            price: Number(row.price) || Number(row.internalCost) || 0,
+            price: Number(row.price) || Number(row.costoInterno) || 0,
             parameters: JSON.parse(row.parameters || '[]'),
             config: JSON.parse(row.config || '{}'),
             integratedStudies: JSON.parse(row.integratedStudies || '[]'),
@@ -138,31 +143,41 @@ export async function getStudyById(id: string): Promise<Study | null> {
 
 export async function updateStudy(id: string, study: Omit<Study, 'id'>): Promise<void> {
     const query = `
-        UPDATE studies SET
-            area = ?, code = ?, name = ?, method = ?, internalCost = ?, deliveryTime = ?, 
-            deliveryUnit = ?, processTime = ?, processDays = ?, isOutsourced = ?, 
-            outsourcedLabId = ?, outsourcedCode = ?, outsourcedCost = ?, 
-            outsourcedDeliveryTime = ?, legend = ?, scientificDescription = ?, 
-            satServiceKey = ?, satUnitKey = ?, parameters = ?, config = ?, 
+        UPDATE estudios SET
+            area = ?, codigo = ?, nombre = ?, metodo = ?, costoInterno = ?, tiempoEntrega = ?, 
+            unidadEntrega = ?, tiempoProceso = ?, diasProceso = ?, esSubcontratado = ?, 
+            laboratorio_externo_id = ?, coidgoExterno = ?, costoExterno = ?, 
+            tiempoEntregaExterno = ?, leyenda = ?, descripcionCientifica = ?, 
+            claveServiciSat = ?, claveUnidadSat = ?, parameters = ?, config = ?, 
             hasSubStudies = ?, isPackage = ?, integratedStudies = ?, synonyms = ?, 
             samples = ?, price = ?, sampleType = ?, category = ?, shortcut = ?
         WHERE id = ?
     `;
     const params = [
-        study.area, study.code, study.name, study.method, study.internalCost,
-        study.deliveryTime, study.deliveryUnit, study.processTime, study.processDays,
-        study.isOutsourced, study.outsourcedLabId, study.outsourcedCode, study.outsourcedCost,
-        study.outsourcedDeliveryTime, study.legend, study.scientificDescription,
-        study.satServiceKey, study.satUnitKey, JSON.stringify(study.parameters),
-        JSON.stringify(study.config), study.hasSubStudies, study.isPackage,
-        JSON.stringify(study.integratedStudies), JSON.stringify(study.synonyms),
-        JSON.stringify(study.samples), study.price, study.sampleType, study.category, study.shortcut,
+        study.area, study.codigo, study.nombre, study.metodo, study.costoInterno,
+        study.tiempoEntrega, study.unidadEntrega, study.tiempoProceso, study.diasProceso,
+        study.esSubcontratado, study.laboratorio_externo_id, study.coidgoExterno, study.costoExterno,
+        study.tiempoEntregaExterno, study.leyenda, study.descripcionCientifica,
+        study.claveServiciSat, study.claveUnidadSat, JSON.stringify(study.parameters),
+        JSON.stringify(study.configuracion), study.hasSubStudies, study.isPackage,
+        JSON.stringify(study.integratedStudies), JSON.stringify(study.sinonimo),
+        JSON.stringify(study.muestras), study.precio, study.tipo_muestra_id, study.categoria, study.abreviatura,
         id
     ];
     await executeQuery(query, params);
 }
 
 export async function deleteStudy(id: string): Promise<void> {
-    const query = 'DELETE FROM studies WHERE id = ?';
+    const query = 'DELETE FROM estudios WHERE id = ?';
     await executeQuery(query, [id]);
 }
+
+export async function getEstudioIdByName(nombre: string): Promise<Number> {
+    const results = await executeQuery('SELECT id, nombre FROM estudios WHERE nombre = ?', [nombre]) as any[];
+    if (results.length > 0) {
+        return results[0].id;
+    }
+    return 0;
+}
+
+

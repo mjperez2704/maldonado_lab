@@ -264,7 +264,7 @@ export default function TestRequestsPage() {
                 </DialogHeader>
                 {selectedRecibo && (
                     <div id="ticket-preview-content">
-                        <SalesTicket recibo={selectedRecibo} items={[...selectedRecibo.studies.map(s => ({name: s, price: 0, type: 'study' as const})), ...selectedRecibo.packages.map(p => ({name: p, price: 0, type: 'package' as const}))]}/>
+                        <SalesTicket recibo={selectedRecibo} items={[...selectedRecibo.estudios.map(s => ({name: s, price: 0, type: 'study' as const})), ...selectedRecibo.paquetes.map(p => ({name: p, price: 0, type: 'package' as const}))]}/>
                     </div>
                 )}
                 <DialogFooter>

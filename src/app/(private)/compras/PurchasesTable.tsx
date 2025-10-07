@@ -137,8 +137,8 @@ export default function PurchasesTable({ initialPurchases }: { initialPurchases:
                   <TableCell>{item.branch}</TableCell>
                   <TableCell>{item.provider}</TableCell>
                   <TableCell>{formatCurrency(item.total || 0)}</TableCell>
-                  <TableCell>{formatCurrency(item.paid || 0)}</TableCell>
-                  <TableCell>{formatCurrency(item.due || 0)}</TableCell>
+                  <TableCell>{formatCurrency(item.pagado || 0)}</TableCell>
+                  <TableCell>{formatCurrency(item.adeudo || 0)}</TableCell>
                   <TableCell>
                       <div className="flex items-center justify-end gap-2">
                       <Button variant="outline" size="icon" onClick={() => handleEdit(String(item.id))}>

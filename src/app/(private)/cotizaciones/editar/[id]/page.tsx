@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Newspaper, User, Microscope, DollarSign, Tag, Save, Package, Trash2 } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
 import { getStudies, Study } from "@/services/studyService";
-import { getPackages, Package as PackageType } from "@/services/packageService";
+import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/packageService";
 import { useRouter, useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { getQuoteById, updateQuote } from "@/services/quoteService";
@@ -24,8 +24,8 @@ type CartItem = {
 };
 
 export default function EditQuotePage() {
-    const [studies, setStudies] = useState<Study[]>([]);
-    const [packages, setPackages] = useState<PackageType[]>([]);
+    const [estudios, setStudies] = useState<Study[]>([]);
+    const [paquetes, setPackages] = useState<PackageType[]>([]);
     
     const [patientName, setPatientName] = useState('');
     const [cart, setCart] = useState<CartItem[]>([]);
@@ -40,24 +40,24 @@ export default function EditQuotePage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [studiesData, packagesData, quoteData] = await Promise.all([
+                const [estudiosData, paquetesData, quoteData] = await Promise.all([
                     getStudies(),
-                    getPackages(),
+                    getPaquetesEstudios(),
                     getQuoteById(quoteId),
                 ]);
-                setStudies(studiesData);
-                setPackages(packagesData);
+                setStudies(estudiosData);
+                setPackages(paquetesData);
 
                 if (quoteData) {
-                    setPatientName(quoteData.patientName);
+                    setPatientName(quoteData.paciente_nombre);
                     const initialCart: CartItem[] = [];
-                    quoteData.studies?.forEach(studyName => {
-                        const study = studiesData.find(s => s.name === studyName);
-                        if(study) initialCart.push({ id: String(study.id), name: study.name, price: study.price, type: 'study' });
+                    quoteData.estudios?.forEach((studyName: any) => {
+                        const study = estudiosData.find((s: { nombre: any; }) => s.nombre === studyName);
+                        if(study) initialCart.push({ id: String(study.id), name: study.nombre, price: study.precio, type: 'study' });
                     });
-                    quoteData.packages?.forEach(packageName => {
-                        const pkg = packagesData.find(p => p.name === packageName);
-                        if(pkg) initialCart.push({ id: String(pkg.id), name: pkg.name, price: pkg.price, type: 'package' });
+                    quoteData.paquetes?.forEach((packageName: any) => {
+                        const pkg = paquetesData.find((p: { nombre: any; }) => p.nombre === packageName);
+                        if(pkg) initialCart.push({ id: String(pkg.id), name: pkg.nombre, price: pkg.precio, type: 'package' });
                     });
                     setCart(initialCart);
                 } else {
@@ -86,15 +86,15 @@ export default function EditQuotePage() {
             return;
         }
 
-        const studyToAdd = studies.find(s => String(s.id) === itemId);
+        const studyToAdd = estudios.find(s => String(s.id) === itemId);
         if (studyToAdd) {
-            setCart(prev => [...prev, {id: itemId, name: studyToAdd.name, price: studyToAdd.price, type: 'study'}]);
+            setCart(prev => [...prev, {id: itemId, name: studyToAdd.nombre, price: studyToAdd.precio, type: 'study'}]);
             return;
         }
 
-        const packageToAdd = packages.find(p => String(p.id) === itemId);
+        const packageToAdd = paquetes.find(p => String(p.id) === itemId);
         if (packageToAdd) {
-            setCart(prev => [...prev, {id: itemId, name: packageToAdd.name, price: packageToAdd.price, type: 'package'}]);
+            setCart(prev => [...prev, {id: itemId, name: packageToAdd.nombre, price: packageToAdd.precio, type: 'package'}]);
         }
     };
 
@@ -104,8 +104,8 @@ export default function EditQuotePage() {
     };
 
     const subtotal = useMemo(() => cart.reduce((acc, item) => acc + item.price, 0), [cart]);
-    const discount = 0; // Placeholder for discount logic
-    const total = subtotal - discount;
+    const descuento = 0; // Placeholder for descuento logic
+    const total = subtotal - descuento;
 
     const handleUpdateQuote = async () => {
         if (cart.length === 0) {
@@ -118,16 +118,16 @@ export default function EditQuotePage() {
         }
         setLoading(true);
 
-        const studiesInCart = cart.filter(i => i.type === 'study').map(i => i.name);
-        const packagesInCart = cart.filter(i => i.type === 'package').map(i => i.name);
+        const estudiosInCart = cart.filter(i => i.type === 'study').map(i => i.name);
+        const paquetesInCart = cart.filter(i => i.type === 'package').map(i => i.name);
 
         try {
             const updatedQuote = {
                 subtotal,
-                discount,
+                descuento,
                 total,
-                studies: studiesInCart,
-                packages: packagesInCart,
+                estudios: estudiosInCart,
+                paquetes: paquetesInCart,
             };
             
             await updateQuote(quoteId, updatedQuote); 
@@ -151,10 +151,10 @@ export default function EditQuotePage() {
     };
 
     const availableItems = useMemo(() => {
-        const studyItems = studies.map(s => ({ value: String(s.id), label: `${s.name} ($${s.price})`, type: 'Estudio' }));
-        const packageItems = packages.map(p => ({ value: String(p.id), label: `${p.name} ($${p.price})`, type: 'Paquete' }));
+        const studyItems = estudios.map(s => ({ value: String(s.id), label: `${s.nombre} ($${s.precio})`, type: 'Estudio' }));
+        const packageItems = paquetes.map(p => ({ value: String(p.id), label: `${p.nombre} ($${p.precio})`, type: 'Paquete' }));
         return [...studyItems, ...packageItems];
-    }, [studies, packages]);
+    }, [estudios, paquetes]);
     
     if (loading) {
         return <div>Cargando...</div>
@@ -253,7 +253,7 @@ export default function EditQuotePage() {
                             </div>
                                 <div className="flex justify-between items-center text-lg">
                                 <span className="flex items-center gap-2"><Tag className="h-5 w-5"/> Descuento</span>
-                                <span>${Number(discount.toFixed(2))}</span>
+                                <span>${Number(descuento.toFixed(2))}</span>
                             </div>
                             <div className="flex justify-between items-center font-bold text-xl text-primary">
                                 <span className="flex items-center gap-2"><DollarSign className="h-5 w-5"/> Total</span>

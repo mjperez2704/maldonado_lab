@@ -1,64 +1,64 @@
 'use server';
 import { executeQuery } from '@/lib/db';
 
-interface Consumption {
+interface Consumos {
     productId: string;
-    quantity: number;
+    cantidad: number;
 }
 
 export interface Culture {
   id: number;
-  category: string;
-  name: string;
-  sampleType: string;
-  price: number;
-  precautions: string;
-  comments: string[];
-  consumptions: Consumption[];
+  categoria_id: string;
+  nombre: string;
+  tipo_muestra_id: string;
+  precio: number;
+  precauciones: string;
+  comentarios: string[];
+  consumos: Consumos[];
 }
 
 export async function getCultures(): Promise<Culture[]> {
     try {
-        const results = await executeQuery<any[]>('SELECT * FROM cultures');
+        const results = await executeQuery<any[]>('SELECT * FROM cultivos');
         const plainResults = JSON.parse(JSON.stringify(results));
         return plainResults.map((row: any) => ({
             ...row,
-            comments: Array.isArray(row.comments) ? row.comments : JSON.parse(row.comments || '[]') as string[],
-            consumptions: Array.isArray(row.consumptions) ? row.consumptions : JSON.parse(row.consumptions || '[]') as Consumption[],
+            comentarios: Array.isArray(row.comentarios) ? row.comentarios : JSON.parse(row.comentarios || '[]') as string[],
+            consumos: Array.isArray(row.consumos) ? row.consumos : JSON.parse(row.consumos || '[]') as Consumos[],
         }));
     } catch (error) {
-        console.error("Database query failed:", error);
+        console.error("Error en la consulta a la base de datos:", error);
         return [];
     }
 }
 
 export async function createCulture(culture: Omit<Culture, 'id'>): Promise<void> {
-    const { category, name, sampleType, price, precautions, comments, consumptions } = culture;
-    const query = 'INSERT INTO cultures (category, name, sampleType, price, precautions, comments, consumptions) VALUES (?, ?, ?, ?, ?, ?, ?)';
-    await executeQuery(query, [category, name, sampleType, price, precautions, JSON.stringify(comments), JSON.stringify(consumptions)]);
+    const { categoria_id, nombre, tipo_muestra_id, precio, precauciones, comentarios, consumos } = culture;
+    const query = 'INSERT INTO cultivos (categoria_id, nombre, tipo_muestra_id, precio, precauciones, comentarios, consumos) VALUES (?, ?, ?, ?, ?, ?, ?)';
+    await executeQuery(query, [categoria_id, nombre, tipo_muestra_id, precio, precauciones, JSON.stringify(comentarios), JSON.stringify(consumos)]);
 }
 
-export async function getCultureById(id: string): Promise<Culture | null> {
-    const results = await executeQuery<any[]>('SELECT * FROM cultures WHERE id = ?', [id]);
+export async function getCultureById(id: number): Promise<Culture | null> {
+    const results = await executeQuery<any[]>('SELECT * FROM cultivos WHERE id = ?', [id]);
      if (results.length > 0) {
         const row = JSON.parse(JSON.stringify(results[0]));
         return {
             ...row,
-            comments: Array.isArray(row.comments) ? row.comments : JSON.parse(row.comments || '[]') as string[],
-            consumptions: Array.isArray(row.consumptions) ? row.consumptions : JSON.parse(row.consumptions || '[]') as Consumption[],
+            comentarios: Array.isArray(row.comentarios) ? row.comentarios : JSON.parse(row.comentarios || '[]') as string[],
+            consumos: Array.isArray(row.consumos) ? row.consumos : JSON.parse(row.consumos || '[]') as Consumos[],
         };
     }
     return null;
 }
 
-export async function updateCulture(id: string, culture: Omit<Culture, 'id'>): Promise<void> {
-    const { category, name, sampleType, price, precautions, comments, consumptions } = culture;
-    const query = 'UPDATE cultures SET category = ?, name = ?, sampleType = ?, price = ?, precautions = ?, comments = ?, consumptions = ? WHERE id = ?';
-    await executeQuery(query, [category, name, sampleType, price, precautions, JSON.stringify(comments), JSON.stringify(consumptions), id]);
+export async function updateCulture(id: number, culture: Omit<Culture, 'id'>): Promise<void> {
+    const { categoria_id, nombre, tipo_muestra_id, precio, precauciones, comentarios, consumos } = culture;
+    const query = 'UPDATE cultivos SET categorias = ?, nombre = ?, tipo_muestra_id = ?, precio = ?, precauciones = ?, comentarios = ?, consumos = ? WHERE id = ?';
+    await executeQuery(query, [categoria_id, nombre, tipo_muestra_id, precio, precauciones, JSON.stringify(comentarios), JSON.stringify(consumos), id]);
 }
 
 
-export async function deleteCulture(id: string): Promise<void> {
-  const query = 'DELETE FROM cultures WHERE id = ?';
+export async function deleteCulture(id: number): Promise<void> {
+  const query = 'DELETE FROM cultivos WHERE id = ?';
   await executeQuery(query, [id]);
 }

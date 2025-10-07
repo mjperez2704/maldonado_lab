@@ -13,10 +13,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { FlaskConical, UserSearch, Search, Trash2, Calendar, User, Microscope, DollarSign, Tag, Save, Package, PlusSquare, Plus } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
-import { getPatients, Patient } from "@/services/patientService";
+import { getPatients, Paciente } from "@/services/patientService";
 import { getStudies, Study } from "@/services/studyService";
-import { getPackages, Package as PackageType } from "@/services/packageService";
-import { getDoctors, Doctor, createDoctor } from "@/services/doctorService";
+import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/packageService";
+import { getDoctores, Doctor, createDoctor } from "@/services/doctorService";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { createRecibo, ReciboCreation } from "@/services/reciboService";
@@ -30,11 +30,11 @@ import * as z from "zod";
 
 
 const doctorSchema = z.object({
-  name: z.string().min(1, { message: "El nombre es requerido." }),
-  phone: z.string().optional(),
+  nombre: z.string().min(1, { message: "El nombre es requerido." }),
+  telefono: z.string().optional(),
   email: z.string().email({ message: "Correo electrónico no válido." }).optional().or(z.literal('')),
-  address: z.string().optional(),
-  commission: z.coerce.number().min(0, "La comisión no puede ser negativa.").max(100, "La comisión no puede ser mayor a 100."),
+  direccion: z.string().optional(),
+  comision: z.coerce.number().min(0, "La comisión no puede ser negativa.").max(100, "La comisión no puede ser mayor a 100."),
 });
 
 type DoctorFormValues = z.infer<typeof doctorSchema>;
@@ -44,21 +44,21 @@ function CreateDoctorForm({ onSuccess }: { onSuccess: (doctor: Doctor) => void }
     
     const form = useForm<DoctorFormValues>({
         resolver: zodResolver(doctorSchema),
-        defaultValues: { name: '', phone: '', email: '', address: '', commission: 0 },
+        defaultValues: { nombre: '', telefono: '', email: '', direccion: '', comision: 0 },
     });
     
     const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
 
     const onSubmit = async (data: DoctorFormValues) => {
         try {
-            const newDoctorData: Omit<Doctor, 'id' | 'code' | 'total' | 'paid' | 'due'> = {
+            const newDoctorData: Omit<Doctor, 'id' | 'codigo' | 'total' | 'pagado' | 'adeudo'> = {
                 ...data,
-                phone: data.phone || null,
+                telefono: data.telefono || null,
                 email: data.email || null,
-                address: data.address || null,
+                direccion: data.direccion || null,
             };
             await createDoctor(newDoctorData);
-            const createdDoctor = { ...newDoctorData, id: Date.now(), code: '', total: 0, paid: 0, due: 0 };
+            const createdDoctor = { ...newDoctorData, id: Date.now(), codigo: '', total: 0, pagado: 0, adeudo: 0 };
             toast({ title: "Éxito", description: "Doctor creado correctamente." });
             form.reset();
             onSuccess(createdDoctor as Doctor);
@@ -72,19 +72,19 @@ function CreateDoctorForm({ onSuccess }: { onSuccess: (doctor: Doctor) => void }
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField control={form.control} name="name" render={({ field }) => (
+                    <FormField control={form.control} name="nombre" render={({ field }) => (
                         <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
-                    <FormField control={form.control} name="phone" render={({ field }) => (
+                    <FormField control={form.control} name="telefono" render={({ field }) => (
                         <FormItem><FormLabel>Teléfono</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="email" render={({ field }) => (
                         <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
-                    <FormField control={form.control} name="commission" render={({ field }) => (
+                    <FormField control={form.control} name="comision" render={({ field }) => (
                         <FormItem><FormLabel>Comisión (%)</FormLabel><FormControl><Input type="number" {...field} onFocus={handleFocus} /></FormControl><FormMessage /></FormItem>
                     )} />
-                    <FormField control={form.control} name="address" render={({ field }) => (
+                    <FormField control={form.control} name="direccion" render={({ field }) => (
                         <FormItem className="md:col-span-2"><FormLabel>Dirección</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
                     )} />
                 </div>
@@ -99,31 +99,31 @@ function CreateDoctorForm({ onSuccess }: { onSuccess: (doctor: Doctor) => void }
 
 type CartItem = {
     id: string;
-    name: string;
-    price: number;
-    type: 'study' | 'package';
+    nombre: string;
+    precio: number;
+    tipo_estudio: 'study' | 'package';
 };
 
 type Discount = {
-    type: 'monto' | 'porcentaje';
-    value: number;
-    reason: string;
+    tipo_descuento: 'monto' | 'porcentaje';
+    valor: number;
+    razon: string;
 };
 
 export default function CreateTestRequestPage() {
-    const [patients, setPatients] = useState<Patient[]>([]);
-    const [studies, setStudies] = useState<Study[]>([]);
-    const [packages, setPackages] = useState<PackageType[]>([]);
+    const [patients, setPatients] = useState<Paciente[]>([]);
+    const [estudios, setStudies] = useState<Study[]>([]);
+    const [paquetes, setPackages] = useState<PackageType[]>([]);
     const [doctors, setDoctors] = useState<Doctor[]>([]);
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+    const [selectedPatient, setSelectedPatient] = useState<Paciente | null>(null);
     const [cart, setCart] = useState<CartItem[]>([]);
     
-    const [discount, setDiscount] = useState<Discount | null>(null);
-    const [discountType, setDiscountType] = useState<'monto' | 'porcentaje'>('monto');
-    const [discountValue, setDiscountValue] = useState(0);
-    const [discountReason, setDiscountReason] = useState('');
+    const [descuento, setDiscount] = useState<Discount | null>(null);
+    const [descuentoType, setDiscountType] = useState<'monto' | 'porcentaje'>('monto');
+    const [descuentoValue, setDiscountValue] = useState(0);
+    const [descuentoReason, setDiscountReason] = useState('');
     const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
     const [isPatientModalOpen, setIsPatientModalOpen] = useState(false);
     const [isDoctorModalOpen, setIsDoctorModalOpen] = useState(false);
@@ -140,18 +140,18 @@ export default function CreateTestRequestPage() {
 
     const fetchAllData = async () => {
         try {
-            const [patientsData, studiesData, doctorsData, packagesData] = await Promise.all([
+            const [patientsData, estudiosData, doctorsData, paquetesData] = await Promise.all([
                 getPatients(),
                 getStudies(),
-                getDoctors(),
-                getPackages(),
+                getDoctores(),
+                getPaquetesEstudios(),
             ]);
             setPatients(patientsData);
-            setStudies(studiesData);
+            setStudies(estudiosData);
             setDoctors(doctorsData);
-            setPackages(packagesData);
+            setPackages(paquetesData);
         } catch (error) {
-            console.error("Error fetching initial data:", error);
+            console.error("Error al obtener los datos iniciales:", error);
             toast({ title: "Error", description: "No se pudieron cargar los datos iniciales."});
         }
     };
@@ -163,21 +163,21 @@ export default function CreateTestRequestPage() {
     const filteredPatients = useMemo(() => {
         if (!searchTerm) return [];
         return patients.filter(p =>
-            p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
             String(p.id).toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [searchTerm, patients]);
 
-    const handleSelectPatient = (patient: Patient) => {
+    const handleSelectPatient = (patient: Paciente) => {
         setSelectedPatient(patient);
         setSearchTerm(''); // Clear search term after selection
     };
 
-    const handlePatientCreated = async (newPatient: Patient) => {
+    const handlePatientCreated = async (newPatient: Paciente) => {
       setIsPatientModalOpen(false);
       toast({
         title: "Éxito",
-        description: `Paciente ${newPatient.name} creado.`,
+        description: `Paciente ${newPatient.nombre} creado.`,
       });
       await fetchAllData(); // Refresh all data to get the new patient
       setSelectedPatient(newPatient); // Automatically select the new patient
@@ -185,9 +185,9 @@ export default function CreateTestRequestPage() {
     
     const handleDoctorCreated = async (newDoctor: Doctor) => {
         setIsDoctorModalOpen(false);
-        toast({ title: "Éxito", description: `Doctor ${newDoctor.name} creado.` });
+        toast({ title: "Éxito", description: `Doctor ${newDoctor.nombre} creado.` });
         await fetchAllData(); // Refresh doctors list
-        setSelectedDoctor(newDoctor.name); // Automatically select the new doctor
+        setSelectedDoctor(newDoctor.nombre); // Automatically select the new doctor
     };
 
     const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -207,15 +207,15 @@ export default function CreateTestRequestPage() {
             return;
         }
 
-        const studyToAdd = studies.find(s => s.id === Number(itemId));
+        const studyToAdd = estudios.find(s => s.id === Number(itemId));
         if (studyToAdd) {
-            setCart(prev => [...prev, {id: String(studyToAdd.id), name: studyToAdd.name, price: Number(studyToAdd.price), type: 'study'}]);
+            setCart(prev => [...prev, {id: String(studyToAdd.id), nombre: studyToAdd.nombre, precio: Number(studyToAdd.precio), tipo_estudio: 'study'}]);
             return;
         }
 
-        const packageToAdd = packages.find(p => p.id === Number(itemId));
+        const packageToAdd = paquetes.find(p => p.id === Number(itemId));
         if (packageToAdd) {
-            setCart(prev => [...prev, {id: String(packageToAdd.id), name: packageToAdd.name, price: Number(packageToAdd.price), type: 'package'}]);
+            setCart(prev => [...prev, {id: String(packageToAdd.id), nombre: packageToAdd.nombre, precio: Number(packageToAdd.precio), tipo_estudio: 'package'}]);
         }
     };
 
@@ -225,11 +225,11 @@ export default function CreateTestRequestPage() {
     };
 
     const handleApplyDiscount = () => {
-        if (discountValue <= 0) {
+        if (descuentoValue <= 0) {
             toast({ title: "Valor inválido", description: "El valor del descuento debe ser mayor a cero.", variant: "destructive" });
             return;
         }
-        setDiscount({ type: discountType, value: discountValue, reason: discountReason });
+        setDiscount({ tipo_descuento: descuentoType, valor: descuentoValue, razon: descuentoReason });
         setIsDiscountModalOpen(false);
     };
 
@@ -240,18 +240,18 @@ export default function CreateTestRequestPage() {
         setIsDiscountModalOpen(false);
     }
 
-    const subtotal = useMemo(() => cart.reduce((acc, item) => acc + item.price, 0), [cart]);
+    const subtotal = useMemo(() => cart.reduce((acc, item) => acc + item.precio, 0), [cart]);
     
     const calculatedDiscount = useMemo(() => {
-        if (!discount) return 0;
-        if (discount.type === 'monto') {
-            return Math.min(discount.value, subtotal);
+        if (!descuento) return 0;
+        if (descuento.tipo_descuento === 'monto') {
+            return Math.min(descuento.valor, subtotal);
         }
-        if (discount.type === 'porcentaje') {
-            return (subtotal * discount.value) / 100;
+        if (descuento.tipo_descuento === 'porcentaje') {
+            return (subtotal * descuento.valor) / 100;
         }
         return 0;
-    }, [discount, subtotal]);
+    }, [descuento, subtotal]);
 
     const total = subtotal - calculatedDiscount;
     
@@ -263,13 +263,13 @@ export default function CreateTestRequestPage() {
     
         const maxDeliveryDays = cart.reduce((maxDays, item) => {
             let deliveryDays = 0;
-            const study = studies.find(s => s.id === Number(item.id));
+            const study = estudios.find(s => s.id === Number(item.id));
     
             if (study) {
-                if (study.deliveryUnit === 'dias') {
-                    deliveryDays = study.deliveryTime;
-                } else if (study.deliveryUnit === 'horas') {
-                    deliveryDays = Math.ceil(study.deliveryTime / 24);
+                if (study.unidadEntrega === 'dias') {
+                    deliveryDays = study.tiempoEntrega;
+                } else if (study.unidadEntrega === 'horas') {
+                    deliveryDays = Math.ceil(study.tiempoEntrega / 24);
                 }
             }
     
@@ -280,7 +280,7 @@ export default function CreateTestRequestPage() {
         newDeliveryDate.setDate(newDeliveryDate.getDate() + maxDeliveryDays);
         setDeliveryDate(newDeliveryDate.toISOString().split('T')[0]);
     
-    }, [cart, studies]);
+    }, [cart, estudios]);
 
 
     const resetForm = () => {
@@ -323,27 +323,27 @@ export default function CreateTestRequestPage() {
         }
         setLoading(true);
 
-        const studiesInCart = cart.filter(i => i.type === 'study').map(i => i.name);
-        const packagesInCart = cart.filter(i => i.type === 'package').map(i => i.name);
+        const estudiosInCart = cart.filter(i => i.tipo_estudio === 'study').map(i => i.nombre);
+        const paquetesInCart = cart.filter(i => i.tipo_estudio === 'package').map(i => i.nombre);
 
         try {
             const newRecibo: ReciboCreation = {
-                patientCode: String(selectedPatient.id),
-                patientName: selectedPatient.name,
-                contract: selectedPatient.convenio,
+                codigoPaciente: String(selectedPatient.id),
+                nombrePaciente: selectedPatient.nombre,
+                contract: selectedPatient.convenio_id?.toString(),
                 subtotal,
-                discount: calculatedDiscount,
+                descuento: calculatedDiscount,
                 total,
-                paid: 0,
-                due: total,
-                studies: studiesInCart,
-                packages: packagesInCart,
+                pagado: 0,
+                adeudo: total,
+                estudios: estudiosInCart,
+                paquetes: paquetesInCart,
                 doctor: selectedDoctor,
                 deliveryDate,
             };
             
             setLastRecibo(newRecibo);
-            await createRecibo(newRecibo);
+            await createRecibo(newRecibo,1);
 
             toast({
                 title: "Éxito",
@@ -366,13 +366,13 @@ export default function CreateTestRequestPage() {
     };
 
     const availableItems = useMemo(() => {
-        const studyItems = studies.map(s => ({ value: s.id, label: `${s.name} ($${s.price})`, type: 'Estudio' }));
-        const packageItems = packages.map(p => ({ value: p.id, label: `${p.name} ($${p.price})`, type: 'Paquete' }));
+        const studyItems = estudios.map(s => ({ value: s.id, label: `${s.nombre} ($${s.precio})`, type: 'Estudio' }));
+        const packageItems = paquetes.map(p => ({ value: p.id, label: `${p.nombre} ($${p.precio})`, type: 'Paquete' }));
         return [...studyItems, ...packageItems];
-    }, [studies, packages]);
+    }, [estudios, paquetes]);
 
     const doctorOptions = useMemo(() => [
-        { id: 'default', name: 'A QUIEN CORRESPONDA' },
+        { id: 'default', nombre: 'A QUIEN CORRESPONDA' },
         ...doctors
     ], [doctors]);
     
@@ -416,7 +416,7 @@ export default function CreateTestRequestPage() {
                                             <div className="absolute z-10 w-full bg-card border rounded-md mt-1 shadow-lg max-h-60 overflow-y-auto">
                                                 {filteredPatients.map(p => (
                                                     <div key={p.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => handleSelectPatient(p)}>
-                                                        {p.name}
+                                                        {p.nombre}
                                                     </div>
                                                 ))}
                                             </div>
@@ -455,10 +455,10 @@ export default function CreateTestRequestPage() {
                                             </TableHeader>
                                             <TableBody>
                                                 {cart.length > 0 ? cart.map(item => (
-                                                    <TableRow key={`${item.id}-${item.type}`}>
-                                                        <TableCell>{item.name}</TableCell>
-                                                        <TableCell className="capitalize">{item.type === 'study' ? 'Estudio' : 'Paquete'}</TableCell>
-                                                        <TableCell className="text-right">${Number(item.price).toFixed(2)}</TableCell>
+                                                    <TableRow key={`${item.id}-${item.tipo_estudio}`}>
+                                                        <TableCell>{item.nombre}</TableCell>
+                                                        <TableCell className="capitalize">{item.tipo_estudio === 'study' ? 'Estudio' : 'Paquete'}</TableCell>
+                                                        <TableCell className="text-right">${Number(item.precio).toFixed(2)}</TableCell>
                                                         <TableCell className="text-right">
                                                             <Button variant="ghost" size="icon" className="text-red-500" onClick={() => handleRemoveFromCart(item.id)}>
                                                                 <Trash2 className="h-4 w-4"/>
@@ -505,11 +505,11 @@ export default function CreateTestRequestPage() {
                                     <>
                                         <div className="flex items-center gap-3">
                                             <User className="text-primary"/>
-                                            <span>{selectedPatient.name}</span>
+                                            <span>{selectedPatient.nombre}</span>
                                         </div>
                                         <div className="text-sm text-muted-foreground">
-                                            <p>Convenio: {selectedPatient.convenio || 'Ninguno'}</p>
-                                            <p>{selectedPatient.age} {selectedPatient.ageUnit}</p>
+                                            <p>Convenio: {selectedPatient.convenio_id || 'Ninguno'}</p>
+                                            <p>{selectedPatient.edad} {selectedPatient.unidad_edad}</p>
                                             <p>{selectedPatient.email}</p>
                                         </div>
                                         <div className="space-y-2">
@@ -519,7 +519,7 @@ export default function CreateTestRequestPage() {
                                                     <SelectTrigger><SelectValue placeholder="Seleccione un médico" /></SelectTrigger>
                                                     <SelectContent>
                                                         {doctorOptions.map(doctor => (
-                                                            <SelectItem key={doctor.id} value={doctor.name}>{doctor.name}</SelectItem>
+                                                            <SelectItem key={doctor.id} value={doctor.nombre}>{doctor.nombre}</SelectItem>
                                                         ))}
                                                     </SelectContent>
                                                 </Select>
@@ -571,20 +571,20 @@ export default function CreateTestRequestPage() {
                                                     <DialogTitle>Gestionar Descuento</DialogTitle>
                                                 </DialogHeader>
                                                 <div className="space-y-4 py-4">
-                                                    {discount && (
+                                                    {descuento && (
                                                         <div className="p-3 rounded-md bg-muted flex justify-between items-center">
                                                             <div>
                                                                 <p className="font-semibold">
-                                                                    {discount.type === 'monto' ? `$${discount.value}` : `${discount.value}%`} de descuento
+                                                                    {descuento.tipo_descuento === 'monto' ? `$${descuento.valor}` : `${descuento.valor}%`} de descuento
                                                                 </p>
-                                                                <p className="text-sm text-muted-foreground">{discount.reason}</p>
+                                                                <p className="text-sm text-muted-foreground">{descuento.razon}</p>
                                                             </div>
                                                             <Button variant="destructive" size="sm" onClick={handleRemoveDiscount}>Eliminar</Button>
                                                         </div>
                                                     )}
                                                     <div className="space-y-2">
                                                         <Label>Tipo de Descuento</Label>
-                                                        <RadioGroup value={discountType} onValueChange={(v) => setDiscountType(v as any)} className="flex gap-4">
+                                                        <RadioGroup value={descuentoType} onValueChange={(v) => setDiscountType(v as any)} className="flex gap-4">
                                                             <div className="flex items-center space-x-2"><RadioGroupItem value="monto" id="monto"/><Label htmlFor="monto">Por Monto</Label></div>
                                                             <div className="flex items-center space-x-2"><RadioGroupItem value="porcentaje" id="porcentaje"/><Label htmlFor="porcentaje">Por Porcentaje</Label></div>
                                                         </RadioGroup>
@@ -592,13 +592,13 @@ export default function CreateTestRequestPage() {
                                                     <div className="space-y-2">
                                                         <Label>Valor</Label>
                                                         <div className="relative">
-                                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{discountType === 'monto' ? '$' : '%'}</span>
-                                                            <Input type="number" value={discountValue} onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)} className="pl-8" onFocus={handleFocus}/>
+                                                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">{descuentoType === 'monto' ? '$' : '%'}</span>
+                                                            <Input type="number" value={descuentoValue} onChange={(e) => setDiscountValue(parseFloat(e.target.value) || 0)} className="pl-8" onFocus={handleFocus}/>
                                                         </div>
                                                     </div>
                                                         <div className="space-y-2">
                                                         <Label>Motivo del Descuento</Label>
-                                                        <Textarea value={discountReason} onChange={(e) => setDiscountReason(e.target.value)} />
+                                                        <Textarea value={descuentoReason} onChange={(e) => setDiscountReason(e.target.value)} />
                                                     </div>
                                                 </div>
                                                 <DialogFooter>

@@ -148,7 +148,7 @@ const ListCard = ({ icon: Icon, title, value, colorClass }: { icon: React.Elemen
 
 
 export default async function HomePage() {
-    const [studies, cultures, antibiotics, patients, convenios] = await Promise.all([
+    const [estudios, cultures, antibiotics, patients, convenios] = await Promise.all([
         getStudies(),
         getCultures(),
         getAntibiotics(),
@@ -157,7 +157,7 @@ export default async function HomePage() {
     ]);
 
     const stats = {
-        studies: studies.length,
+        estudios: estudios.length,
         cultures: cultures.length,
         antibiotics: antibiotics.length,
         patients: patients.length,
@@ -196,7 +196,7 @@ export default async function HomePage() {
 
         {/* Statistics Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
-            <StatCard icon={Microscope} value={stats.studies.toString()} label="Pruebas" link="/estudios" colorClass="bg-teal-500" />
+            <StatCard icon={Microscope} value={stats.estudios.toString()} label="Pruebas" link="/estudios" colorClass="bg-teal-500" />
             <StatCard icon={TestTube} value={stats.cultures.toString()} label="Cultivos" link="/cultivos" colorClass="bg-teal-500" />
             <StatCard icon={Pill} value={stats.antibiotics.toString()} label="Antibióticos" link="/antibioticos" colorClass="bg-teal-500" />
             <StatCard icon={Users} value={stats.patients.toString()} label="Pacientes" link="/pacientes" colorClass="bg-teal-500" />
@@ -212,7 +212,7 @@ export default async function HomePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="space-y-4">
-                <ListCard icon={ListChecks} title="Pruebas" value={stats.studies.toString()} colorClass="bg-primary" />
+                <ListCard icon={ListChecks} title="Pruebas" value={stats.estudios.toString()} colorClass="bg-primary" />
                 <ListCard icon={ListChecks} title="Cultivos" value={stats.cultures.toString()} colorClass="bg-primary" />
             </div>
             <div className="space-y-4">

@@ -78,7 +78,7 @@ export default function CreatePurchasePage() {
     [watchedPayments]);
     
     const total = subtotal + (watchedTax || 0);
-    const due = total - totalPaid;
+    const adeudo = total - totalPaid;
 
     useEffect(() => {
         getProviders().then(setProviders);
@@ -92,8 +92,8 @@ export default function CreatePurchasePage() {
                 products: data.products.map(p => ({...p, totalPrice: p.unitPrice * p.quantity })),
                 subtotal,
                 total,
-                paid: totalPaid,
-                due,
+                pagado: totalPaid,
+                adeudo,
             };
             await createPurchase(purchaseData);
             toast({ title: "Éxito", description: "Compra creada correctamente." });
@@ -198,7 +198,7 @@ export default function CreatePurchasePage() {
                      )}/>
                     <div className="flex items-center justify-between p-3 bg-background rounded-lg"><Label>Total</Label><Input className="text-right border-0 bg-transparent w-24" value={Number(total.toFixed(2))} readOnly/></div>
                     <div className="flex items-center justify-between p-3 bg-background rounded-lg"><Label>Pagado</Label><Input className="text-right border-0 bg-transparent w-24" value={Number(totalPaid.toFixed(2))} readOnly/></div>
-                    <div className="flex items-center justify-between p-3 bg-background rounded-lg"><Label>Debido</Label><Input className="text-right border-0 bg-transparent w-24" value={Number(due.toFixed(2))} readOnly/></div>
+                    <div className="flex items-center justify-between p-3 bg-background rounded-lg"><Label>Debido</Label><Input className="text-right border-0 bg-transparent w-24" value={Number(adeudo.toFixed(2))} readOnly/></div>
                 </CardContent>
             </Card>
 

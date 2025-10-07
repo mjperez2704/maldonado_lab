@@ -94,13 +94,13 @@ export default function QuotesPage() {
             await createRecibo({
                 patientCode: quote.patientId,
                 patientName: quote.patientName,
-                studies: quote.studies,
-                packages: quote.packages,
+                estudios: quote.estudios,
+                paquetes: quote.paquetes,
                 subtotal: quote.subtotal,
-                discount: quote.discount,
+                descuento: quote.descuento,
                 total: quote.total,
-                paid: 0,
-                due: quote.total,
+                pagado: 0,
+                adeudo: quote.total,
             });
 
             await updateQuote(String(quote.id), { status: 'converted' });

@@ -205,10 +205,10 @@ export default function CreateStudyPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [cats, provs, studies] = await Promise.all([getCategories(), getProviders(), getAllStudies()]);
+                const [cats, provs, estudios] = await Promise.all([getCategories(), getProviders(), getAllStudies()]);
                 setCategories(cats);
                 setProviders(provs);
-                setAllStudies(studies);
+                setAllStudies(estudios);
             } catch (error) {
                 console.error("Error fetching dependencies", error);
                 toast({ title: "Error", description: "No se pudieron cargar las áreas y laboratorios.", variant: "destructive" });

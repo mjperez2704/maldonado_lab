@@ -4,7 +4,7 @@ import { executeQuery } from '@/lib/db';
 export interface Convenio {
     id: number;
     title: string;
-    discount: number;
+    descuento: number;
     items?: { type: string, id: number, name: string, price: string }[];
 }
 
@@ -13,15 +13,15 @@ export async function getConvenios(): Promise<Convenio[]> {
         const results = await executeQuery('SELECT * FROM convenios');
         return JSON.parse(JSON.stringify(results)) as Convenio[];
     } catch (error) {
-        console.error("Database query failed:", error);
+        console.error("Error en la consulta a la base de datos:", error);
         return [];
     }
 }
 
 export async function createConvenio(convenio: Omit<Convenio, 'id'>): Promise<void> {
-    const { title, discount } = convenio;
-    const query = 'INSERT INTO convenios (title, discount) VALUES (?, ?)';
-    await executeQuery(query, [title, discount]);
+    const { title, descuento } = convenio;
+    const query = 'INSERT INTO convenios (titulos, descuento) VALUES (?, ?)';
+    await executeQuery(query, [title, descuento]);
 }
 
 export async function getConvenioById(id: number): Promise<Convenio | null> {
@@ -37,9 +37,9 @@ export async function getConvenioById(id: number): Promise<Convenio | null> {
 }
 
 export async function updateConvenio(id: number, convenio: Partial<Omit<Convenio, 'id'>>): Promise<void> {
-    const { title, discount } = convenio;
-    const query = 'UPDATE convenios SET title = ?, discount = ? WHERE id = ?';
-    await executeQuery(query, [title, discount, id]);
+    const { title, descuento } = convenio;
+    const query = 'UPDATE convenios SET titulo = ?, descuento = ? WHERE id = ?';
+    await executeQuery(query, [title, descuento, id]);
 }
 
 

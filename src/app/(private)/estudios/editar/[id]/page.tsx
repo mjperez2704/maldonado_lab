@@ -186,7 +186,7 @@ export default function EditStudyPage() {
         if (studyId) {
             const fetchData = async () => {
                 try {
-                    const [studyData, cats, provs, studies] = await Promise.all([
+                    const [studyData, cats, provs, estudios] = await Promise.all([
                         getStudyById(studyId),
                         getCategories(),
                         getProviders(),
@@ -207,7 +207,7 @@ export default function EditStudyPage() {
                     }
                     setCategories(cats);
                     setProviders(provs);
-                    setAllStudies(studies);
+                    setAllStudies(estudios);
                 } catch (error) {
                     console.error("Error fetching data", error);
                     toast({ title: "Error", description: "No se pudieron cargar los datos.", variant: "destructive" });

@@ -8,34 +8,34 @@ export interface Category {
 
 export async function getCategories(): Promise<Category[]> {
     try {
-        const results = await executeQuery('SELECT * FROM categories');
+        const results = await executeQuery('SELECT * FROM categorias');
         return JSON.parse(JSON.stringify(results)) as Category[];
     } catch (error) {
-        console.error("Database query failed:", error);
+        console.error("Error en la consulta a la base de datos:", error);
         return [];
     }
 }
 
-export async function createCategory(name: string): Promise<void> {
-  const query = 'INSERT INTO categories (name) VALUES (?)';
-  await executeQuery(query, [name]);
+export async function createCategory(nombre: string): Promise<void> {
+  const query = 'INSERT INTO categorias (nombre) VALUES (?)';
+  await executeQuery(query, [nombre]);
 }
 
 export async function getCategoryById(id: number): Promise<Category | null> {
-    const results = await executeQuery<Category[]>('SELECT * FROM categories WHERE id = ?', [id]);
+    const results = await executeQuery<Category[]>('SELECT * FROM categorias WHERE id = ?', [id]);
     if (results.length > 0) {
         return JSON.parse(JSON.stringify(results[0]));
     }
     return null;
 }
 
-export async function updateCategory(id: number, name: string): Promise<void> {
-  const query = 'UPDATE categories SET name = ? WHERE id = ?';
-  await executeQuery(query, [name, id]);
+export async function updateCategory(id: number, nombre: string): Promise<void> {
+  const query = 'UPDATE categorias SET nombre = ? WHERE id = ?';
+  await executeQuery(query, [nombre, id]);
 }
 
 
 export async function deleteCategory(id: number): Promise<void> {
-  const query = 'DELETE FROM categories WHERE id = ?';
+  const query = 'DELETE FROM categorias WHERE id = ?';
   await executeQuery(query, [id]);
 }

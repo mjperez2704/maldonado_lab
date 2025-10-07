@@ -68,13 +68,13 @@ export default function IncomeAndExpensesPage() {
             }));
 
             const automaticIncomes: CombinedTransaction[] = recibos
-                .filter(recibo => recibo.paid > 0)
+                .filter(recibo => recibo.pagado > 0)
                 .map(recibo => ({
                     id: `rec-${recibo.id}`,
                     date: recibo.date,
                     concept: `Pago Solicitud Folio #${recibo.barcode}`,
                     type: 'ingress',
-                    amount: recibo.paid,
+                    amount: recibo.pagado,
                     source: 'solicitud'
                 }));
             

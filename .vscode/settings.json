@@ -11,10 +11,10 @@
             "server": "195.250.27.25",
             "port": 3306,
             "driver": "MariaDB",
-            "name": "megalaboratorio",
-            "database": "megaspots_megalaboratorio",
-            "username": "megaspots_megalaboratorio",
-            "password": "megaspots_megalaboratorio"
+            "name": "mega_lims",
+            "database": "megaspots_lims",
+            "username": "megaspots_lims",
+            "password": "megaspots_lims"
         }
     ]
 }

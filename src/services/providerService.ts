@@ -1,46 +1,46 @@
 "use server";
 import { executeQuery } from '@/lib/db';
 
-export interface Provider {
+export interface Proveedor {
   id: number;
-  name: string;
-  phone: string | null;
+  nombre: string;
+  telefono: string | null;
   email: string | null;
-  address: string | null;
+  direccion: string | null;
 }
 
-export async function getProviders(): Promise<Provider[]> {
+export async function getProviders(): Promise<Proveedor[]> {
     try {
-        const results = await executeQuery('SELECT * FROM providers');
-        return JSON.parse(JSON.stringify(results)) as Provider[];
+        const results = await executeQuery('SELECT * FROM proveedores');
+        return JSON.parse(JSON.stringify(results)) as Proveedor[];
     } catch (error) {
-        console.error("Database query failed:", error);
+        console.error("Error en la consulta a la base de datos:", error);
         return [];
     }
 }
 
-export async function createProvider(provider: Omit<Provider, 'id'>): Promise<void> {
-    const { name, phone, email, address } = provider;
-    const query = 'INSERT INTO providers (name, phone, email, address) VALUES (?, ?, ?, ?)';
-    await executeQuery(query, [name, phone, email, address]);
+export async function createProvider(proveedor: Omit<Proveedor, 'id'>): Promise<void> {
+    const { nombre, telefono, email, direccion } = proveedor;
+    const query = 'INSERT INTO proveedores (nombre, telefono, email, direccion) VALUES (?, ?, ?, ?)';
+    await executeQuery(query, [nombre, telefono, email, direccion]);
 }
 
-export async function getProviderById(id: number): Promise<Provider | null> {
-    const results = await executeQuery<Provider[]>('SELECT * FROM providers WHERE id = ?', [id]);
+export async function getProviderById(id: number): Promise<Proveedor | null> {
+    const results = await executeQuery<Proveedor[]>('SELECT * FROM proveedores WHERE id = ?', [id]);
     if (results.length > 0) {
-        return JSON.parse(JSON.stringify(results[0])) as Provider;
+        return JSON.parse(JSON.stringify(results[0])) as Proveedor;
     }
     return null;
 }
 
-export async function updateProvider(id: number, provider: Partial<Omit<Provider, 'id'>>): Promise<void> {
-    const { name, phone, email, address } = provider;
-    const query = 'UPDATE providers SET name = ?, phone = ?, email = ?, address = ? WHERE id = ?';
-    await executeQuery(query, [name, phone, email, address, id]);
+export async function updateProvider(id: number, proveedor: Partial<Omit<Proveedor, 'id'>>): Promise<void> {
+    const { nombre, telefono, email, direccion } = proveedor;
+    const query = 'UPDATE proveedores SET nombre = ?, telefono = ?, email = ?, direccion = ? WHERE id = ?';
+    await executeQuery(query, [nombre, telefono, email, direccion, id]);
 }
 
 
 export async function deleteProvider(id: number): Promise<void> {
-  const query = 'DELETE FROM providers WHERE id = ?';
+  const query = 'DELETE FROM proveedores WHERE id = ?';
   await executeQuery(query, [id]);
 }

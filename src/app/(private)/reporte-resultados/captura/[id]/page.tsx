@@ -39,18 +39,18 @@ export default function CaptureResultsPage() {
             Promise.all([
                 getReciboById(reciboId),
                 getStudies()
-            ]).then(([reciboData, studiesData]) => {
+            ]).then(([reciboData, estudiosData]) => {
                 if (reciboData) {
                     setRecibo(reciboData);
-                    setAllStudies(studiesData);
+                    setAllStudies(estudiosData);
 
                     const initialResults: ResultInput[] = [];
-                    const studiesInRecibo = studiesData.filter(s => 
-                        reciboData.studies.includes(s.name) || 
-                        reciboData.packages.some(pkgName => pkgName === s.name)
+                    const estudiosInRecibo = estudiosData.filter(s => 
+                        reciboData.estudios.includes(s.name) || 
+                        reciboData.paquetes.some(pkgName => pkgName === s.name)
                     );
 
-                    studiesInRecibo.forEach(study => {
+                    estudiosInRecibo.forEach(study => {
                         const existingMainResult = reciboData.results?.find(r => r.studyName === study.name && !r.parameterName);
                         // Don't add a row for the main study if it has parameters
                         if (!study.parameters || study.parameters.length === 0) {

@@ -10,9 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { FlaskConical, UserSearch, Search, Trash2, Calendar, User, Microscope, DollarSign, Tag, Save, Package, Newspaper } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
-import { getPatients, Patient } from "@/services/patientService";
+import { getPatients, Paciente } from "@/services/patientService";
 import { getStudies, Study } from "@/services/studyService";
-import { getPackages, Package as PackageType } from "@/services/packageService";
+import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/packageService";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { createQuote, QuoteCreation } from "@/services/quoteService";
@@ -27,12 +27,12 @@ type CartItem = {
 };
 
 export default function CreateQuotePage() {
-    const [patients, setPatients] = useState<Patient[]>([]);
-    const [studies, setStudies] = useState<Study[]>([]);
-    const [packages, setPackages] = useState<PackageType[]>([]);
+    const [patients, setPatients] = useState<Paciente[]>([]);
+    const [estudios, setStudies] = useState<Study[]>([]);
+    const [paquetes, setPackages] = useState<PackageType[]>([]);
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+    const [selectedPatient, setSelectedPatient] = useState<Paciente | null>(null);
     const [cart, setCart] = useState<CartItem[]>([]);
 
     const [loading, setLoading] = useState(false);
@@ -44,14 +44,14 @@ export default function CreateQuotePage() {
 
     const fetchAllData = async () => {
         try {
-            const [patientsData, studiesData, packagesData] = await Promise.all([
+            const [patientsData, estudiosData, paquetesData] = await Promise.all([
                 getPatients(),
                 getStudies(),
-                getPackages(),
+                getPaquetesEstudios(),
             ]);
             setPatients(patientsData);
-            setStudies(studiesData);
-            setPackages(packagesData);
+            setStudies(estudiosData);
+            setPackages(paquetesData);
         } catch (error) {
             console.error("Error fetching initial data:", error);
             toast({ title: "Error", description: "No se pudieron cargar los datos iniciales."});
@@ -65,7 +65,7 @@ export default function CreateQuotePage() {
     const filteredPatients = useMemo(() => {
         if (!searchTerm) return [];
         return patients.filter(p =>
-            p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
             String(p.id).toLowerCase().includes(searchTerm.toLowerCase())
         );
     }, [searchTerm, patients]);
@@ -78,16 +78,16 @@ export default function CreateQuotePage() {
     };
 
 
-    const handleSelectPatient = (patient: Patient) => {
+    const handleSelectPatient = (patient: Paciente) => {
         setSelectedPatient(patient);
         setSearchTerm(''); // Clear search term after selection
     };
     
-    const handlePatientCreated = async (newPatient: Patient) => {
+    const handlePatientCreated = async (newPatient: Paciente) => {
       setIsPatientModalOpen(false);
       toast({
         title: "Éxito",
-        description: `Paciente ${newPatient.name} creado.`,
+        description: `Paciente ${newPatient.nombre} creado.`,
       });
       await fetchAllData(); // Refresh all data to get the new patient
       setSelectedPatient(newPatient); // Automatically select the new patient
@@ -103,15 +103,15 @@ export default function CreateQuotePage() {
             return;
         }
 
-        const studyToAdd = studies.find(s => String(s.id) === itemId);
+        const studyToAdd = estudios.find(s => String(s.id) === itemId);
         if (studyToAdd) {
-            setCart(prev => [...prev, {id: itemId, name: studyToAdd.name, price: Number(studyToAdd.price), type: 'study'}]);
+            setCart(prev => [...prev, {id: itemId, name: studyToAdd.nombre, price: Number(studyToAdd.precio), type: 'study'}]);
             return;
         }
 
-        const packageToAdd = packages.find(p => String(p.id) === itemId);
+        const packageToAdd = paquetes.find(p => String(p.id) === itemId);
         if (packageToAdd) {
-            setCart(prev => [...prev, {id: itemId, name: packageToAdd.name, price: Number(packageToAdd.price), type: 'package'}]);
+            setCart(prev => [...prev, {id: itemId, name: packageToAdd.nombre, price: Number(packageToAdd.precio), type: 'package'}]);
         }
     };
 
@@ -121,8 +121,8 @@ export default function CreateQuotePage() {
     };
 
     const subtotal = useMemo(() => cart.reduce((acc, item) => acc + item.price, 0), [cart]);
-    const discount = 0; // Placeholder for discount logic
-    const total = subtotal - discount;
+    const descuento = 0; // Placeholder for descuento logic
+    const total = subtotal - descuento;
 
     const resetForm = () => {
         setSearchTerm('');
@@ -141,18 +141,18 @@ export default function CreateQuotePage() {
         }
         setLoading(true);
 
-        const studiesInCart = cart.filter(i => i.type === 'study').map(i => i.name);
-        const packagesInCart = cart.filter(i => i.type === 'package').map(i => i.name);
+        const estudiosInCart = cart.filter(i => i.type === 'study').map(i => i.name);
+        const paquetesInCart = cart.filter(i => i.type === 'package').map(i => i.name);
 
         try {
             const newQuote: QuoteCreation = {
-                patientId: String(selectedPatient.id),
-                patientName: selectedPatient.name,
+                paciente_id: String(selectedPatient.id),
+                paciente_nombre: selectedPatient.nombre,
                 subtotal,
-                discount,
+                descuento,
                 total,
-                studies: studiesInCart,
-                packages: packagesInCart,
+                estudios: estudiosInCart,
+                paquetes: paquetesInCart,
             };
 
             await createQuote(newQuote);
@@ -177,10 +177,10 @@ export default function CreateQuotePage() {
     };
 
     const availableItems = useMemo(() => {
-        const studyItems = studies.map(s => ({ value: String(s.id), label: `${s.name} ($${s.price})`, type: 'Estudio' }));
-        const packageItems = packages.map(p => ({ value: String(p.id), label: `${p.name} ($${p.price})`, type: 'Paquete' }));
+        const studyItems = estudios.map(s => ({ value: String(s.id), label: `${s.nombre} ($${s.precio}c)`, type: 'Estudio' }));
+        const packageItems = paquetes.map(p => ({ value: String(p.id), label: `${p.nombre} ($${p.precio})`, type: 'Paquete' }));
         return [...studyItems, ...packageItems];
-    }, [studies, packages]);
+    }, [estudios, paquetes]);
 
     return (
         <div className="flex flex-col gap-6 py-8">
@@ -218,7 +218,7 @@ export default function CreateQuotePage() {
                                     <div className="absolute z-10 w-full bg-card border rounded-md mt-1 shadow-lg max-h-60 overflow-y-auto">
                                         {filteredPatients.map(p => (
                                             <div key={p.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => handleSelectPatient(p)}>
-                                                {p.name}
+                                                {p.nombre}
                                             </div>
                                         ))}
                                     </div>
@@ -306,7 +306,7 @@ export default function CreateQuotePage() {
                                 <>
                                     <div className="flex items-center gap-3">
                                         <User className="text-primary"/>
-                                        <span>{selectedPatient.name}</span>
+                                        <span>{selectedPatient.nombre}</span>
                                     </div>
                                 </>
                              ) : (
@@ -326,7 +326,7 @@ export default function CreateQuotePage() {
                                 </div>
                                  <div className="flex justify-between items-center text-lg">
                                     <span className="flex items-center gap-2"><Tag className="h-5 w-5"/> Descuento</span>
-                                    <span>-${Number(discount.toFixed(2))}</span>
+                                    <span>-${Number(descuento.toFixed(2))}</span>
                                 </div>
                                 <div className="flex justify-between items-center font-bold text-xl text-primary">
                                     <span className="flex items-center gap-2"><DollarSign className="h-5 w-5"/> Total</span>

@@ -16,7 +16,7 @@ import { getCategories, Category } from '@/services/categoryService';
 import Link from "next/link";
 
 export default function PriceListPage() {
-  const [studies, setStudies] = useState<Study[]>([]);
+  const [estudios, setStudies] = useState<Study[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -26,11 +26,11 @@ export default function PriceListPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [studiesData, categoriesData] = await Promise.all([
+        const [estudiosData, categoriesData] = await Promise.all([
             getStudies(),
             getCategories(),
         ]);
-        setStudies(studiesData);
+        setStudies(estudiosData);
         setCategories(categoriesData);
       } catch (error) {
         console.error("Error fetching data for price list: ", error);
@@ -43,7 +43,7 @@ export default function PriceListPage() {
   }, []);
 
   const filteredAndSortedStudies = useMemo(() => {
-    let filtered = studies;
+    let filtered = estudios;
 
     if (searchTerm) {
         filtered = filtered.filter(study => 
@@ -72,7 +72,7 @@ export default function PriceListPage() {
     });
     
     return sorted;
-  }, [studies, searchTerm, sortOrder, selectedCategory]);
+  }, [estudios, searchTerm, sortOrder, selectedCategory]);
 
   const handleFocus = (event: React.FocusEvent<HTMLInputElement>) => event.target.select();
 

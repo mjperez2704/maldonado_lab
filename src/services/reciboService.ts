@@ -3,7 +3,7 @@
 import { executeQuery } from '@/lib/db';
 
 export interface TestResult {
-    studyName: string;
+    estudio_id: string;
     parameterName: string; // Keep it as string, empty for main study result
     result: string;
     reference: string;
@@ -12,35 +12,35 @@ export interface TestResult {
 
 export interface Recibo {
     id: number;
-    createdBy: string;
-    barcode: string;
-    patientCode: string;
-    patientName: string;
+    creado_por_id: string;
+    codigoBarras: string;
+    codigoPaciente: string;
+    nombrePaciente: string;
     contract?: string;
     subtotal: number;
-    discount: number;
+    descuento: number;
     total: number;
-    paid: number;
-    due: number;
-    date: string;
-    status: 'pending' | 'completed' | 'cancelled';
-    studies: string[];
-    packages: string[];
+    pagado: number;
+    adeudo: number;
+    fecha: string;
+    estado: 'pending' | 'completed' | 'cancelled';
+    estudios: string[];
+    paquetes: string[];
     doctor?: string;
     deliveryDate?: string;
     results?: TestResult[];
 }
 
-export type ReciboCreation = Omit<Recibo, 'id' | 'createdBy' | 'barcode' | 'date' | 'status'>;
+export type ReciboCreation = Omit<Recibo, 'id' | 'creado_por_id' | 'codigoBarras' | 'fecha' | 'estado'>;
 
 export async function getRecibos(): Promise<Recibo[]> {
     try {
-        const results = await executeQuery('SELECT * FROM recibos ORDER BY date DESC');
+        const results = await executeQuery('SELECT * FROM recibos ORDER BY fecha DESC');
         const plainResults = JSON.parse(JSON.stringify(results)) as any[];
         return plainResults.map((row: any) => ({
             ...row,
-            studies: JSON.parse(row.studies || '[]'),
-            packages: JSON.parse(row.packages || '[]'),
+            estudios: JSON.parse(row.estudios || '[]'),
+            paquetes: JSON.parse(row.paquetes || '[]'),
             results: JSON.parse(row.results || '[]'),
         }));
     } catch (error) {
@@ -49,29 +49,29 @@ export async function getRecibos(): Promise<Recibo[]> {
     }
 }
 
-export async function createRecibo(reciboData: ReciboCreation): Promise<void> {
-    const barcode = `BC-${Date.now()}`;
-    const date = new Date().toISOString();
-    const status: Recibo['status'] = 'pending';
-    const createdBy = 'admin'; // Debería venir del usuario logueado
+export async function createRecibo(reciboData: ReciboCreation, usuario_id: number): Promise<void> {
+    const codigoBarras = `BC-${Date.now()}`;
+    const fecha = new Date().toISOString();
+    const estado: Recibo['estado'] = 'pending';
+    const creado_por_id = usuario_id; // Debería venir del usuario logueado
 
     const {
-        patientCode, patientName, contract, subtotal, discount, total, paid, due,
-        studies, packages, doctor, deliveryDate
+        codigoPaciente, nombrePaciente, contract, subtotal, descuento, total, pagado, adeudo,
+        estudios, paquetes, doctor, deliveryDate
     } = reciboData;
 
     const query = `
         INSERT INTO recibos (
-            createdBy, barcode, patientCode, patientName, contract, 
-            subtotal, discount, total, paid, due, date, status, 
-            studies, packages, doctor, deliveryDate
+            creado_por_id, codigoBarras, patientCode, patientName, contract, 
+            subtotal, descuento, total, pagado, adeudo, fecha, estado, 
+            estudios, paquetes, doctor, deliveryDate
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const params = [
-        createdBy, barcode, patientCode, patientName, contract,
-        subtotal, discount, total, paid, due, date, status,
-        JSON.stringify(studies), JSON.stringify(packages), doctor, deliveryDate
+        creado_por_id, codigoBarras, codigoPaciente, nombrePaciente, contract,
+        subtotal, descuento, total, pagado, adeudo, fecha, estado,
+        JSON.stringify(estudios), JSON.stringify(paquetes), doctor, deliveryDate
     ];
 
     await executeQuery(query, params);
@@ -84,8 +84,8 @@ export async function getReciboById(id: string): Promise<Recibo | null> {
             const row = JSON.parse(JSON.stringify(results[0]));
             return {
                 ...row,
-                studies: JSON.parse(row.studies || '[]'),
-                packages: JSON.parse(row.packages || '[]'),
+                estudios: JSON.parse(row.estudios || '[]'),
+                paquetes: JSON.parse(row.paquetes || '[]'),
                 results: JSON.parse(row.results || '[]')
             };
         }
@@ -97,25 +97,25 @@ export async function getReciboById(id: string): Promise<Recibo | null> {
 }
 
 export async function saveResults(id: number, results: TestResult[]): Promise<void> {
-    const query = 'UPDATE recibos SET results = ?, status = ? WHERE id = ?';
+    const query = 'UPDATE recibos SET results = ?, estado = ? WHERE id = ?';
     await executeQuery(query, [JSON.stringify(results), 'completed', id]);
 }
 
-export async function updateRecibo(id: number, recibo: Partial<Omit<Recibo, 'id'| 'date' | 'createdBy'>>): Promise<void> {
+export async function updateRecibo(id: number, recibo: Partial<Omit<Recibo, 'id'| 'fecha' | 'creado_por_id'>>): Promise<void> {
     const { 
-        patientCode, patientName, contract, subtotal, discount, total, paid, due, 
-        status, studies, packages, doctor, deliveryDate, results
+        codigoPaciente, nombrePaciente, contract, subtotal, descuento, total, pagado, adeudo, 
+        estado, estudios, paquetes, doctor, deliveryDate, results
     } = recibo;
     
     const query = `UPDATE recibos SET 
-        patientCode = ?, patientName = ?, contract = ?, subtotal = ?, discount = ?, 
-        total = ?, paid = ?, due = ?, status = ?, studies = ?, packages = ?, 
+        patientCode = ?, patientName = ?, contract = ?, subtotal = ?, descuento = ?, 
+        total = ?, pagado = ?, adeudo = ?, estado = ?, estudios = ?, paquetes = ?, 
         doctor = ?, deliveryDate = ?, results = ? 
         WHERE id = ?`;
 
     const params = [
-        patientCode, patientName, contract, subtotal, discount, total, paid, due,
-        status, JSON.stringify(studies), JSON.stringify(packages), doctor, deliveryDate,
+        codigoPaciente, nombrePaciente, contract, subtotal, descuento, total, pagado, adeudo,
+        estado, JSON.stringify(estudios), JSON.stringify(paquetes), doctor, deliveryDate,
         JSON.stringify(results), id
     ];
 

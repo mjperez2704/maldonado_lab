@@ -33,7 +33,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useLoader } from '@/hooks/useLoader';
 
 export default function PaquetesTable({ initialPackages }: { initialPackages: Package[] }) {
-  const [packages, setPackages] = useState<Package[]>(initialPackages);
+  const [paquetes, setPackages] = useState<Package[]>(initialPackages);
   const router = useRouter();
   const { toast } = useToast();
   const loader = useLoader();
@@ -43,7 +43,7 @@ export default function PaquetesTable({ initialPackages }: { initialPackages: Pa
         loader.start('delete');
         try {
             await deletePackage(id);
-            setPackages(packages.filter(p => p.id !== id));
+            setPackages(paquetes.filter(p => p.id !== id));
             toast({ title: "Éxito", description: "Paquete eliminado." });
         } catch (error) {
             console.error("Error deleting package: ", error);
@@ -118,7 +118,7 @@ export default function PaquetesTable({ initialPackages }: { initialPackages: Pa
               </TableRow>
               </TableHeader>
               <TableBody>
-              {packages.map((item, index) => (
+              {paquetes.map((item, index) => (
                   <TableRow key={item.id}>
                   <TableCell>
                       <Checkbox />
@@ -144,7 +144,7 @@ export default function PaquetesTable({ initialPackages }: { initialPackages: Pa
       </div>
         <div className="flex justify-between items-center">
           <div className="text-sm text-muted-foreground">
-              Mostrando 1 a {packages.length} de {packages.length} registros
+              Mostrando 1 a {paquetes.length} de {paquetes.length} registros
           </div>
           <Pagination>
               <PaginationContent>

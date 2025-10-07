@@ -44,11 +44,11 @@ export default function CreatePackagePage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [studiesData, culturesData] = await Promise.all([getStudies(), getCultures()]);
-                setAllStudies(studiesData);
+                const [estudiosData, culturesData] = await Promise.all([getStudies(), getCultures()]);
+                setAllStudies(estudiosData);
                 setAllCultures(culturesData);
             } catch (error) {
-                console.error("Error fetching studies/cultures", error);
+                console.error("Error fetching estudios/cultures", error);
                 toast({ title: "Error", description: "No se pudieron cargar estudios y cultivos." });
             }
         };

@@ -114,7 +114,7 @@ export default function EditPurchasePage() {
     [watchedPayments]);
 
     const total = subtotal + (watchedTax || 0);
-    const due = total - totalPaid;
+    const adeudo = total - totalPaid;
 
     const onSubmit = async (data: PurchaseFormValues) => {
         try {
@@ -125,8 +125,8 @@ export default function EditPurchasePage() {
                 subtotal,
                 tax: watchedTax || 0,
                 total,
-                paid: totalPaid,
-                due,
+                pagado: totalPaid,
+                adeudo,
             };
             await updatePurchase(purchaseId, purchaseData);
             toast({ title: "Éxito", description: "Compra actualizada correctamente." });
@@ -235,7 +235,7 @@ export default function EditPurchasePage() {
                      )}/>
                     <div className="flex items-center justify-between p-3 bg-background rounded-lg"><Label>Total</Label><Input className="text-right border-0 bg-transparent w-24" value={Number(total.toFixed(2))} readOnly/></div>
                     <div className="flex items-center justify-between p-3 bg-background rounded-lg"><Label>Pagado</Label><Input className="text-right border-0 bg-transparent w-24" value={Number(totalPaid.toFixed(2))} readOnly/></div>
-                    <div className="flex items-center justify-between p-3 bg-background rounded-lg"><Label>Debido</Label><Input className="text-right border-0 bg-transparent w-24" value={Number(due.toFixed(2))} readOnly/></div>
+                    <div className="flex items-center justify-between p-3 bg-background rounded-lg"><Label>Debido</Label><Input className="text-right border-0 bg-transparent w-24" value={Number(adeudo.toFixed(2))} readOnly/></div>
                 </CardContent>
             </Card>
 

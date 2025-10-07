@@ -70,7 +70,7 @@ CREATE TABLE `categories` (
 CREATE TABLE `convenios` (
   `id` int(11) NOT NULL,
   `title` varchar(255) NOT NULL,
-  `discount` decimal(5,2) DEFAULT NULL,
+  `descuento` decimal(5,2) DEFAULT NULL,
   `items` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`items`))
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
@@ -134,8 +134,8 @@ CREATE TABLE `doctors` (
   `address` text DEFAULT NULL,
   `commission` decimal(5,2) DEFAULT 0.00,
   `total` decimal(10,2) DEFAULT 0.00,
-  `paid` decimal(10,2) DEFAULT 0.00,
-  `due` decimal(10,2) DEFAULT 0.00
+  `pagado` decimal(10,2) DEFAULT 0.00,
+  `adeudo` decimal(10,2) DEFAULT 0.00
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
@@ -189,10 +189,10 @@ CREATE TABLE `operations` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `packages`
+-- Estructura de tabla para la tabla `paquetes`
 --
 
-CREATE TABLE `packages` (
+CREATE TABLE `paquetes` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
   `shortcut` varchar(50) DEFAULT NULL,
@@ -278,8 +278,8 @@ CREATE TABLE `purchases` (
   `subtotal` decimal(10,2) DEFAULT NULL,
   `tax` decimal(10,2) DEFAULT NULL,
   `total` decimal(10,2) DEFAULT NULL,
-  `paid` decimal(10,2) DEFAULT NULL,
-  `due` decimal(10,2) DEFAULT NULL
+  `pagado` decimal(10,2) DEFAULT NULL,
+  `adeudo` decimal(10,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
@@ -293,12 +293,12 @@ CREATE TABLE `quotes` (
   `patientId` int(11) NOT NULL,
   `patientName` varchar(255) NOT NULL,
   `subtotal` decimal(10,2) DEFAULT NULL,
-  `discount` decimal(10,2) DEFAULT NULL,
+  `descuento` decimal(10,2) DEFAULT NULL,
   `total` decimal(10,2) DEFAULT NULL,
   `date` datetime NOT NULL,
   `status` enum('pending','converted') NOT NULL,
-  `studies` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`studies`)),
-  `packages` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`packages`))
+  `estudios` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`estudios`)),
+  `paquetes` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`paquetes`))
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
@@ -315,14 +315,14 @@ CREATE TABLE `recibos` (
   `patientName` varchar(255) DEFAULT NULL,
   `contract` varchar(100) DEFAULT NULL,
   `subtotal` decimal(10,2) DEFAULT NULL,
-  `discount` decimal(10,2) DEFAULT NULL,
+  `descuento` decimal(10,2) DEFAULT NULL,
   `total` decimal(10,2) DEFAULT NULL,
-  `paid` decimal(10,2) DEFAULT NULL,
-  `due` decimal(10,2) DEFAULT NULL,
+  `pagado` decimal(10,2) DEFAULT NULL,
+  `adeudo` decimal(10,2) DEFAULT NULL,
   `date` datetime DEFAULT NULL,
   `status` enum('completed','cancelled','pending') DEFAULT NULL,
-  `studies` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`studies`)),
-  `packages` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`packages`)),
+  `estudios` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`estudios`)),
+  `paquetes` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`paquetes`)),
   `results` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`results`)),
   `deliveryDate` date DEFAULT NULL,
   `doctor` varchar(255) DEFAULT NULL
@@ -344,10 +344,10 @@ CREATE TABLE `settings` (
 -- --------------------------------------------------------
 
 --
--- Estructura de tabla para la tabla `studies`
+-- Estructura de tabla para la tabla `estudios`
 --
 
-CREATE TABLE `studies` (
+CREATE TABLE `estudios` (
   `id` int(11) NOT NULL,
   `area` varchar(100) DEFAULT NULL,
   `code` varchar(50) DEFAULT NULL,
@@ -469,9 +469,9 @@ ALTER TABLE `operations`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indices de la tabla `packages`
+-- Indices de la tabla `paquetes`
 --
-ALTER TABLE `packages`
+ALTER TABLE `paquetes`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -521,9 +521,9 @@ ALTER TABLE `settings`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indices de la tabla `studies`
+-- Indices de la tabla `estudios`
 --
-ALTER TABLE `studies`
+ALTER TABLE `estudios`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `code` (`code`);
 
@@ -604,9 +604,9 @@ ALTER TABLE `operations`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de la tabla `packages`
+-- AUTO_INCREMENT de la tabla `paquetes`
 --
-ALTER TABLE `packages`
+ALTER TABLE `paquetes`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -652,9 +652,9 @@ ALTER TABLE `settings`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de la tabla `studies`
+-- AUTO_INCREMENT de la tabla `estudios`
 --
-ALTER TABLE `studies`
+ALTER TABLE `estudios`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --

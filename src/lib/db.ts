@@ -26,7 +26,7 @@ function getTableNameFromQuery(query: string): keyof typeof dataNull | null {
 
 export async function executeQuery<T>(query: string, values: any[] = []): Promise<T> {
     if (!dbConfig.host || !dbConfig.user || !dbConfig.database) {
-        console.warn("Database environment variables are not fully configured.");
+        console.warn("Las variables de entorno de la base de datos no están totalmente configuradas.");
         const tableName = getTableNameFromQuery(query);
         if (tableName && tableName in dataNull) {
             return dataNull[tableName] as T;
@@ -43,11 +43,11 @@ export async function executeQuery<T>(query: string, values: any[] = []): Promis
         const [results] = await connection.execute(query, values);
         return results as T;
     } catch (error) {
-        console.error("Database Query Error:", error);
+        console.error("Error de consulta de la base de datos:", error);
 
         const tableName = getTableNameFromQuery(query);
         if (tableName && tableName in dataNull) {
-            console.log(`Query failed for table '${tableName}'. Returning empty fallback data.`);
+            console.log(`Error en la consulta de la tabla '${tableName}'. Returning empty fallback data.`);
             return dataNull[tableName] as T;
         }
 

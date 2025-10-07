@@ -9,10 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FlaskConical, UserSearch, Search, Trash2, Calendar, User, Microscope, DollarSign, Tag, Save, Package } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
-import { getPatients, Patient } from "@/services/patientService";
+import { getPatients, Paciente } from "@/services/patientService";
 import { getStudies, Study } from "@/services/studyService";
-import { getPackages, Package as PackageType } from "@/services/packageService";
-import { getDoctors, Doctor } from "@/services/doctorService";
+import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/packageService";
+import { getDoctores, Doctor } from "@/services/doctorService";
 import { useRouter, useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { getReciboById, updateRecibo, Recibo } from "@/services/reciboService";
@@ -30,8 +30,8 @@ export default function EditTestRequestPage() {
     const params = useParams();
     const reciboId = params.id as string;
 
-    const [studies, setStudies] = useState<Study[]>([]);
-    const [packages, setPackages] = useState<PackageType[]>([]);
+    const [estudios, setStudies] = useState<Study[]>([]);
+    const [paquetes, setPackages] = useState<PackageType[]>([]);
     const [doctors, setDoctors] = useState<Doctor[]>([]);
     
     const [recibo, setRecibo] = useState<Recibo | null>(null);
@@ -47,27 +47,27 @@ export default function EditTestRequestPage() {
         const fetchData = async () => {
             if (!reciboId) return;
             try {
-                const [reciboData, studiesData, doctorsData, packagesData] = await Promise.all([
+                const [reciboData, estudiosData, doctorsData, paquetesData] = await Promise.all([
                     getReciboById(reciboId),
                     getStudies(),
-                    getDoctors(),
-                    getPackages(),
+                    getDoctores(),
+                    getPaquetesEstudios(),
                 ]);
                 
                 if (reciboData) {
                     setRecibo(reciboData);
-                    setStudies(studiesData);
+                    setStudies(estudiosData);
                     setDoctors(doctorsData);
-                    setPackages(packagesData);
+                    setPackages(paquetesData);
 
                     const initialCart: CartItem[] = [];
-                    reciboData.studies.forEach(studyName => {
-                        const study = studiesData.find(s => s.name === studyName);
-                        if (study) initialCart.push({ id: String(study.id), name: study.name, price: Number(study.price), type: 'study' });
+                    reciboData.estudios.forEach((studyName: any) => {
+                        const study = estudiosData.find((s: { nombre: any; }) => s.nombre === studyName);
+                        if (study) initialCart.push({ id: String(study.id), name: study.nombre, price: Number(study.precio), type: 'study' });
                     });
-                    reciboData.packages.forEach(packageName => {
-                        const pkg = packagesData.find(p => p.name === packageName);
-                        if (pkg) initialCart.push({ id: String(pkg.id), name: pkg.name, price: Number(pkg.price), type: 'package' });
+                    reciboData.paquetes.forEach((packageName: any) => {
+                        const pkg = paquetesData.find((p: { nombre: any; }) => p.nombre === packageName);
+                        if (pkg) initialCart.push({ id: String(pkg.id), name: pkg.nombre, price: Number(pkg.precio), type: 'package' });
                     });
                     setCart(initialCart);
                     
@@ -97,15 +97,15 @@ export default function EditTestRequestPage() {
             return;
         }
 
-        const studyToAdd = studies.find(s => String(s.id) === itemId);
+        const studyToAdd = estudios.find(s => String(s.id) === itemId);
         if (studyToAdd) {
-            setCart(prev => [...prev, {id: String(studyToAdd.id), name: studyToAdd.name, price: Number(studyToAdd.price), type: 'study'}]);
+            setCart(prev => [...prev, {id: String(studyToAdd.id), name: studyToAdd.nombre, price: Number(studyToAdd.precio), type: 'study'}]);
             return;
         }
 
-        const packageToAdd = packages.find(p => String(p.id) === itemId);
+        const packageToAdd = paquetes.find(p => String(p.id) === itemId);
         if (packageToAdd) {
-            setCart(prev => [...prev, {id: String(packageToAdd.id), name: packageToAdd.name, price: Number(packageToAdd.price), type: 'package'}]);
+            setCart(prev => [...prev, {id: String(packageToAdd.id), name: packageToAdd.nombre, price: Number(packageToAdd.precio), type: 'package'}]);
         }
     };
 
@@ -114,8 +114,8 @@ export default function EditTestRequestPage() {
     };
 
     const subtotal = useMemo(() => cart.reduce((acc, item) => acc + item.price, 0), [cart]);
-    const discount = 0;
-    const total = subtotal - discount;
+    const descuento = 0;
+    const total = subtotal - descuento;
 
     const handleUpdateRequest = async () => {
         if (!recibo || cart.length === 0 || !deliveryDate) {
@@ -131,14 +131,14 @@ export default function EditTestRequestPage() {
         try {
             const updatedData: Partial<Omit<Recibo, 'id'>> = {
                 ...recibo,
-                studies: cart.filter(i => i.type === 'study').map(i => i.name),
-                packages: cart.filter(i => i.type === 'package').map(i => i.name),
+                estudios: cart.filter(i => i.type === 'study').map(i => i.name),
+                paquetes: cart.filter(i => i.type === 'package').map(i => i.name),
                 doctor: selectedDoctor,
                 deliveryDate,
                 subtotal,
-                discount,
+                descuento,
                 total,
-                due: total - recibo.paid, // Recalculate due amount
+                adeudo: total - recibo.pagado, // Recalculate adeudo amount
             };
             
             await updateRecibo(recibo.id, updatedData);
@@ -162,10 +162,10 @@ export default function EditTestRequestPage() {
     };
 
      const availableItems = useMemo(() => {
-        const studyItems = studies.map(s => ({ value: String(s.id), label: `${s.name} ($${s.price})`, type: 'Estudio' }));
-        const packageItems = packages.map(p => ({ value: String(p.id), label: `${p.name} ($${p.price})`, type: 'Paquete' }));
+        const studyItems = estudios.map(s => ({ value: String(s.id), label: `${s.nombre} ($${s.precio})`, type: 'Estudio' }));
+        const packageItems = paquetes.map(p => ({ value: String(p.id), label: `${p.nombre} ($${p.precio})`, type: 'Paquete' }));
         return [...studyItems, ...packageItems];
-    }, [studies, packages]);
+    }, [estudios, paquetes]);
     
     if (loading) return <div>Cargando...</div>;
     if (!recibo) return <div>Solicitud no encontrada.</div>;
@@ -248,7 +248,7 @@ export default function EditTestRequestPage() {
                         <CardContent className="space-y-4">
                             <div className="flex items-center gap-3">
                                 <User className="text-primary"/>
-                                <span>{recibo.patientName}</span>
+                                <span>{recibo.nombrePaciente}</span>
                             </div>
                             <div className="text-sm text-muted-foreground">
                                 <p>Convenio: {recibo.contract || 'Ninguno'}</p>
@@ -259,7 +259,7 @@ export default function EditTestRequestPage() {
                                     <SelectTrigger><SelectValue placeholder="Seleccionar Médico"/></SelectTrigger>
                                     <SelectContent>
                                         {doctors.map(doctor => (
-                                            <SelectItem key={doctor.id} value={doctor.name}>{doctor.name}</SelectItem>
+                                            <SelectItem key={doctor.id} value={doctor.nombre}>{doctor.nombre}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
@@ -284,7 +284,7 @@ export default function EditTestRequestPage() {
                             </div>
                             <div className="flex justify-between items-center text-lg">
                                 <span className="flex items-center gap-2"><Tag className="h-5 w-5"/> Descuento</span>
-                                <span>${Number(discount).toFixed(2)}</span>
+                                <span>${Number(descuento).toFixed(2)}</span>
                             </div>
                             <div className="flex justify-between items-center font-bold text-xl text-primary">
                                 <span className="flex items-center gap-2"><DollarSign className="h-5 w-5"/> Total</span>
