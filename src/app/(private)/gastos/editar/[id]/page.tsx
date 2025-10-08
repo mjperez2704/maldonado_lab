@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { BadgePercent, Calendar, Check, DollarSign } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { getExpenseById, updateExpense, Expense } from "@/services/expenseService";
+import { getExpenseById, updateExpense, Expense } from "@/services/expenseServicio";
 import Link from "next/link";
 
 export default function EditExpensePage() {
@@ -20,7 +20,7 @@ export default function EditExpensePage() {
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState<Omit<Expense, 'id'>>({
         date: '',
-        category: '',
+        categoria: '',
         amount: 0,
         paymentMethod: '',
         notes: ''
@@ -102,8 +102,8 @@ export default function EditExpensePage() {
                         </div>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="category">Categoría</Label>
-                        <Input id="category" placeholder="Ej: Salarios, Renta" value={formData.category} onChange={handleChange}/>
+                        <Label htmlFor="categoria">Categoría</Label>
+                        <Input id="categoria" placeholder="Ej: Salarios, Renta" value={formData.categoria} onChange={handleChange}/>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="amount">Cantidad</Label>

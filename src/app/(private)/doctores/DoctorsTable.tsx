@@ -38,7 +38,7 @@ import {
   Trash2,
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { deleteDoctor, Doctor } from '@/services/doctorService';
+import { deleteDoctor, Doctor } from '@/services/doctorServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useLoader } from '@/hooks/useLoader';

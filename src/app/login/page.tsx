@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
-import { login } from '@/services/authService';
+import { login } from '@/services/authServicio';
 
 export default function LoginPage() {
   const router = useRouter();

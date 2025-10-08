@@ -19,8 +19,8 @@ import {
   DollarSign
 } from "lucide-react";
 import React, { useEffect, useState } from 'react';
-import { createOperation, getOperations, deleteOperation, Operation } from '@/services/operationService';
-import { getRecibos, Recibo } from "@/services/reciboService";
+import { createOperation, getOperations, deleteOperation, Operation } from '@/services/operationServicio';
+import { getRecibos, Recibo } from "@/services/reciboServicio";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 

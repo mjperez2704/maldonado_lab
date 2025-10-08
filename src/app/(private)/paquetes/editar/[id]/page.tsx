@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Check, Package as PackageIcon, X, Search } from "lucide-react";
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { getPackageById, updatePackage, Package } from "@/services/packageService";
+import { getPackageById, updatePackage, Package } from "@/services/packageServicio";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,8 +16,8 @@ import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useLoader } from "@/hooks/useLoader";
-import { getStudies, Study } from "@/services/studyService";
-import { getCultures, Culture } from "@/services/cultureService";
+import { getStudies, Estudio } from "@/services/studyServicio";
+import { getCultures, Culture } from "@/services/cultureServicio";
 import { Badge } from "@/components/ui/badge";
 
 const packageSchema = z.object({
@@ -38,9 +38,9 @@ export default function EditPackagePage() {
     const { toast } = useToast();
     const loader = useLoader();
 
-    const [allStudies, setAllStudies] = useState<Study[]>([]);
+    const [allStudies, setAllStudies] = useState<Estudio[]>([]);
     const [allCultures, setAllCultures] = useState<Culture[]>([]);
-    const [studySearch, setStudySearch] = useState('');
+    const [studySearch, setEstudioSearch] = useState('');
     const [cultureSearch, setCultureSearch] = useState('');
 
     const form = useForm<PackageFormValues>({
@@ -94,7 +94,7 @@ export default function EditPackagePage() {
 
     const addTest = (testName: string) => {
         form.setValue('tests', [...selectedTests, testName]);
-        setStudySearch('');
+        setEstudioSearch('');
     };
 
     const removeTest = (testName: string) => {
@@ -181,7 +181,7 @@ export default function EditPackagePage() {
                                 <Input 
                                     placeholder="Buscar prueba para agregar..." 
                                     value={studySearch}
-                                    onChange={(e) => setStudySearch(e.target.value)}
+                                    onChange={(e) => setEstudioSearch(e.target.value)}
                                     className="pl-10"
                                 />
                                 {filteredStudies.length > 0 && (

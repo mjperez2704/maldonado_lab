@@ -37,14 +37,14 @@ import {
   ArrowUpDown,
   Microscope
 } from "lucide-react"
-import { getStudies, deleteStudy, Study } from '@/services/studyService';
+import { getStudies, deleteEstudio, Estudio } from '@/services/studyServicio';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useRouter } from 'next/navigation';
 import { useToast } from "@/hooks/use-toast";
 
 
 export default function StudiesPage() {
-    const [estudios, setStudies] = useState<Study[]>([]);
+    const [estudios, setStudies] = useState<Estudio[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const router = useRouter();
@@ -85,7 +85,7 @@ export default function StudiesPage() {
     const handleDelete = async (id: string) => {
         if (confirm('¿Estás seguro de que quieres eliminar este estudio? Esta acción no se puede deshacer.')) {
             try {
-                await deleteStudy(id);
+                await deleteEstudio(id);
                 setStudies(estudios.filter(s => s.id !== Number(id)));
                 toast({
                     title: "Éxito",

@@ -11,8 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Check, Plus, ShoppingCart, Calendar as CalendarIcon, Trash2 } from "lucide-react";
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from "next/navigation";
-import { getPurchaseById, updatePurchase, Purchase } from "@/services/purchaseService";
-import { getProviders, Provider } from "@/services/providerService";
+import { getPurchaseById, updatePurchase, Purchase } from "@/services/purchaseServicio";
+import { getProveedores, Provider } from "@/services/providerServicio";
 import Link from "next/link";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -74,7 +74,7 @@ export default function EditPurchasePage() {
         const fetchData = async () => {
             try {
                 const [providersData, purchaseData] = await Promise.all([
-                    getProviders(),
+                    getProveedores(),
                     getPurchaseById(purchaseId)
                 ]);
                 setProviders(providersData);

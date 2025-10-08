@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Check, Plus, TestTube, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { getCultureById, updateCulture, Culture } from "@/services/cultureService";
+import { getCultureById, updateCulture, Culture } from "@/services/cultureServicio";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 
@@ -21,9 +21,9 @@ export default function EditCulturePage() {
     const cultureId = params.id as string;
     
     const [formData, setFormData] = useState<Omit<Culture, 'id'>>({
-        category: '',
+        categoria: '',
         name: '',
-        sampleType: '',
+        tipo_muestra_id: '',
         price: 0,
         precautions: '',
         comments: [''],
@@ -116,9 +116,9 @@ export default function EditCulturePage() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-8">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2">
-                        <Label htmlFor="category">Categoría</Label>
-                        <Select onValueChange={(value) => handleSelectChange('category', value)} value={formData.category}>
-                            <SelectTrigger id="category">
+                        <Label htmlFor="categoria">Categoría</Label>
+                        <Select onValueChange={(value) => handleSelectChange('categoria', value)} value={formData.categoria}>
+                            <SelectTrigger id="categoria">
                                 <SelectValue placeholder="Categoría" />
                             </SelectTrigger>
                             <SelectContent>
@@ -134,8 +134,8 @@ export default function EditCulturePage() {
                         <Input id="name" value={formData.name} onChange={handleChange} />
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="sampleType">Tipo de ejemplo</Label>
-                        <Input id="sampleType" value={formData.sampleType} onChange={handleChange}/>
+                        <Label htmlFor="tipo_muestra_id">Tipo de ejemplo</Label>
+                        <Input id="tipo_muestra_id" value={formData.tipo_muestra_id} onChange={handleChange}/>
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="price">Precio</Label>

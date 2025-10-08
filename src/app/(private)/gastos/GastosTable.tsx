@@ -28,7 +28,7 @@ import {
   ArrowUpDown
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { deleteExpense, Expense } from '@/services/expenseService';
+import { deleteExpense, Expense } from '@/services/expenseServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 
@@ -122,7 +122,7 @@ export default function GastosTable({ initialExpenses }: { initialExpenses: Expe
                         <Checkbox />
                     </TableCell>
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>{item.category}</TableCell>
+                    <TableCell>{item.categoria}</TableCell>
                     <TableCell>{item.date}</TableCell>
                     <TableCell>{item.amount} MXN</TableCell>
                     <TableCell>{item.paymentMethod}</TableCell>

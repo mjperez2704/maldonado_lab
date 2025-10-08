@@ -31,8 +31,8 @@ import {
   Hash,
   Filter,
 } from "lucide-react"
-import { getQuotes, deleteQuote, updateQuote, Quote } from '@/services/quoteService';
-import { createRecibo } from '@/services/reciboService';
+import { getQuotes, deleteQuote, updateQuote, Quote } from '@/services/quoteServicio';
+import { createRecibo } from '@/services/reciboServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 

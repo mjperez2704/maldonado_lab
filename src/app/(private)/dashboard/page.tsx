@@ -38,11 +38,11 @@ import {
   Home,
 } from "lucide-react";
 import DashboardClientComponent from "@/app/dashboard-client";
-import { getAntibiotics } from "@/services/antibioticService";
-import { getConvenios } from "@/services/convenioService";
-import { getCultures } from "@/services/cultureService";
-import { getPatients } from "@/services/patientService";
-import { getStudies } from "@/services/studyService";
+import { getAntibiotics } from "@/services/antibioticServicio";
+import { getConvenios } from "@/services/convenioServicio";
+import { getCultures } from "@/services/cultureServicio";
+import { getPatients } from "@/services/patientServicio";
+import { getStudies } from "@/services/studyServicio";
 
 
 const HandshakeIcon = () => (

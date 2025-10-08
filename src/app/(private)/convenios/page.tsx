@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button"
 import Link from "next/link";
 import { Plus } from "lucide-react"
-import { getConvenios } from '@/services/convenioService';
+import { getConvenios } from '@/services/convenioServicio';
 import ConveniosTable from './ConveniosTable';
 
 

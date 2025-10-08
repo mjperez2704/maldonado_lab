@@ -13,13 +13,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { FlaskConical, UserSearch, Search, Trash2, Calendar, User, Microscope, DollarSign, Tag, Save, Package, PlusSquare, Plus } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
-import { getPatients, Paciente } from "@/services/patientService";
-import { getStudies, Study } from "@/services/studyService";
-import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/packageService";
-import { getDoctores, Doctor, createDoctor } from "@/services/doctorService";
+import { getPatients, Paciente } from "@/services/patientServicio";
+import { getStudies, Estudio } from "@/services/studyServicio";
+import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/packageServicio";
+import { getDoctores, Doctor, createDoctor } from "@/services/doctorServicio";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { createRecibo, ReciboCreation } from "@/services/reciboService";
+import { createRecibo, ReciboCreation } from "@/services/reciboServicio";
 import Link from "next/link";
 import { SalesTicket } from "./SalesTicket";
 import { CreatePatientForm } from "../../pacientes/CreatePatientForm";
@@ -112,7 +112,7 @@ type Discount = {
 
 export default function CreateTestRequestPage() {
     const [patients, setPatients] = useState<Paciente[]>([]);
-    const [estudios, setStudies] = useState<Study[]>([]);
+    const [estudios, setStudies] = useState<Estudio[]>([]);
     const [paquetes, setPackages] = useState<PackageType[]>([]);
     const [doctors, setDoctors] = useState<Doctor[]>([]);
 

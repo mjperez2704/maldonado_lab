@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User, Globe, Mail, Phone, Calendar, MapPin, FileText, CreditCard, VenetianMask, FileSignature, Save } from "lucide-react";
 import Image from 'next/image';
-import { createPatient, Patient } from "@/services/patientService";
+import { createPatient, Patient } from "@/services/patientServicio";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";

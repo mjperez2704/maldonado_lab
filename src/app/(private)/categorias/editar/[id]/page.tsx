@@ -19,38 +19,38 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Check, ListTree } from "lucide-react";
-import { getCategoryById, updateCategory } from "@/services/categoryService";
+import { getCategoryById, updateCategory } from "@/services/categoriaServicio";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useLoader } from "@/hooks/useLoader";
 
-const categorySchema = z.object({
+const categoriaSchema = z.object({
   name: z.string().min(1, { message: "El nombre es requerido." }),
 });
 
-type CategoryFormValues = z.infer<typeof categorySchema>;
+type CategoryFormValues = z.infer<typeof categoriaSchema>;
 
 export default function EditCategoryPage() {
   const router = useRouter();
   const params = useParams();
-  const categoryId = Number(params.id);
+  const categoriaId = Number(params.id);
   const { toast } = useToast();
   const loader = useLoader();
 
   const form = useForm<CategoryFormValues>({
-    resolver: zodResolver(categorySchema),
+    resolver: zodResolver(categoriaSchema),
     defaultValues: {
       name: "",
     },
   });
 
   useEffect(() => {
-    if (categoryId) {
+    if (categoriaId) {
       loader.start("read");
-      getCategoryById(categoryId)
-        .then((categoryData) => {
-          if (categoryData) {
-            form.setValue("name", categoryData.name);
+      getCategoryById(categoriaId)
+        .then((categoriaData) => {
+          if (categoriaData) {
+            form.setValue("name", categoriaData.name);
           } else {
             toast({
               title: "Error",
@@ -61,7 +61,7 @@ export default function EditCategoryPage() {
           }
         })
         .catch((error) => {
-          console.error("Error fetching category:", error);
+          console.error("Error fetching categoria:", error);
           toast({
             title: "Error",
             description: "No se pudieron cargar los datos de la categoría.",
@@ -70,19 +70,19 @@ export default function EditCategoryPage() {
         })
         .finally(() => loader.stop());
     }
-  }, [categoryId, router, toast, form, loader]);
+  }, [categoriaId, router, toast, form, loader]);
 
   const onSubmit = async (data: CategoryFormValues) => {
     loader.start("update");
     try {
-      await updateCategory(categoryId, data.name);
+      await updateCategory(categoriaId, data.name);
       toast({
         title: "Éxito",
         description: "La categoría se ha actualizado correctamente.",
       });
       router.push("/categorias");
     } catch (error) {
-      console.error("Error updating category: ", error);
+      console.error("Error updating categoria: ", error);
       toast({
         title: "Error",
         description: "No se pudo actualizar la categoría.",

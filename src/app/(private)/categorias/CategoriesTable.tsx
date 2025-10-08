@@ -28,7 +28,7 @@ import {
   ArrowUpDown
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from "@/components/ui/pagination";
-import { deleteCategory, Category } from '@/services/categoryService';
+import { deleteCategory, Category } from '@/services/categoriaServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useLoader } from '@/hooks/useLoader';
@@ -47,7 +47,7 @@ export default function CategoriesTable({ initialCategories }: { initialCategori
               setCategories(categories.filter(c => c.id !== id));
               toast({ title: "Éxito", description: "Categoría eliminada." });
           } catch (error) {
-              console.error("Error deleting category: ", error);
+              console.error("Error deleting categoria: ", error);
               toast({ title: "Error", description: "No se pudo eliminar la categoría.", variant: "destructive" });
           } finally {
               loader.stop();

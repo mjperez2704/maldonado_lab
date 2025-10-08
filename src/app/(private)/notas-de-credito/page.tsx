@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Search, Calendar, Hash, User, NotebookTabs, Plus, Trash2, FileEdit } from "lucide-react";
 import Link from "next/link";
 import React, { useState, useEffect, useMemo } from 'react';
-import { getCreditNotes, deleteCreditNote, CreditNote } from "@/services/creditNoteService";
+import { getCreditNotes, deleteCreditNote, CreditNote } from "@/services/creditNoteServicio";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 

@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Check, Plus, ClipboardList, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createCultureOption } from "@/services/cultureOptionService";
+import { createCultureOption } from "@/services/cultureOptionServicio";
 import Link from "next/link";
 
 export default function CreateCultureOptionPage() {

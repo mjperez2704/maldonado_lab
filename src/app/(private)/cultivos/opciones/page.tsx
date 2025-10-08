@@ -37,7 +37,7 @@ import {
   ArrowUpDown
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { getCultureOptions, deleteCultureOption, CultureOption } from '@/services/cultureOptionService';
+import { getCultureOptions, deleteCultureOption, CultureOption } from '@/services/cultureOptionServicio';
 import { useRouter } from 'next/navigation';
 
 export default function CultureOptionsPage() {

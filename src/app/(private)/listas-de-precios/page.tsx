@@ -11,12 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ClipboardList, Search, Trash2 } from "lucide-react";
 import { useEffect, useState, useMemo } from 'react';
-import { getStudies, Study } from '@/services/studyService';
-import { getCategories, Category } from '@/services/categoryService';
+import { getStudies, Estudio } from '@/services/studyServicio';
+import { getCategories, Category } from '@/services/categoriaServicio';
 import Link from "next/link";
 
 export default function PriceListPage() {
-  const [estudios, setStudies] = useState<Study[]>([]);
+  const [estudios, setStudies] = useState<Estudio[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -53,7 +53,7 @@ export default function PriceListPage() {
     }
     
     if (selectedCategory !== 'all') {
-        filtered = filtered.filter(study => study.category === selectedCategory);
+        filtered = filtered.filter(study => study.categoria === selectedCategory);
     }
 
     const sorted = [...filtered].sort((a, b) => {
@@ -64,8 +64,8 @@ export default function PriceListPage() {
             return a.name.localeCompare(b.name);
         }
         if (sortOrder === 'area') {
-            const categoryCompare = a.category.localeCompare(b.category);
-            if (categoryCompare !== 0) return categoryCompare;
+            const categoriaCompare = a.categoria.localeCompare(b.categoria);
+            if (categoriaCompare !== 0) return categoriaCompare;
             return a.name.localeCompare(b.name);
         }
         return 0;
@@ -198,7 +198,7 @@ export default function PriceListPage() {
                                     <TableRow key={study.id}>
                                         <TableCell>{study.shortcut}</TableCell>
                                         <TableCell>{study.name}</TableCell>
-                                        <TableCell>{study.category}</TableCell>
+                                        <TableCell>{study.categoria}</TableCell>
                                         <TableCell>
                                             <Input type="number" defaultValue={Number(study.price.toFixed(2))} className="w-24" onFocus={handleFocus} />
                                         </TableCell>

@@ -11,7 +11,7 @@ import { NotebookTabs, User, Calendar, DollarSign, Building, Save } from "lucide
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { getCreditNoteById, updateCreditNote, CreditNote } from "@/services/creditNoteService";
+import { getCreditNoteById, updateCreditNote, CreditNote } from "@/services/creditNoteServicio";
 import { useToast } from "@/hooks/use-toast";
 
 

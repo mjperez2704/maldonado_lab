@@ -35,12 +35,12 @@ import {
   ArrowUpDown
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { getProviders } from '@/services/providerService';
+import { getProveedores } from '@/services/providerServicio';
 import ProvidersTable from './ProvidersTable';
 
 
 export default async function ProvidersPage() {
-    const providers = await getProviders();
+    const providers = await getProveedores();
 
   return (
     <div className="flex flex-col gap-4 py-8">

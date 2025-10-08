@@ -11,7 +11,7 @@ import { User, Trash2, Globe, Mail, Phone, Calendar, MapPin, FileText, CreditCar
 import Image from 'next/image';
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { getPatientById, updatePatient, Patient } from "@/services/patientService";
+import { getPatientById, updatePatient, Patient } from "@/services/patientServicio";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

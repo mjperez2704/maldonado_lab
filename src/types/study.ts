@@ -1,4 +1,4 @@
-export interface Study {
+export interface Estudio {
     id: number;
     nombre: string;
     descripcion: string;

@@ -25,8 +25,8 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from 'react';
 import Link from "next/link";
-import { getRecibos, Recibo } from "@/services/reciboService";
-import { getExpenses, Expense } from "@/services/expenseService";
+import { getRecibos, Recibo } from "@/services/reciboServicio";
+import { getExpenses, Expense } from "@/services/expenseServicio";
 
 export default function CashCutPage() {
     const [recibos, setRecibos] = useState<Recibo[]>([]);
@@ -209,7 +209,7 @@ export default function CashCutPage() {
                                             expenses.map(expense => (
                                                 <TableRow key={expense.id}>
                                                     <TableCell>{expense.date}</TableCell>
-                                                    <TableCell>{expense.category}</TableCell>
+                                                    <TableCell>{expense.categoria}</TableCell>
                                                     <TableCell>{formatCurrency(expense.amount)}</TableCell>
                                                     <TableCell>{expense.notes}</TableCell>
                                                 </TableRow>

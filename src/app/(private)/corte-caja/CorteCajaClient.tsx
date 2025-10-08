@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Expense } from '@/services/expenseService';
+import { Expense } from '@/services/expenseServicio';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from '@/components/ui/button';
@@ -48,7 +48,7 @@ export default function CorteCajaClient({ initialExpenses }: CorteCajaClientProp
               {expenses.map((expense) => (
                 <TableRow key={expense.id}>
                   <TableCell>{new Date(expense.date).toLocaleDateString()}</TableCell>
-                  <TableCell>{expense.category}</TableCell>
+                  <TableCell>{expense.categoria}</TableCell>
                   <TableCell>{expense.paymentMethod}</TableCell>
                   <TableCell className="text-right">${Number(expense.amount.toFixed(2))}</TableCell>
                 </TableRow>

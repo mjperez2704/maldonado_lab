@@ -9,7 +9,7 @@ export interface Proveedor {
   direccion: string | null;
 }
 
-export async function getProviders(): Promise<Proveedor[]> {
+export async function getProveedores(): Promise<Proveedor[]> {
     try {
         const results = await executeQuery('SELECT * FROM proveedores');
         return JSON.parse(JSON.stringify(results)) as Proveedor[];

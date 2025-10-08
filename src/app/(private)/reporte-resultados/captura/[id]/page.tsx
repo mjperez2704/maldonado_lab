@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getReciboById, Recibo, TestResult, saveResults } from "@/services/reciboService";
-import { getStudies, Study } from "@/services/studyService";
+import { getReciboById, Recibo, TestResult, saveResults } from "@/services/reciboServicio";
+import { getStudies, Estudio } from "@/services/studyServicio";
 import { FileStack, Save, User, Calendar, Hash } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -30,7 +30,7 @@ export default function CaptureResultsPage() {
     const reciboId = params.id as string;
 
     const [recibo, setRecibo] = useState<Recibo | null>(null);
-    const [allStudies, setAllStudies] = useState<Study[]>([]);
+    const [allStudies, setAllStudies] = useState<Estudio[]>([]);
     const [results, setResults] = useState<ResultInput[]>([]);
     const [loading, setLoading] = useState(true);
 

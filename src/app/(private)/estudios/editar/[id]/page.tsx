@@ -14,14 +14,14 @@ import { Info, Plus, Trash2, Save, HelpCircle, ArrowUp, ArrowDown, Pencil } from
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from "next/navigation";
-import { getStudyById, updateStudy, getStudies as getAllStudies, Study, StudyParameter, IntegratedStudyRef, StudySample } from "@/services/studyService";
-import { getCategories, Category } from "@/services/categoryService";
-import { getProviders, Provider } from "@/services/providerService";
+import { getEstudioById, updateEstudio, getStudies as getAllStudies, Estudio, ParametroEstudio, IntegratedEstudioRef, MuestraEstudio } from "@/services/studyServicio";
+import { getCategories, Category } from "@/services/categoriaServicio";
+import { getProveedores, Provider } from "@/services/providerServicio";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
-const initialNewParam: StudyParameter = {
+const initialNewParam: ParametroEstudio = {
     name: '',
     unit: '',
     cost: 0,
@@ -41,8 +41,8 @@ const initialNewParam: StudyParameter = {
     referenceText: '',
 };
 
-function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (param: StudyParameter) => void, initialData?: StudyParameter }) {
-    const [param, setParam] = useState<StudyParameter>(initialData);
+function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (param: ParametroEstudio) => void, initialData?: ParametroEstudio }) {
+    const [param, setParam] = useState<ParametroEstudio>(initialData);
     const [newPossibleValue, setNewPossibleValue] = useState('');
 
     useEffect(() => {
@@ -146,50 +146,50 @@ function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (par
     );
 }
 
-export default function EditStudyPage() {
+export default function EditEstudioPage() {
     const router = useRouter();
     const params = useParams();
     const studyId = params.id as string;
     const { toast } = useToast();
     const [loading, setLoading] = useState(true);
 
-    const [formData, setFormData] = useState<Omit<Study, 'id'>>({
+    const [formData, setFormData] = useState<Omit<Estudio, 'id'>>({
         area: '', code: '', name: '', method: '', internalCost: 0, deliveryTime: 0,
         deliveryUnit: 'dias', processTime: '', processDays: '', isOutsourced: false,
         outsourcedLabId: '', outsourcedCode: '', outsourcedCost: 0, outsourcedDeliveryTime: '',
-        legend: '', scientificDescription: '', satServiceKey: '', satUnitKey: '',
+        legend: '', scientificDescription: '', satServicioKey: '', satUnitKey: '',
         parameters: [],
         config: {
             showInRequest: false, canUploadDocuments: false, printLabSignature: false,
             printWebSignature: false, hasEnglishHeaders: false, printWithParams: false,
             generateWorkOrder: false,
         },
-        hasSubStudies: false,
-        isPackage: false,
+        tieneSubestudios: false,
+        esPaquete: false,
         integratedStudies: [],
         synonyms: [''],
         samples: [],
-        price: 0, sampleType: '', category: '', shortcut: '',
+        price: 0, tipo_muestra_id: '', categoria: '', shortcut: '',
     });
     const [categories, setCategories] = useState<Category[]>([]);
     const [providers, setProviders] = useState<Provider[]>([]);
-    const [allStudies, setAllStudies] = useState<Study[]>([]);
+    const [allStudies, setAllStudies] = useState<Estudio[]>([]);
     
     const [isParamModalOpen, setIsParamModalOpen] = useState(false);
     const [editingParamIndex, setEditingParamIndex] = useState<number | null>(null);
 
-    const [newSample, setNewSample] = useState<StudySample>({ type: '', container: '', indications: '', cost: 0 });
-    const [studySearchTerm, setStudySearchTerm] = useState('');
-    const [selectedIntegratedStudy, setSelectedIntegratedStudy] = useState<string | null>(null);
+    const [newSample, setNewSample] = useState<MuestraEstudio>({ type: '', container: '', indications: '', cost: 0 });
+    const [studySearchTerm, setEstudioSearchTerm] = useState('');
+    const [selectedIntegratedEstudio, setSelectedIntegratedEstudio] = useState<string | null>(null);
 
     useEffect(() => {
         if (studyId) {
             const fetchData = async () => {
                 try {
                     const [studyData, cats, provs, estudios] = await Promise.all([
-                        getStudyById(studyId),
+                        getEstudioById(studyId),
                         getCategories(),
-                        getProviders(),
+                        getProveedores(),
                         getAllStudies(),
                     ]);
 
@@ -224,15 +224,15 @@ export default function EditStudyPage() {
         setFormData(prev => ({ ...prev, [id]: type === 'number' ? parseFloat(value) || 0 : value }));
     };
 
-    const handleSelectChange = (id: keyof Omit<Study, 'id'>, value: string | boolean) => {
+    const handleSelectChange = (id: keyof Omit<Estudio, 'id'>, value: string | boolean) => {
         setFormData(prev => ({ ...prev, [id]: value }));
     };
 
-    const handleConfigChange = (id: keyof Study['config'], value: boolean) => {
+    const handleConfigChange = (id: keyof Estudio['config'], value: boolean) => {
         setFormData(prev => ({ ...prev, config: { ...prev.config, [id]: value } }));
     };
 
-    const handleSaveParameter = (param: StudyParameter) => {
+    const handleSaveParameter = (param: ParametroEstudio) => {
         if (editingParamIndex !== null) {
             const updatedParameters = [...(formData.parameters || [])];
             updatedParameters[editingParamIndex] = param;
@@ -263,22 +263,22 @@ export default function EditStudyPage() {
         !formData.integratedStudies?.some(is => is.id === study.id)
     ).slice(0, 10);
 
-    const addIntegratedStudy = (study: Study) => {
-        const newIntegratedStudy: IntegratedStudyRef = { id: study.id, name: study.name };
+    const addIntegratedEstudio = (study: Estudio) => {
+        const newIntegratedEstudio: IntegratedEstudioRef = { id: study.id, name: study.name };
         setFormData(prev => ({
             ...prev,
-            integratedStudies: [...(prev.integratedStudies || []), newIntegratedStudy]
+            integratedStudies: [...(prev.integratedStudies || []), newIntegratedEstudio]
         }));
-        setStudySearchTerm('');
+        setEstudioSearchTerm('');
     };
 
-    const removeIntegratedStudy = () => {
-        if (!selectedIntegratedStudy) return;
+    const removeIntegratedEstudio = () => {
+        if (!selectedIntegratedEstudio) return;
         setFormData(prev => ({
             ...prev,
-            integratedStudies: (prev.integratedStudies || []).filter(s => String(s.id) !== selectedIntegratedStudy)
+            integratedStudies: (prev.integratedStudies || []).filter(s => String(s.id) !== selectedIntegratedEstudio)
         }));
-        setSelectedIntegratedStudy(null);
+        setSelectedIntegratedEstudio(null);
     };
 
     // --- Synonyms Logic ---
@@ -318,7 +318,7 @@ export default function EditStudyPage() {
                 ...formData,
                 synonyms: formData.synonyms?.filter(s => s.trim() !== '')
             };
-            await updateStudy(studyId, finalData);
+            await updateEstudio(studyId, finalData);
             toast({ title: "Éxito", description: "Estudio actualizado correctamente." });
             router.push('/estudios');
         } catch (error) {
@@ -329,7 +329,7 @@ export default function EditStudyPage() {
         }
     };
     
-    const getParameterDisplayReference = (param: StudyParameter) => {
+    const getParameterDisplayReference = (param: ParametroEstudio) => {
         switch (param.referenceType) {
             case 'Intervalo Biologico de Referencia':
                 return `${param.intervalFrom} - ${param.intervalTo}`;
@@ -342,7 +342,7 @@ export default function EditStudyPage() {
         }
     };
 
-    const renderConfigRadio = (id: keyof Study['config'], label: string) => (
+    const renderConfigRadio = (id: keyof Estudio['config'], label: string) => (
         <div className="flex items-center justify-between p-3 border-b">
             <div className="flex items-center gap-2">
                 <Label htmlFor={id} className="text-sm">{label}</Label>
@@ -420,7 +420,7 @@ export default function EditStudyPage() {
                     <CardTitle className="text-base text-primary">Datos de Facturación para el estudio (Aplicable solo para México)</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2"><Label htmlFor="satServiceKey">Clave del Servicio</Label><Select value={formData.satServiceKey} onValueChange={(v) => handleSelectChange('satServiceKey', v)}><SelectTrigger><SelectValue placeholder="Seleccione"/></SelectTrigger><SelectContent><SelectItem value="85121500">85121500 - Servicios de laboratorios médicos</SelectItem></SelectContent></Select></div>
+                    <div className="space-y-2"><Label htmlFor="satServicioKey">Clave del Servicio</Label><Select value={formData.satServicioKey} onValueChange={(v) => handleSelectChange('satServicioKey', v)}><SelectTrigger><SelectValue placeholder="Seleccione"/></SelectTrigger><SelectContent><SelectItem value="85121500">85121500 - Servicios de laboratorios médicos</SelectItem></SelectContent></Select></div>
                     <div className="space-y-2"><Label htmlFor="satUnitKey">Clave de Unidad</Label><Select value={formData.satUnitKey} onValueChange={(v) => handleSelectChange('satUnitKey', v)}><SelectTrigger><SelectValue placeholder="Seleccione"/></SelectTrigger><SelectContent><SelectItem value="E48">E48 - Unidad de servicio</SelectItem></SelectContent></Select></div>
                 </CardContent>
             </Card>
@@ -483,7 +483,7 @@ export default function EditStudyPage() {
                             <Label>¿Se está registrando un examen con sub-exámenes?</Label>
                             <Info className="h-4 w-4 text-muted-foreground" />
                         </div>
-                         <RadioGroup value={formData.hasSubStudies ? 'yes' : 'no'} onValueChange={(v) => handleSelectChange('hasSubStudies', v === 'yes')} className="flex gap-4 mt-2">
+                         <RadioGroup value={formData.tieneSubestudios ? 'yes' : 'no'} onValueChange={(v) => handleSelectChange('tieneSubestudios', v === 'yes')} className="flex gap-4 mt-2">
                              <RadioGroupItem value="yes" id="subexam-yes-edit"/><Label htmlFor="subexam-yes-edit">Si</Label>
                              <RadioGroupItem value="no" id="subexam-no-edit"/><Label htmlFor="subexam-no-edit">No</Label>
                          </RadioGroup>
@@ -494,7 +494,7 @@ export default function EditStudyPage() {
                             <Label>¿Se está registrando un paquete?</Label>
                             <Info className="h-4 w-4 text-muted-foreground" />
                         </div>
-                        <RadioGroup value={formData.isPackage ? 'yes' : 'no'} onValueChange={(v) => handleSelectChange('isPackage', v === 'yes')} className="flex gap-4 mt-2">
+                        <RadioGroup value={formData.esPaquete ? 'yes' : 'no'} onValueChange={(v) => handleSelectChange('esPaquete', v === 'yes')} className="flex gap-4 mt-2">
                              <RadioGroupItem value="yes" id="pkg-yes-edit"/><Label htmlFor="pkg-yes-edit">Si</Label>
                              <RadioGroupItem value="no" id="pkg-no-edit"/><Label htmlFor="pkg-no-edit">No</Label>
                          </RadioGroup>
@@ -519,12 +519,12 @@ export default function EditStudyPage() {
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="study-search">Nombre del estudio:</Label>
-                                <Input id="study-search" value={studySearchTerm} onChange={(e) => setStudySearchTerm(e.target.value)} placeholder="Buscar por nombre o código"/>
+                                <Input id="study-search" value={studySearchTerm} onChange={(e) => setEstudioSearchTerm(e.target.value)} placeholder="Buscar por nombre o código"/>
                             </div>
                             {studySearchTerm && (
                                 <div className="border rounded-md max-h-40 overflow-y-auto">
                                     {filteredStudies.map(study => (
-                                        <div key={study.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => addIntegratedStudy(study)}>
+                                        <div key={study.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => addIntegratedEstudio(study)}>
                                             {study.name} ({study.code})
                                         </div>
                                     ))}
@@ -536,14 +536,14 @@ export default function EditStudyPage() {
                             <div className="border rounded-md h-48 overflow-y-auto p-1 space-y-1">
                                 {formData.integratedStudies?.map(study => (
                                      <div key={study.id}
-                                          className={`p-2 rounded-md cursor-pointer ${Number(selectedIntegratedStudy) === study.id ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`}
-                                          onClick={() => setSelectedIntegratedStudy(String(study.id))}>
+                                          className={`p-2 rounded-md cursor-pointer ${Number(selectedIntegratedEstudio) === study.id ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`}
+                                          onClick={() => setSelectedIntegratedEstudio(String(study.id))}>
                                          {study.name}
                                      </div>
                                 ))}
                             </div>
                             <div className="flex justify-between">
-                                <Button type="button" variant="destructive" size="sm" onClick={removeIntegratedStudy} disabled={!selectedIntegratedStudy}>
+                                <Button type="button" variant="destructive" size="sm" onClick={removeIntegratedEstudio} disabled={!selectedIntegratedEstudio}>
                                     <Trash2 className="mr-2 h-4 w-4"/> Quitar estudio de la lista
                                 </Button>
                                 <div className="flex gap-2">

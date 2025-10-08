@@ -1,5 +1,5 @@
 
-import { getPatientById } from '@/services/patientService';
+import { getPatientById } from '@/services/patientServicio';
 import { NextResponse } from 'next/server';
 
 export async function GET(

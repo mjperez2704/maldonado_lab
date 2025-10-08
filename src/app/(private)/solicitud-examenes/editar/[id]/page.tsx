@@ -9,13 +9,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FlaskConical, UserSearch, Search, Trash2, Calendar, User, Microscope, DollarSign, Tag, Save, Package } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
-import { getPatients, Paciente } from "@/services/patientService";
-import { getStudies, Study } from "@/services/studyService";
-import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/packageService";
-import { getDoctores, Doctor } from "@/services/doctorService";
+import { getPatients, Paciente } from "@/services/patientServicio";
+import { getStudies, Estudio } from "@/services/studyServicio";
+import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/packageServicio";
+import { getDoctores, Doctor } from "@/services/doctorServicio";
 import { useRouter, useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { getReciboById, updateRecibo, Recibo } from "@/services/reciboService";
+import { getReciboById, updateRecibo, Recibo } from "@/services/reciboServicio";
 import Link from "next/link";
 
 type CartItem = {
@@ -30,7 +30,7 @@ export default function EditTestRequestPage() {
     const params = useParams();
     const reciboId = params.id as string;
 
-    const [estudios, setStudies] = useState<Study[]>([]);
+    const [estudios, setStudies] = useState<Estudio[]>([]);
     const [paquetes, setPackages] = useState<PackageType[]>([]);
     const [doctors, setDoctors] = useState<Doctor[]>([]);
     

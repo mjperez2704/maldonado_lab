@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Check, PlusSquare } from "lucide-react";
-import { getDoctorById, updateDoctor } from '@/services/doctorService';
+import { getDoctorById, updateDoctor } from '@/services/doctorServicio';
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

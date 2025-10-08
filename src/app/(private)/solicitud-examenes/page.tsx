@@ -31,7 +31,7 @@ import {
   Hash,
   Eye,
 } from "lucide-react"
-import { getRecibos, Recibo, deleteRecibo } from '@/services/reciboService';
+import { getRecibos, Recibo, deleteRecibo } from '@/services/reciboServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';

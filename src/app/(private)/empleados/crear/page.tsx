@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, UserCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { createEmployee } from "@/services/employeeService";
+import { createEmployee } from "@/services/employeeServicio";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

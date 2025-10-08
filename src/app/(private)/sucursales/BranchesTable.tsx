@@ -28,7 +28,7 @@ import {
   ArrowUpDown
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { deleteBranch, Branch } from '@/services/branchService';
+import { deleteBranch, Branch } from '@/services/branchServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useLoader } from '@/hooks/useLoader';

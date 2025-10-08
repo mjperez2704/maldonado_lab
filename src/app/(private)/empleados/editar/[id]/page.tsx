@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Check, UserCheck } from "lucide-react";
 import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { getEmployeeById, updateEmployee } from "@/services/employeeService";
+import { getEmployeeById, updateEmployee } from "@/services/employeeServicio";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";

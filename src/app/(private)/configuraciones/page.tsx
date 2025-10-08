@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Settings, BarChart, Barcode, Mail, MessageSquare, KeyRound, Check, Globe, Copyright, Phone, MapPin, Clock, Pencil, Languages, Wallet, Info, FileText as FileTextIcon, Database, Palette, Facebook, Twitter, Instagram, Youtube, Image as ImageIcon, Trash2, Eye } from "lucide-react";
 import React, { useEffect, useState, useRef } from 'react';
-import { getReportSettings, saveReportSettings, ReportSettings, saveEmailSettings, getEmailSettings, EmailSettings, getDbSettings, saveDbSettings, testDbConnection, DbSettings, getGeneralSettings, saveGeneralSettings, GeneralSettings, getWhatsappSettings, saveWhatsappSettings, WhatsappSettings, getSmsSettings, saveSmsSettings, SmsSettings, saveBarcodeSettings, getBarcodeSettings, BarcodeSettings, saveApiKeysSettings, getApiKeysSettings, ApiKeysSettings } from "@/services/settingsService";
+import { getReportSettings, saveReportSettings, ReportSettings, saveEmailSettings, getEmailSettings, EmailSettings, getDbSettings, saveDbSettings, testDbConnection, DbSettings, getGeneralSettings, saveGeneralSettings, GeneralSettings, getWhatsappSettings, saveWhatsappSettings, WhatsappSettings, getSmsSettings, saveSmsSettings, SmsSettings, saveBarcodeSettings, getBarcodeSettings, BarcodeSettings, saveApiKeysSettings, getApiKeysSettings, ApiKeysSettings } from "@/services/settingsServicio";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { useTranslation } from "@/hooks/useTranslation";

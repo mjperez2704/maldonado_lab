@@ -29,19 +29,19 @@ export interface ParametroEstudio {
     referenceText?: string;
 }
 
-export interface IntegratedStudyRef {
+export interface IntegratedEstudioRef {
     id: number;
     nombre: string;
 }
 
-export interface StudySample {
+export interface MuestraEstudio {
     type: string;
     container: string;
     indications: string;
     cost: number;
 }
 
-export interface Study {
+export interface Estudio {
     id: number;
     area: string;
     codigo: string;
@@ -59,7 +59,7 @@ export interface Study {
     tiempoEntregaExterno: string;
     leyenda: string;
     descripcionCientifica: string;
-    claveServiciSat: string;
+    claveServicioSat: string;
     claveUnidadSat: string;
     parameters: ParametroEstudio[];
     configuracion: {
@@ -71,18 +71,18 @@ export interface Study {
         printWithParams: boolean;
         generateWorkOrder: boolean;
     };
-    hasSubStudies: boolean;
-    isPackage: boolean;
-    integratedStudies: IntegratedStudyRef[];
+    tieneSubestudios: boolean;
+    esPaquete: boolean;
+    integratedStudies: IntegratedEstudioRef[];
     sinonimo: string[];
-    muestras: StudySample[];
+    muestras: MuestraEstudio[];
     precio: number;
     tipo_muestra_id: string;
     categoria: string;
     abreviatura: string;
 }
 
-export async function getStudies(): Promise<Study[]> {
+export async function getStudies(): Promise<Estudio[]> {
     try {
         const results = await executeQuery('SELECT * FROM estudios');
         const plainResults = JSON.parse(JSON.stringify(results)) as any[];
@@ -101,14 +101,14 @@ export async function getStudies(): Promise<Study[]> {
     }
 }
 
-export async function createStudy(study: Omit<Study, 'id'>): Promise<void> {
+export async function crearEstudio(study: Omit<Estudio, 'id'>): Promise<void> {
     const query = `
         INSERT INTO estudios (
             area, codigo, nombre, metodo, costoInterno, tiempoEntrega, unidadEntrega,
             tiempoProceso, diasProceso, esSubcontratado, laboratorio_externo_id, coidgoExterno,
             costoExterno, tiempoEntregaExterno, leyenda, descripcionCientifica,
-            claveServiciSat, claveUnidadSat, parameters, config, hasSubStudies, isPackage,
-            integratedStudies, synonyms, samples, price, sampleType, category, shortcut
+            claveServicioSat, claveUnidadSat, parameters, config, tieneSubestudios, esPaquete,
+            integratedStudies, synonyms, samples, price, tipo_muestra_id, categoria, shortcut
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const params = [
@@ -116,15 +116,15 @@ export async function createStudy(study: Omit<Study, 'id'>): Promise<void> {
         study.tiempoEntrega, study.unidadEntrega, study.tiempoProceso, study.diasProceso,
         study.esSubcontratado, study.laboratorio_externo_id, study.coidgoExterno, study.costoExterno,
         study.tiempoEntregaExterno, study.leyenda, study.descripcionCientifica,
-        study.claveServiciSat, study.claveUnidadSat, JSON.stringify(study.parameters),
-        JSON.stringify(study.configuracion), study.hasSubStudies, study.isPackage,
+        study.claveServicioSat, study.claveUnidadSat, JSON.stringify(study.parameters),
+        JSON.stringify(study.configuracion), study.tieneSubestudios, study.esPaquete,
         JSON.stringify(study.integratedStudies), JSON.stringify(study.sinonimo),
         JSON.stringify(study.muestras), study.precio, study.tipo_muestra_id, study.categoria, study.abreviatura,
     ];
     await executeQuery(query, params);
 }
 
-export async function getStudyById(id: string): Promise<Study | null> {
+export async function getEstudioById(id: string): Promise<Estudio | null> {
     const results = await executeQuery('SELECT * FROM estudios WHERE id = ?', [id]) as any[];
     if (results.length > 0) {
         const row = JSON.parse(JSON.stringify(results[0]));
@@ -141,16 +141,16 @@ export async function getStudyById(id: string): Promise<Study | null> {
     return null;
 }
 
-export async function updateStudy(id: string, study: Omit<Study, 'id'>): Promise<void> {
+export async function updateEstudio(id: string, study: Omit<Estudio, 'id'>): Promise<void> {
     const query = `
         UPDATE estudios SET
             area = ?, codigo = ?, nombre = ?, metodo = ?, costoInterno = ?, tiempoEntrega = ?, 
             unidadEntrega = ?, tiempoProceso = ?, diasProceso = ?, esSubcontratado = ?, 
             laboratorio_externo_id = ?, coidgoExterno = ?, costoExterno = ?, 
             tiempoEntregaExterno = ?, leyenda = ?, descripcionCientifica = ?, 
-            claveServiciSat = ?, claveUnidadSat = ?, parameters = ?, config = ?, 
-            hasSubStudies = ?, isPackage = ?, integratedStudies = ?, synonyms = ?, 
-            samples = ?, price = ?, sampleType = ?, category = ?, shortcut = ?
+            claveServicioSat = ?, claveUnidadSat = ?, configuracion = ?, 
+            tieneSubestudios = ?, esPaquete = ?, 
+            precio = ?, tipo_muestra_id = ?, categoria = ?, abreviatura = ?
         WHERE id = ?
     `;
     const params = [
@@ -158,16 +158,14 @@ export async function updateStudy(id: string, study: Omit<Study, 'id'>): Promise
         study.tiempoEntrega, study.unidadEntrega, study.tiempoProceso, study.diasProceso,
         study.esSubcontratado, study.laboratorio_externo_id, study.coidgoExterno, study.costoExterno,
         study.tiempoEntregaExterno, study.leyenda, study.descripcionCientifica,
-        study.claveServiciSat, study.claveUnidadSat, JSON.stringify(study.parameters),
-        JSON.stringify(study.configuracion), study.hasSubStudies, study.isPackage,
-        JSON.stringify(study.integratedStudies), JSON.stringify(study.sinonimo),
-        JSON.stringify(study.muestras), study.precio, study.tipo_muestra_id, study.categoria, study.abreviatura,
+        study.claveServicioSat, study.claveUnidadSat, JSON.stringify(study.configuracion), study.tieneSubestudios, study.esPaquete,
+        study.precio, study.tipo_muestra_id, study.categoria, study.abreviatura,
         id
     ];
     await executeQuery(query, params);
 }
 
-export async function deleteStudy(id: string): Promise<void> {
+export async function deleteEstudio(id: string): Promise<void> {
     const query = 'DELETE FROM estudios WHERE id = ?';
     await executeQuery(query, [id]);
 }

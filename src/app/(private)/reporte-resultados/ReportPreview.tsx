@@ -1,8 +1,8 @@
 
 "use client";
 
-import { Recibo } from "@/services/reciboService";
-import { Patient, getPatientById } from "@/services/patientService";
+import { Recibo } from "@/services/reciboServicio";
+import { Patient, getPatientById } from "@/services/patientServicio";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 

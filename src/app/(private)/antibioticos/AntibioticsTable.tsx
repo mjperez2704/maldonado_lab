@@ -29,7 +29,7 @@ import {
   ArrowUpDown
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { deleteAntibiotic } from '@/services/antibioticService';
+import { deleteAntibiotic } from '@/services/antibioticServicio';
 import { Antibiotic } from '@/types/antibiotic';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';

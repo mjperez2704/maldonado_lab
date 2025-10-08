@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { createConvenio } from "@/services/convenioService";
+import { createConvenio } from "@/services/convenioServicio";
 
 const HandshakeIcon = () => (
     <svg

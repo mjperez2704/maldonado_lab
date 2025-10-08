@@ -98,9 +98,9 @@ CREATE TABLE `credit_notes` (
 
 CREATE TABLE `cultures` (
   `id` int(11) NOT NULL,
-  `category` varchar(100) DEFAULT NULL,
+  `categoria` varchar(100) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
-  `sampleType` varchar(100) DEFAULT NULL,
+  `tipo_muestra_id` varchar(100) DEFAULT NULL,
   `price` decimal(10,2) DEFAULT NULL,
   `precautions` text DEFAULT NULL,
   `comments` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`comments`)),
@@ -164,7 +164,7 @@ CREATE TABLE `employees` (
 CREATE TABLE `expenses` (
   `id` int(11) NOT NULL,
   `date` date NOT NULL,
-  `category` varchar(100) DEFAULT NULL,
+  `categoria` varchar(100) DEFAULT NULL,
   `amount` decimal(10,2) NOT NULL,
   `paymentMethod` varchar(50) DEFAULT NULL,
   `notes` text DEFAULT NULL
@@ -236,7 +236,7 @@ CREATE TABLE `products` (
   `name` varchar(255) NOT NULL,
   `sku` varchar(100) DEFAULT NULL,
   `branch` varchar(100) DEFAULT NULL,
-  `category` varchar(100) DEFAULT NULL,
+  `categoria` varchar(100) DEFAULT NULL,
   `unit` varchar(50) DEFAULT NULL,
   `purchasePrice` decimal(10,2) DEFAULT NULL,
   `salePrice` decimal(10,2) DEFAULT NULL,
@@ -349,7 +349,7 @@ CREATE TABLE `settings` (
 
 CREATE TABLE `estudios` (
   `id` int(11) NOT NULL,
-  `area` varchar(100) DEFAULT NULL,
+  `categoria` varchar(100) DEFAULT NULL,
   `code` varchar(50) DEFAULT NULL,
   `name` varchar(255) NOT NULL,
   `method` varchar(255) DEFAULT NULL,
@@ -365,18 +365,18 @@ CREATE TABLE `estudios` (
   `outsourcedDeliveryTime` varchar(100) DEFAULT NULL,
   `legend` text DEFAULT NULL,
   `scientificDescription` text DEFAULT NULL,
-  `satServiceKey` varchar(50) DEFAULT NULL,
+  `satServicioKey` varchar(50) DEFAULT NULL,
   `satUnitKey` varchar(50) DEFAULT NULL,
   `parameters` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`parameters`)),
   `config` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`config`)),
-  `hasSubStudies` tinyint(1) DEFAULT 0,
-  `isPackage` tinyint(1) DEFAULT 0,
+  `tieneSubestudios` tinyint(1) DEFAULT 0,
+  `esPaquete` tinyint(1) DEFAULT 0,
   `integratedStudies` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`integratedStudies`)),
   `synonyms` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`synonyms`)),
   `samples` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`samples`)),
   `shortcut` varchar(50) DEFAULT NULL,
-  `category` varchar(100) DEFAULT NULL,
-  `sampleType` varchar(100) DEFAULT NULL,
+  `categoria` varchar(100) DEFAULT NULL,
+  `tipo_muestra_id` varchar(100) DEFAULT NULL,
   `price` decimal(10,2) DEFAULT NULL,
   `indications` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;

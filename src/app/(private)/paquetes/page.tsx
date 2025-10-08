@@ -12,7 +12,7 @@ import {
   Plus,
   Package as PackageIcon
 } from "lucide-react"
-import { getPackages } from '@/services/packageService';
+import { getPackages } from '@/services/packageServicio';
 import PaquetesTable from './PaquetesTable';
 
 

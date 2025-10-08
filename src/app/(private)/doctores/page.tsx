@@ -12,7 +12,7 @@ import {
   Plus,
   PlusSquare
 } from "lucide-react"
-import { getDoctors } from '@/services/doctorService';
+import { getDoctors } from '@/services/doctorServicio';
 import DoctorsTable from './DoctorsTable';
 
 

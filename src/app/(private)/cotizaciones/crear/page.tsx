@@ -10,12 +10,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { FlaskConical, UserSearch, Search, Trash2, Calendar, User, Microscope, DollarSign, Tag, Save, Package, Newspaper } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
-import { getPatients, Paciente } from "@/services/patientService";
-import { getStudies, Study } from "@/services/studyService";
-import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/packageService";
+import { getPatients, Paciente } from "@/services/patientServicio";
+import { getStudies, Estudio } from "@/services/studyServicio";
+import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/packageServicio";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { createQuote, QuoteCreation } from "@/services/quoteService";
+import { createQuote, QuoteCreation } from "@/services/quoteServicio";
 import Link from "next/link";
 import { CreatePatientForm } from "../../pacientes/CreatePatientForm";
 
@@ -28,7 +28,7 @@ type CartItem = {
 
 export default function CreateQuotePage() {
     const [patients, setPatients] = useState<Paciente[]>([]);
-    const [estudios, setStudies] = useState<Study[]>([]);
+    const [estudios, setStudies] = useState<Estudio[]>([]);
     const [paquetes, setPackages] = useState<PackageType[]>([]);
 
     const [searchTerm, setSearchTerm] = useState('');

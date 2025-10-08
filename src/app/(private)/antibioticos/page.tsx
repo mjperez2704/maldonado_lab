@@ -12,7 +12,7 @@ import {
   Plus,
   Pill,
 } from "lucide-react"
-import { getAntibiotics } from '@/services/antibioticService';
+import { getAntibiotics } from '@/services/antibioticServicio';
 /*import { Antibiotic } from '@/types/antibiotic';*/
 import AntibioticsTable from './AntibioticsTable';
 

@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button"
 import Link from "next/link";
 import { Plus, BadgePercent } from "lucide-react"
-import { getExpenses } from '@/services/expenseService';
+import { getExpenses } from '@/services/expenseServicio';
 import GastosTable from './GastosTable';
 
 

@@ -11,8 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Check, Plus, ShoppingCart, Calendar as CalendarIcon, Trash2 } from "lucide-react";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
-import { createPurchase, Purchase } from "@/services/purchaseService";
-import { getProviders, Provider } from "@/services/providerService";
+import { createPurchase, Purchase } from "@/services/purchaseServicio";
+import { getProveedores, Provider } from "@/services/providerServicio";
 import Link from "next/link";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -81,7 +81,7 @@ export default function CreatePurchasePage() {
     const adeudo = total - totalPaid;
 
     useEffect(() => {
-        getProviders().then(setProviders);
+        getProveedores().then(setProviders);
     }, []);
 
     const onSubmit = async (data: PurchaseFormValues) => {

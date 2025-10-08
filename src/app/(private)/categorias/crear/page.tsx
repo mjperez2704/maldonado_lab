@@ -18,16 +18,16 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Check, ListTree } from "lucide-react";
-import { createCategory } from "@/services/categoryService";
+import { createCategory } from "@/services/categoriaServicio";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useLoader } from "@/hooks/useLoader";
 
-const categorySchema = z.object({
+const categoriaSchema = z.object({
   name: z.string().min(1, { message: "El nombre es requerido." }),
 });
 
-type CategoryFormValues = z.infer<typeof categorySchema>;
+type CategoryFormValues = z.infer<typeof categoriaSchema>;
 
 export default function CreateCategoryPage() {
   const router = useRouter();
@@ -35,7 +35,7 @@ export default function CreateCategoryPage() {
   const loader = useLoader();
 
   const form = useForm<CategoryFormValues>({
-    resolver: zodResolver(categorySchema),
+    resolver: zodResolver(categoriaSchema),
     defaultValues: {
       name: "",
     },
@@ -53,7 +53,7 @@ export default function CreateCategoryPage() {
       form.reset(); // Limpia el formulario
       success = true;
     } catch (error) {
-      console.error("Error creating category: ", error);
+      console.error("Error creating categoria: ", error);
       toast({
         title: "Error",
         description: "No se pudo crear la categoría.",

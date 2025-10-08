@@ -5,7 +5,7 @@
  */
 'use server';
 
-import { getEmailSettings } from '@/services/settingsService';
+import { getEmailSettings } from '@/services/settingsServicio';
 import { SendEmailReportInput, SendEmailReportOutput } from '@/ai/schemas/reportSchema';
 
 

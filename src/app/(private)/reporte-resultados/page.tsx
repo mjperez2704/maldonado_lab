@@ -18,7 +18,7 @@ import {
   Eye
 } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
-import { getRecibos, Recibo } from '@/services/reciboService';
+import { getRecibos, Recibo } from '@/services/reciboServicio';
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import Link from "next/link";

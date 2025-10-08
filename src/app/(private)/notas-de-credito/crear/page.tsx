@@ -11,9 +11,9 @@ import { NotebookTabs, User, Calendar, DollarSign, Building, Save } from "lucide
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createCreditNote } from "@/services/creditNoteService";
+import { createCreditNote } from "@/services/creditNoteServicio";
 import { useToast } from "@/hooks/use-toast";
-import { getPatients, Patient } from "@/services/patientService";
+import { getPatients, Patient } from "@/services/patientServicio";
 
 
 export default function CreateCreditNotePage() {

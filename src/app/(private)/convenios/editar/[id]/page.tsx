@@ -22,7 +22,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { getConvenioById, updateConvenio } from "@/services/convenioService";
+import { getConvenioById, updateConvenio } from "@/services/convenioServicio";
 
 const HandshakeIcon = () => (
     <svg

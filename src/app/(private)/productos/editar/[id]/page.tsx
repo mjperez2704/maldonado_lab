@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Boxes, Check, Calendar as CalendarIcon } from "lucide-react";
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from "next/navigation";
-import { getProductById, updateProduct } from "@/services/productService";
+import { getProductById, updateProduct } from "@/services/productServicio";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,7 +22,7 @@ const productSchema = z.object({
   name: z.string().min(1, "El nombre es requerido."),
   sku: z.string().optional(),
   branch: z.string().min(1, "La sucursal es requerida."),
-  category: z.string().min(1, "La categoría es requerida."),
+  categoria: z.string().min(1, "La categoría es requerida."),
   unit: z.string().min(1, "La unidad es requerida."),
   purchasePrice: z.coerce.number().min(0, "El precio debe ser positivo."),
   salePrice: z.coerce.number().min(0, "El precio debe ser positivo."),
@@ -116,7 +116,7 @@ export default function EditProductPage() {
                         <FormField control={form.control} name="branch" render={({ field }) => (
                             <FormItem><FormLabel>Sucursal</FormLabel><Select onValueChange={field.onChange} value={field.value} disabled={loader.status !== 'idle'}><FormControl><SelectTrigger><SelectValue placeholder="Seleccionar sucursal" /></SelectTrigger></FormControl><SelectContent><SelectItem value="main">Sucursal Principal</SelectItem><SelectItem value="secondary">Sucursal Secundaria</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={form.control} name="category" render={({ field }) => (
+                        <FormField control={form.control} name="categoria" render={({ field }) => (
                             <FormItem><FormLabel>Categoría</FormLabel><Select onValueChange={field.onChange} value={field.value} disabled={loader.status !== 'idle'}><FormControl><SelectTrigger><SelectValue placeholder="Seleccionar categoría" /></SelectTrigger></FormControl><SelectContent><SelectItem value="reagents">Reactivos</SelectItem><SelectItem value="materials">Materiales</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                         )}/>
                         <FormField control={form.control} name="unit" render={({ field }) => (

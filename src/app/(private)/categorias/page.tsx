@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button"
 import Link from "next/link";
 import { Plus, ListTree } from "lucide-react"
-import { getCategories } from '@/services/categoryService';
+import { getCategories } from '@/services/categoriaServicio';
 import CategoriesTable from './CategoriesTable';
 
 export default async function CategoriesPage() {

@@ -28,7 +28,7 @@ import {
   Trash2,
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { deleteCulture, Culture } from '@/services/cultureService';
+import { deleteCulture, Culture } from '@/services/cultureServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 
@@ -124,9 +124,9 @@ export default function CultivosTable({ initialCultivos }: { initialCultivos: Cu
                       <Checkbox />
                   </TableCell>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell>{cultivo.category}</TableCell>
+                  <TableCell>{cultivo.categoria}</TableCell>
                   <TableCell>{cultivo.name}</TableCell>
-                  <TableCell>{cultivo.sampleType}</TableCell>
+                  <TableCell>{cultivo.tipo_muestra_id}</TableCell>
                   <TableCell>{Number((cultivo.price || 0)).toFixed(2)} MXN</TableCell>
                   <TableCell>
                       <div className="flex items-center gap-2">
