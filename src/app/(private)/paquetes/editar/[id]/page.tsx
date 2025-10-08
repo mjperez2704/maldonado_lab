@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Check, Package as PackageIcon, X, Search } from "lucide-react";
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { getPackageById, updatePackage, Package } from "@/services/paquetesServicio";
+import { getPaqueteById, updatePaquete, Paquetes } from "@/services/paquetesServicio";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,11 +22,11 @@ import { Badge } from "@/components/ui/badge";
 
 const packageSchema = z.object({
   nombre: z.string().min(1, { message: "El nombre es requerido." }),
-  shortcut: z.string().optional(),
-  price: z.coerce.number().min(0, "El precio no puede ser negativo."),
-  tests: z.array(z.string()).optional(),
-  cultures: z.array(z.string()).optional(),
-  precautions: z.string().optional(),
+  abreviatura: z.string().optional(),
+  precio: z.coerce.number().min(0, "El precio no puede ser negativo."),
+  estudios: z.array(z.string()).optional(),
+  cultivos: z.array(z.string()).optional(),
+  precauciones: z.string().optional(),
 });
 
 type PackageFormValues = z.infer<typeof packageSchema>;
@@ -46,8 +46,8 @@ export default function EditPackagePage() {
     const form = useForm<PackageFormValues>({
         resolver: zodResolver(packageSchema),
         defaultValues: {
-            tests: [],
-            cultures: []
+            estudios: [],
+            cultivos: []
         }
     });
 
@@ -55,18 +55,18 @@ export default function EditPackagePage() {
         if (packageId) {
             loader.start('read');
             Promise.all([
-                getPackageById(packageId),
+                getPaqueteById(packageId),
                 getStudies(),
                 getCultures()
             ]).then(([pkg, estudiosData, culturesData]) => {
                 if (pkg) {
                     form.reset({
                         nombre: pkg.nombre,
-                        shortcut: pkg.shortcut || '',
-                        price: pkg.price,
-                        tests: pkg.tests || [],
-                        cultures: pkg.cultures || [],
-                        precautions: pkg.precautions || '',
+                        abreviatura: pkg.abreviatura || '',
+                        precio: pkg.precio,
+                        estudios: pkg.estudios || [],
+                        cultivos: pkg.cultivos || [],
+                        precauciones: pkg.precauciones || '',
                     });
                 } else {
                      toast({ title: "Error", description: "Paquete no encontrado.", variant: "destructive" });
@@ -75,14 +75,14 @@ export default function EditPackagePage() {
                 setAllStudies(estudiosData);
                 setAllCultures(culturesData);
             }).catch(error => {
-                console.error("Error fetching data:", error);
+                console.error("Error en la obtención de datos:", error);
                 toast({ title: "Error", description: "No se pudieron cargar los datos del paquete.", variant: "destructive" });
             }).finally(() => loader.stop());
         }
     }, [packageId, router, form, toast, loader]);
 
-    const selectedTests = form.watch('tests') || [];
-    const selectedCultures = form.watch('cultures') || [];
+    const selectedTests = form.watch('estudios') || [];
+    const selectedCultures = form.watch('cultivos') || [];
 
     const filteredStudies = useMemo(() => 
         studySearch ? allStudies.filter(s => s.nombre.toLowerCase().includes(studySearch.toLowerCase()) && !selectedTests.includes(s.nombre)) : [],
@@ -93,34 +93,35 @@ export default function EditPackagePage() {
     [cultureSearch, allCultures, selectedCultures]);
 
     const addTest = (testName: string) => {
-        form.setValue('tests', [...selectedTests, testName]);
+        form.setValue('estudios', [...selectedTests, testName]);
         setEstudioSearch('');
     };
 
     const removeTest = (testName: string) => {
-        form.setValue('tests', selectedTests.filter(t => t !== testName));
+        form.setValue('estudios', selectedTests.filter(t => t !== testName));
     };
 
     const addCulture = (cultureName: string) => {
-        form.setValue('cultures', [...selectedCultures, cultureName]);
+        form.setValue('cultivos', [...selectedCultures, cultureName]);
         setCultureSearch('');
     };
 
     const removeCulture = (cultureName: string) => {
-        form.setValue('cultures', selectedCultures.filter(c => c !== cultureName));
+        form.setValue('cultivos', selectedCultures.filter(c => c !== cultureName));
     };
 
     const onSubmit = async (data: PackageFormValues) => {
         loader.start('update');
         try {
-            const packageData: Omit<Package, 'id'> = {
+            const packageData: Omit<Paquetes, 'id'> = {
                 ...data,
-                shortcut: data.shortcut || '',
-                precautions: data.precautions || '',
-                tests: data.tests || [],
-                cultures: data.cultures || [],
+                abreviatura: data.abreviatura || '',
+                precauciones: data.precauciones || '',
+                estudios: data.estudios || [],
+                cultivos: data.cultivos || [],
+                tipo: "estudios"
             };
-            await updatePackage(packageId, packageData);
+            await updatePaquete(packageId, packageData);
             toast({
                 title: "Éxito",
                 description: "Paquete actualizado correctamente.",
@@ -162,10 +163,10 @@ export default function EditPackagePage() {
                         <FormField control={form.control} name="nombre" render={({ field }) => (
                             <FormItem><FormLabel>Nombre del paquete</FormLabel><FormControl><Input placeholder="Nombre del paquete" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={form.control} name="shortcut" render={({ field }) => (
+                        <FormField control={form.control} name="abreviatura" render={({ field }) => (
                             <FormItem><FormLabel>Atajo</FormLabel><FormControl><Input placeholder="Atajo" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={form.control} name="price" render={({ field }) => (
+                        <FormField control={form.control} name="precio" render={({ field }) => (
                             <FormItem><FormLabel>Precio</FormLabel>
                                 <div className="flex items-center">
                                     <span className="inline-flex items-center px-3 rounded-l-md border border-r-0 bg-muted text-muted-foreground">MXN</span>
@@ -240,7 +241,7 @@ export default function EditPackagePage() {
 
                     </div>
 
-                    <FormField control={form.control} name="precautions" render={({ field }) => (
+                    <FormField control={form.control} name="precauciones" render={({ field }) => (
                         <FormItem><FormLabel>Precauciones</FormLabel><FormControl><Textarea placeholder="Precauciones" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                     )}/>
                     

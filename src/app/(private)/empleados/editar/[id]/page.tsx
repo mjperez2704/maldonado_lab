@@ -19,12 +19,12 @@ import { useLoader } from "@/hooks/useLoader";
 
 const employeeSchema = z.object({
   nombre: z.string().min(1, { message: "El nombre es requerido." }),
-  usernombre: z.string().min(1, { message: "El nombre de usuario es requerido." }),
+  usuario: z.string().min(1, { message: "El nombre de usuario es requerido." }),
   email: z.string().email({ message: "Correo electrónico no válido." }),
-  password: z.string().optional(),
-  phone: z.string().optional(),
-  branch: z.string().min(1, { message: "La sucursal es requerida." }),
-  position: z.string().min(1, { message: "El puesto es requerido." }),
+  contrasena: z.string().optional(),
+  telefono: z.string().optional(),
+  sucursal_id: z.string().min(1, { message: "La sucursal es requerida." }),
+  puesto: z.string().min(1, { message: "El puesto es requerido." }),
 });
 
 type EmployeeFormValues = z.infer<typeof employeeSchema>;
@@ -41,12 +41,12 @@ export default function EditEmployeePage() {
     resolver: zodResolver(employeeSchema),
     defaultValues: {
       nombre: '',
-      usernombre: '',
+      usuario: '',
       email: '',
-      password: '',
-      phone: '',
-      branch: '',
-      position: '',
+      contrasena: '',
+      telefono: '',
+      sucursal_id: '',
+      puesto: '',
     },
   });
 
@@ -57,8 +57,8 @@ export default function EditEmployeePage() {
         if(data) {
           form.reset({ 
               ...data, 
-              password: '', // Don't pre-fill password
-              phone: data.phone || ''
+              contrasena: '', // Don't pre-fill password
+              telefono: data.telefono || ''
             });
         } else {
           toast({ title: "Error", description: "Empleado no encontrado.", variant: "destructive" });
@@ -74,9 +74,10 @@ export default function EditEmployeePage() {
   const onSubmit = async (data: EmployeeFormValues) => {
     loader.start("update");
     try {
-      const updateData = { ...data };
-      if (!updateData.password) {
-        delete updateData.password;
+      const role_id = data.puesto === 'Administrador de Sistema' ? 1 : 2;
+      const updateData: any = { ...data, role_id };
+      if (!updateData.contrasena) {
+        delete updateData.contrasena;
       }
       
       await updateEmployee(employeeId, updateData);
@@ -119,19 +120,19 @@ export default function EditEmployeePage() {
                   <FormField control={form.control} name="nombre" render={({ field }) => (
                       <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input placeholder="Nombre completo" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                   )}/>
-                  <FormField control={form.control} name="usernombre" render={({ field }) => (
+                  <FormField control={form.control} name="usuario" render={({ field }) => (
                       <FormItem><FormLabel>Nombre de usuario</FormLabel><FormControl><Input placeholder="Nombre de usuario" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                   )}/>
                   <FormField control={form.control} name="email" render={({ field }) => (
                       <FormItem><FormLabel>Correo electrónico</FormLabel><FormControl><Input type="email" placeholder="Correo electrónico" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                   )}/>
-                  <FormField control={form.control} name="password" render={({ field }) => (
+                  <FormField control={form.control} name="contrasena" render={({ field }) => (
                       <FormItem><FormLabel>Contraseña</FormLabel><FormControl><Input type="password" placeholder="Dejar en blanco para no cambiar" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                   )}/>
-                  <FormField control={form.control} name="phone" render={({ field }) => (
+                  <FormField control={form.control} name="telefono" render={({ field }) => (
                       <FormItem><FormLabel>Teléfono</FormLabel><FormControl><Input placeholder="Número de teléfono" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                   )}/>
-                  <FormField control={form.control} name="branch" render={({ field }) => (
+                  <FormField control={form.control} name="sucursal_id" render={({ field }) => (
                       <FormItem><FormLabel>Sucursal</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value} disabled={loader.status !== 'idle'}>
                               <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar sucursal" /></SelectTrigger></FormControl>
@@ -142,7 +143,7 @@ export default function EditEmployeePage() {
                           </Select>
                       <FormMessage /></FormItem>
                   )}/>
-                  <FormField control={form.control} name="position" render={({ field }) => (
+                  <FormField control={form.control} name="puesto" render={({ field }) => (
                       <FormItem><FormLabel>Puesto</FormLabel>
                           <Select onValueChange={field.onChange} value={field.value} disabled={loader.status !== 'idle'}>
                               <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar puesto" /></SelectTrigger></FormControl>

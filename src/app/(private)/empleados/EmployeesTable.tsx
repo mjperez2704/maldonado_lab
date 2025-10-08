@@ -12,13 +12,13 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Pencil, Trash2 } from "lucide-react"
-import { deleteEmployee, Employee } from '@/services/empleadosServicio';
+import { deleteEmpleado, Empleado } from '@/services/empleadosServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useLoader } from '@/hooks/useLoader';
 
-export default function EmployeesTable({ initialEmployees }: { initialEmployees: Employee[] }) {
-  const [employees, setEmployees] = useState<Employee[]>(initialEmployees);
+export default function EmployeesTable({ initialEmployees }: { initialEmployees: Empleado[] }) {
+  const [employees, setEmployees] = useState<Empleado[]>(initialEmployees);
   const router = useRouter();
   const { toast } = useToast();
   const loader = useLoader();
@@ -27,7 +27,7 @@ export default function EmployeesTable({ initialEmployees }: { initialEmployees:
     if (confirm('¿Estás seguro de que quieres eliminar este empleado?')) {
       loader.start('delete');
       try {
-        await deleteEmployee(id);
+        await deleteEmpleado(id);
         setEmployees(employees.filter(e => e.id !== id));
         toast({ title: "Éxito", description: "Empleado eliminado." });
       } catch (error) {
@@ -59,9 +59,9 @@ export default function EmployeesTable({ initialEmployees }: { initialEmployees:
           {employees.map((employee) => (
             <TableRow key={employee.id}>
               <TableCell>{employee.nombre}</TableCell>
-              <TableCell>{employee.position}</TableCell>
+              <TableCell>{employee.puesto}</TableCell>
               <TableCell>{employee.email}</TableCell>
-              <TableCell>{employee.branch}</TableCell>
+              <TableCell>{employee.sucursal_id}</TableCell>
               <TableCell>
                 <div className="flex gap-2">
                     <Button variant="outline" size="icon" onClick={() => handleEdit(employee.id)}>

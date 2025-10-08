@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, UserCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { createEmployee } from "@/services/empleadosServicio";
+import { createEmpleado } from "@/services/empleadosServicio";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,12 +18,12 @@ import { useLoader } from "@/hooks/useLoader";
 
 const employeeSchema = z.object({
   nombre: z.string().min(1, { message: "El nombre es requerido." }),
-  usernombre: z.string().min(1, { message: "El nombre de usuario es requerido." }),
+  usuario: z.string().min(1, { message: "El nombre de usuario es requerido." }),
   email: z.string().email({ message: "Correo electrónico no válido." }),
-  password: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
-  phone: z.string().optional(),
-  branch: z.string().min(1, { message: "La sucursal es requerida." }),
-  position: z.string().min(1, { message: "El puesto es requerido." }),
+  contrasena: z.string().min(6, { message: "La contraseña debe tener al menos 6 caracteres." }),
+  telefono: z.string().min(10,{message: "El teléfono debe tener al menos 10 caracteres."}),
+  sucursal_id: z.string().min(1, { message: "La sucursal es requerida." }),
+  puesto: z.string().min(1, { message: "El puesto es requerido." }),
 });
 
 type EmployeeFormValues = z.infer<typeof employeeSchema>;
@@ -37,12 +37,12 @@ export default function CreateEmployeePage() {
     resolver: zodResolver(employeeSchema),
     defaultValues: {
       nombre: '',
-      usernombre: '',
+      usuario: '',
       email: '',
-      password: '',
-      phone: '',
-      branch: '',
-      position: '',
+      contrasena: '',
+      telefono: '',
+      sucursal_id: '',
+      puesto: '',
     },
   });
 
@@ -50,12 +50,9 @@ export default function CreateEmployeePage() {
         let success = false;
         loader.start("create");
         try {
-            // El objeto que se pasa a createEmployee debe coincidir con la interfaz Employee
-            const employeeData = {
-                ...data,
-                phone: data.phone || null, // Aseguramos que los opcionales sean null si están vacíos
-            };
-            await createEmployee(employeeData);
+            const role_id = data.puesto === 'Administrador de Sistema' ? 1 : 2;
+            const employeeData = { ...data, role_id };
+            await createEmpleado(employeeData);
             toast({
                 title: "Éxito",
                 description: "Empleado creado correctamente.",
@@ -99,19 +96,19 @@ export default function CreateEmployeePage() {
                   <FormField control={form.control} name="nombre" render={({ field }) => (
                       <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input placeholder="Nombre completo" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                   )}/>
-                  <FormField control={form.control} name="usernombre" render={({ field }) => (
+                  <FormField control={form.control} name="usuario" render={({ field }) => (
                       <FormItem><FormLabel>Nombre de usuario</FormLabel><FormControl><Input placeholder="Nombre de usuario" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                   )}/>
                   <FormField control={form.control} name="email" render={({ field }) => (
                       <FormItem><FormLabel>Correo electrónico</FormLabel><FormControl><Input type="email" placeholder="Correo electrónico" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                   )}/>
-                  <FormField control={form.control} name="password" render={({ field }) => (
+                  <FormField control={form.control} name="contrasena" render={({ field }) => (
                       <FormItem><FormLabel>Contraseña</FormLabel><FormControl><Input type="password" placeholder="Contraseña" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                   )}/>
-                  <FormField control={form.control} name="phone" render={({ field }) => (
+                  <FormField control={form.control} name="telefono" render={({ field }) => (
                       <FormItem><FormLabel>Teléfono</FormLabel><FormControl><Input placeholder="Número de teléfono" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                   )}/>
-                  <FormField control={form.control} name="branch" render={({ field }) => (
+                  <FormField control={form.control} name="sucursal_id" render={({ field }) => (
                       <FormItem><FormLabel>Sucursal</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value} disabled={loader.status !== 'idle'}>
                               <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar sucursal" /></SelectTrigger></FormControl>
@@ -122,7 +119,7 @@ export default function CreateEmployeePage() {
                           </Select>
                       <FormMessage /></FormItem>
                   )}/>
-                  <FormField control={form.control} name="position" render={({ field }) => (
+                  <FormField control={form.control} name="puesto" render={({ field }) => (
                       <FormItem><FormLabel>Puesto</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value} disabled={loader.status !== 'idle'}>
                               <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar puesto" /></SelectTrigger></FormControl>

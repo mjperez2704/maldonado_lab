@@ -40,7 +40,7 @@ export default function LoginPage() {
 
         toast({
           title: "Inicio de Sesión Exitoso",
-          description: `Bienvenido, ${nombre}.`,
+          description: 'Bienvenido,' + nombre + '.'
         });
 
         // Redirigimos al nuevo dashboard

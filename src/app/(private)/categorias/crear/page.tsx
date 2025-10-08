@@ -87,7 +87,7 @@ export default function CreateCategoryPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
-                nombre="nombre"
+                name="nombre"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Nombre</FormLabel>
