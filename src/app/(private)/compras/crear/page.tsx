@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Check, Plus, ShoppingCart, Calendar as CalendarIcon, Trash2 } from "lucide-react";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
-import { createPurchase, Purchase } from "@/services/comprasServicio";
+import { createPurchase, Compras} from "@/services/comprasServicio";
 import { getProveedores, Proveedor } from "@/services/proveedoresServicio";
 import Link from "next/link";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
@@ -62,12 +62,12 @@ export default function CreatePurchasePage() {
         },
     });
 
-    const { fields: productFields, append: appendProduct, remove: removeProduct } = useFieldArray({ control: form.control, nombre: "products" });
-    const { fields: paymentFields, append: appendPayment, remove: removePayment } = useFieldArray({ control: form.control, nombre: "payments" });
+    const { fields: productFields, append: appendProduct, remove: removeProduct } = useFieldArray({ control: form.control, name: "products" });
+    const { fields: paymentFields, append: appendPayment, remove: removePayment } = useFieldArray({ control: form.control, name: "payments" });
 
-    const watchedProducts = useWatch({ control: form.control, nombre: 'products' });
-    const watchedPayments = useWatch({ control: form.control, nombre: 'payments' });
-    const watchedTax = useWatch({ control: form.control, nombre: 'tax' });
+    const watchedProducts = useWatch({ control: form.control, name: 'products' });
+    const watchedPayments = useWatch({ control: form.control, name: 'payments' });
+    const watchedTax = useWatch({ control: form.control, name: 'tax' });
 
     const subtotal = React.useMemo(() => 
         (watchedProducts || []).reduce((acc, p) => acc + (p.unitPrice || 0) * (p.quantity || 0), 0), 
@@ -86,14 +86,14 @@ export default function CreatePurchasePage() {
 
     const onSubmit = async (data: PurchaseFormValues) => {
         try {
-            const purchaseData: Omit<Purchase, 'id'> = {
+            const purchaseData: Omit<Compras, 'id'> = {
                 ...data,
-                notes: data.notes || '',
-                products: data.products.map(p => ({...p, totalPrice: p.unitPrice * p.quantity })),
+                notas: data.notes || '',
+                productos: data.products.map(p => ({...p, totalPrice: p.unitPrice * p.quantity })),
                 subtotal,
                 total,
                 pagado: totalPaid,
-                adeudo,
+                adeudo: adeudo,
             };
             await createPurchase(purchaseData);
             toast({ title: "Éxito", description: "Compra creada correctamente." });

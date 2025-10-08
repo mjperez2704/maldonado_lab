@@ -17,11 +17,11 @@ import {
   Plus,
   UserCheck,
 } from "lucide-react"
-import { getEmployees } from '@/services/empleadosServicio';
+import { getEmpleados } from '@/services/empleadosServicio';
 import EmployeesTable from './EmployeesTable';
 
 export default async function EmployeesPage() {
-  const employees = await getEmployees();
+  const employees = await getEmpleados();
 
   return (
     <div className="flex flex-col gap-8 py-8">

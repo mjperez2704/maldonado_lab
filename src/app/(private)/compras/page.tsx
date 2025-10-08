@@ -12,11 +12,11 @@ import {
   Plus,
   ShoppingCart
 } from "lucide-react"
-import { getPurchases } from '@/services/comprasServicio';
+import { getCompras } from '@/services/comprasServicio';
 import PurchasesTable from './PurchasesTable';
 
 export default async function PurchasesPage() {
-  const purchases = await getPurchases();
+  const purchases = await getCompras();
 
   return (
     <div className="flex flex-col gap-4 py-8">

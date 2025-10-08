@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Check, Plus, ShoppingCart, Calendar as CalendarIcon, Trash2 } from "lucide-react";
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from "next/navigation";
-import { getPurchaseById, updatePurchase, Purchase } from "@/services/comprasServicio";
+import { getPurchaseById, updatePurchase, Compras as Purchase } from "@/services/comprasServicio";
 import { getProveedores, Proveedor } from "@/services/proveedoresServicio";
 import Link from "next/link";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
@@ -67,8 +67,8 @@ export default function EditPurchasePage() {
         resolver: zodResolver(purchaseSchema),
     });
 
-    const { fields: productFields, append: appendProduct, remove: removeProduct } = useFieldArray({ control: form.control, nombre: "products" });
-    const { fields: paymentFields, append: appendPayment, remove: removePayment } = useFieldArray({ control: form.control, nombre: "payments" });
+    const { fields: productFields, append: appendProduct, remove: removeProduct } = useFieldArray({ control: form.control, name: "products" });
+    const { fields: paymentFields, append: appendPayment, remove: removePayment } = useFieldArray({ control: form.control, name: "payments" });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -81,7 +81,7 @@ export default function EditPurchasePage() {
                 if (purchaseData) {
                     form.reset({
                         ...purchaseData,
-                        notes: purchaseData.notes || '',
+                        notes: purchaseData.notas || '',
                         tax: purchaseData.tax || 0,
                     });
                 } else {
@@ -101,9 +101,9 @@ export default function EditPurchasePage() {
     }, [purchaseId, router, form, toast]);
 
 
-    const watchedProducts = useWatch({ control: form.control, nombre: 'products' });
-    const watchedPayments = useWatch({ control: form.control, nombre: 'payments' });
-    const watchedTax = useWatch({ control: form.control, nombre: 'tax' });
+    const watchedProducts = useWatch({ control: form.control, name: 'products' });
+    const watchedPayments = useWatch({ control: form.control, name: 'payments' });
+    const watchedTax = useWatch({ control: form.control, name: 'tax' });
 
     const subtotal = React.useMemo(() =>
         (watchedProducts || []).reduce((acc, p) => acc + (p.unitPrice || 0) * (p.quantity || 0), 0),
@@ -120,8 +120,8 @@ export default function EditPurchasePage() {
         try {
             const purchaseData: Omit<Purchase, 'id'> = {
                 ...data,
-                notes: data.notes || '',
-                products: data.products.map(p => ({ ...p, totalPrice: p.unitPrice * p.quantity })),
+                notas: data.notes || '',
+                productos: data.products.map(p => ({ ...p, totalPrice: p.unitPrice * p.quantity })),
                 subtotal,
                 tax: watchedTax || 0,
                 total,

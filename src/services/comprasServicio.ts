@@ -9,21 +9,21 @@ interface CompraProducto {
 }
 
 interface CompraPago {
-    fecha: string;
-    monto: number;
+    date: string;
+    amount: number;
     method: string;
 }
 
 export interface Compras {
   id: number;
-  fecha: string;
-  sucursal_id: string;
-  proveedor_id: string;
+  date: string;
+  branch: string;
+  provider: string;
   notas: string;
   productos: CompraProducto[];
   pagos: CompraPago[];
   subtotal: number;
-  impuesto: number;
+  tax: number; // Renombrado de impuesto
   total: number;
   pagado: number;
   adeudo: number;
@@ -45,9 +45,9 @@ export async function getCompras(): Promise<Compras[]> {
 }
 
 export async function createPurchase(purchase: Omit<Compras, 'id'>): Promise<void> {
-    const { fecha, sucursal_id, proveedor_id, notas, productos, pagos, subtotal, impuesto, total, pagado, adeudo } = purchase;
-    const query = 'INSERT INTO compras (fecha, sucursal_id, proveedor_id, notas, productos, pagos, subtotal, impuesto, total, pagado, adeudo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    await executeQuery(query, [fecha, sucursal_id, proveedor_id, notas, JSON.stringify(productos), JSON.stringify(pagos), subtotal, impuesto, total, pagado, adeudo]);
+    const { date, branch, provider, notas, productos, pagos, subtotal, tax, total, pagado, adeudo } = purchase;
+    const query = 'INSERT INTO compras (date, branch, provider, notas, productos, pagos, subtotal, tax, total, pagado, adeudo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    await executeQuery(query, [date, branch, provider, notas, JSON.stringify(productos), JSON.stringify(pagos), subtotal, tax, total, pagado, adeudo]);
 }
 
 export async function getPurchaseById(id: string): Promise<Compras | null> {
@@ -64,9 +64,9 @@ export async function getPurchaseById(id: string): Promise<Compras | null> {
 }
 
 export async function updatePurchase(id: string, purchase: Omit<Compras, 'id'>): Promise<void> {
-    const { fecha, sucursal_id, proveedor_id, notas, productos, pagos, subtotal, impuesto, total, pagado, adeudo } = purchase;
-    const query = 'UPDATE compras SET fecha = ?, sucursal_id = ?, proveedor_id = ?, notas = ?, productos = ?, pagos = ?, subtotal = ?, impuesto = ?, total = ?, pagado = ?, adeudo = ? WHERE id = ?';
-    await executeQuery(query, [fecha, sucursal_id, proveedor_id, notas, JSON.stringify(productos), JSON.stringify(pagos), subtotal, impuesto, total, pagado, adeudo, id]);
+    const { date, branch, provider, notas, productos, pagos, subtotal, tax, total, pagado, adeudo } = purchase;
+    const query = 'UPDATE compras SET date = ?, branch = ?, provider = ?, notas = ?, productos = ?, pagos = ?, subtotal = ?, tax = ?, total = ?, pagado = ?, adeudo = ? WHERE id = ?';
+    await executeQuery(query, [date, branch, provider, notas, JSON.stringify(productos), JSON.stringify(pagos), subtotal, tax, total, pagado, adeudo, id]);
 }
 
 
