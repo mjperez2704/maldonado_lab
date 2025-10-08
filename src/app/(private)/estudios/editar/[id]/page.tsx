@@ -21,29 +21,23 @@ import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
-const initialNewParam: ParametroEstudio = {
+const initialNewParam: Omit<ParametroEstudio, 'estudio_id'> = {
     nombre: '',
     unidad_medida: '',
     costo: 0,
-    factor: '',
-    tipo_referencia: 'Intervalo Biologico de Referencia',
+    tipo_referencia: 'Intervalo',
     sexo: 'Ambos',
     edad_inicio: 0,
-    edad_fin: 0,
+    edad_fin: 99,
     unidad_edad: 'Anos',
     referencia_inicio_a: '',
     referencia_fin_a: '',
-    factorConversion: 0,
-    unidadConversion: '',
     posiblesValores: [],
-    valorDefault: '',
-    valorReferencia: '',
-    referenceText: '',
-    estudio_id: 0,
 };
 
-function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (param: ParametroEstudio) => void, initialData?: ParametroEstudio }) {
-    const [param, setParam] = useState<ParametroEstudio>(initialData);
+
+function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (param: ParametroEstudio) => void, initialData?: Omit<ParametroEstudio, 'estudio_id'> }) {
+    const [param, setParam] = useState<Omit<ParametroEstudio, 'estudio_id'>>(initialData);
     const [newPossibleValue, setNewPossibleValue] = useState('');
 
     useEffect(() => {
@@ -62,30 +56,27 @@ function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (par
     };
 
     const handleSave = () => {
-        onSave(param);
+        onSave({ ...param, estudio_id: 0 }); // estudio_id will be handled by the parent
     };
 
     return (
         <div className="space-y-4">
-             <div className="grid grid-cols-1 md:grid-cols-5 gap-x-4 gap-y-2 items-end">
-                <div className="space-y-1 col-span-full md:col-span-1"><Label>Parámetro</Label><Input placeholder="Nombre" value={param.nombre} onChange={(e) => setParam({...param, nombre: e.target.value})}/></div>
-                <div className="space-y-1 col-span-1"><Label>Unidad</Label><Input placeholder="ej. ml" value={param.unidad_medida} onChange={(e) => setParam({...param, unidad_medida: e.target.value})}/></div>
-                <div className="space-y-1 col-span-1"><Label>Costo</Label><Input type="number" placeholder="0.00" value={param.costo} onChange={(e) => setParam({...param, costo: parseFloat(e.target.value) || 0})}/></div>
-                <div className="space-y-1 col-span-1"><Label>FC</Label><Input type="number" placeholder="ej. 1.0" value={param.factorConversion} onChange={(e) => setParam({...param, factorConversion: parseFloat(e.target.value) || 0})}/></div>
-                <div className="space-y-1 col-span-1"><Label>U.I</Label><Input placeholder="ej. mU/L" value={param.unidadConversion} onChange={(e) => setParam({...param, unidadConversion: e.target.value})}/></div>
-                <div className="col-span-full md:col-span-5"><Label>Tipo de Valor de Referencia</Label><RadioGroup value={param.tipo_referencia} onValueChange={(v) => setParam({...param, tipo_referencia: v})} className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo Biologico de Referencia" id="ref-intervalo-edit" /><Label htmlFor="ref-intervalo-edit">Intervalo BR</Label></div>
+             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1"><Label>Parámetro</Label><Input placeholder="Nombre del Parámetro" value={param.nombre} onChange={(e) => setParam({...param, nombre: e.target.value})}/></div>
+                <div className="space-y-1"><Label>Unidad de Medida</Label><Input placeholder="ej. mg/dL" value={param.unidad_medida} onChange={(e) => setParam({...param, unidad_medida: e.target.value})}/></div>
+             </div>
+             <div className="col-span-full"><Label>Tipo de Valor de Referencia</Label><RadioGroup value={param.tipo_referencia} onValueChange={(v) => setParam({...param, tipo_referencia: v})} className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo" id="ref-intervalo-edit" /><Label htmlFor="ref-intervalo-edit">Intervalo</Label></div>
                     <div className="flex items-center space-x-2"><RadioGroupItem value="Mixto" id="ref-mixto-edit" /><Label htmlFor="ref-mixto-edit">Mixto</Label></div>
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="Criterio R" id="ref-criterio-edit" /><Label htmlFor="ref-criterio-edit">Criterio R</Label></div>
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="Sin valor de referencia" id="ref-sin-valor-edit" /><Label htmlFor="ref-sin-valor-edit">Sin valor de referencia</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="Criterio" id="ref-criterio-edit" /><Label htmlFor="ref-criterio-edit">Criterio</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="Sin_referencia" id="ref-sin-valor-edit" /><Label htmlFor="ref-sin-valor-edit">Sin referencia</Label></div>
                 </RadioGroup></div>
-            </div>
 
-            {param.tipo_referencia === 'Intervalo Biologico de Referencia' && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-muted/50 rounded-md">
-                    <div className="space-y-2"><Label>Intervalo</Label><div className="flex items-center gap-2"><Input placeholder="De:" value={param.referencia_inicio_a} onChange={(e) => setParam({...param, referencia_inicio_a: e.target.value})}/><span>A:</span><Input placeholder="A:" value={param.referencia_fin_a} onChange={(e) => setParam({...param, referencia_fin_a: e.target.value})}/></div></div>
-                    <div className="space-y-2"><Label>Género</Label><RadioGroup value={param.sexo} onValueChange={(v) => setParam({...param, sexo: v})} className="flex pt-2 gap-4"><div className="flex items-center space-x-2"><RadioGroupItem value="Hombre" id="gender-h-edit"/><Label htmlFor="gender-h-edit">Hombre</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Mujer" id="gender-m-edit"/><Label htmlFor="gender-m-edit">Mujer</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Ambos" id="gender-a-edit"/><Label htmlFor="gender-a-edit">Ambos</Label></div></RadioGroup></div>
-                    <div className="space-y-2"><Label>Edad</Label><div className="flex items-center gap-2"><Input placeholder="De:" type="number" value={param.edad_inicio} onChange={(e) => setParam({...param, edad_inicio: Number(e.target.value)})}/><span>A:</span><Input placeholder="A:" type="number" value={param.edad_fin} onChange={(e) => setParam({...param, edad_fin: Number(e.target.value)})}/></div><RadioGroup value={param.unidad_edad} onValueChange={(v) => setParam({...param, unidad_edad: v as 'Anos' | 'Meses' | 'Dias'})} className="flex pt-2 gap-4"><div className="flex items-center space-x-2"><RadioGroupItem value="Dias" id="age-d-edit"/><Label htmlFor="age-d-edit">Días</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Meses" id="age-m-edit"/><Label htmlFor="age-m-edit">Meses</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Anos" id="age-a-edit"/><Label htmlFor="age-a-edit">Años</Label></div></RadioGroup></div>
+            {param.tipo_referencia === 'Intervalo' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-md">
+                    <div className="space-y-2"><Label>Género</Label><RadioGroup value={param.sexo} onValueChange={(v) => setParam({...param, sexo: v as any})} className="flex pt-2 gap-4"><div className="flex items-center space-x-2"><RadioGroupItem value="Masculino" id="gender-h-edit"/><Label htmlFor="gender-h-edit">Hombre</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Femenino" id="gender-m-edit"/><Label htmlFor="gender-m-edit">Mujer</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Ambos" id="gender-a-edit"/><Label htmlFor="gender-a-edit">Ambos</Label></div></RadioGroup></div>
+                    <div className="space-y-2"><Label>Edad</Label><div className="flex items-center gap-2"><Input placeholder="De" type="number" value={param.edad_inicio} onChange={(e) => setParam({...param, edad_inicio: Number(e.target.value)})}/><span>a</span><Input placeholder="A" type="number" value={param.edad_fin} onChange={(e) => setParam({...param, edad_fin: Number(e.target.value)})}/><Select value={param.unidad_edad} onValueChange={(v) => setParam({...param, unidad_edad: v as any})}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="Dias">Días</SelectItem><SelectItem value="Meses">Meses</SelectItem><SelectItem value="Anos">Años</SelectItem></SelectContent></Select></div></div>
+                    <div className="md:col-span-2 space-y-2"><Label>Intervalo de Referencia</Label><div className="flex items-center gap-2"><Input placeholder="Valor Mínimo" value={param.referencia_inicio_a || ''} onChange={(e) => setParam({...param, referencia_inicio_a: e.target.value})}/><span>-</span><Input placeholder="Valor Máximo" value={param.referencia_fin_a || ''} onChange={(e) => setParam({...param, referencia_fin_a: e.target.value})}/></div></div>
                 </div>
             )}
              {param.tipo_referencia === 'Mixto' && (
@@ -93,10 +84,10 @@ function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (par
                     <div className="space-y-2">
                         <Label>Valores Posibles</Label>
                         <div className="flex items-center gap-2">
-                            <Input placeholder="Nombre del valor" value={newPossibleValue} onChange={(e) => setNewPossibleValue(e.target.value)} />
-                            <Button type="button" size="sm" onClick={handleAddPossibleValue}>Agregar Valor</Button>
+                            <Input placeholder="Añadir valor posible" value={newPossibleValue} onChange={(e) => setNewPossibleValue(e.target.value)} />
+                            <Button type="button" size="sm" onClick={handleAddPossibleValue}>Agregar</Button>
                         </div>
-                        <div className="border rounded-md p-2 min-h-[100px]">
+                        <div className="border rounded-md p-2 min-h-[100px] space-y-1">
                             {(param.posiblesValores || []).map((val, i) => (
                                 <div key={i} className="flex justify-between items-center p-1 hover:bg-background rounded-md">
                                     <span>{val}</span>
@@ -107,10 +98,11 @@ function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (par
                     </div>
                     <div className="space-y-4">
                         <div className="space-y-2">
-                            <Label>Valor Predeterminado</Label>
+                            <Label>Valor Predeterminado (Opcional)</Label>
                             <Select value={param.valorDefault} onValueChange={(v) => setParam({...param, valorDefault: v})}>
-                                <SelectTrigger><SelectValue placeholder="Seleccione un valor"/></SelectTrigger>
+                                <SelectTrigger><SelectValue placeholder="Seleccione un valor predeterminado"/></SelectTrigger>
                                 <SelectContent>
+                                    <SelectItem value="">Ninguno</SelectItem>
                                     {(param.posiblesValores || []).map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
                                 </SelectContent>
                             </Select>
@@ -118,7 +110,7 @@ function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (par
                             <div className="space-y-2">
                             <Label>Valor de Referencia</Label>
                             <Select value={param.valorReferencia} onValueChange={(v) => setParam({...param, valorReferencia: v})}>
-                                <SelectTrigger><SelectValue placeholder="Seleccione un valor"/></SelectTrigger>
+                                <SelectTrigger><SelectValue placeholder="Seleccione el valor de referencia"/></SelectTrigger>
                                 <SelectContent>
                                     {(param.posiblesValores || []).map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
                                 </SelectContent>
@@ -127,15 +119,15 @@ function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (par
                     </div>
                 </div>
             )}
-            {param.tipo_referencia === 'Criterio R' && (
+            {param.tipo_referencia === 'Criterio' && (
                 <div className="p-4 bg-muted/50 rounded-md">
                     <div className="space-y-2">
-                        <Label htmlFor="referenceText-edit">Introduce un texto que será el valor de referencia:</Label>
+                        <Label htmlFor="referenceText-edit">Texto de Referencia (Criterio)</Label>
                         <Textarea
                             id="referenceText-edit"
-                            placeholder="Ej: Menor de 1.0"
-                            value={param.referenceText}
-                            onChange={(e) => setParam({...param, referenceText: e.target.value})}
+                            placeholder="Ej: Menor de 1.0 ng/mL"
+                            value={param.texto_referencia || ''}
+                            onChange={(e) => setParam({...param, texto_referencia: e.target.value})}
                         />
                     </div>
                 </div>
@@ -332,11 +324,11 @@ export default function EditEstudioPage() {
     
     const getParameterDisplayReference = (param: ParametroEstudio) => {
         switch (param.tipo_referencia) {
-            case 'Intervalo Biologico de Referencia':
-                return `${param.referencia_inicio_a} - ${param.referencia_fin_a}`;
+            case 'Intervalo':
+                return `(${param.sexo}) ${param.referencia_inicio_a} - ${param.referencia_fin_a}`;
             case 'Mixto':
                 return param.valorReferencia || 'N/A';
-            case 'Criterio R':
+            case 'Criterio':
                 return param.texto_referencia || 'N/A';
             default:
                 return 'N/A';
@@ -413,13 +405,13 @@ export default function EditEstudioPage() {
                         <div className="space-y-2 lg:col-span-1"><Label htmlFor="tiempoEntregaExterno">Tiempo de entrega</Label><Select value={formData.tiempoEntregaExterno} onValueChange={(v) => handleSelectChange('tiempoEntregaExterno', v)} disabled={!formData.esSubcontratado}><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent><SelectItem value="3_dias">3 días</SelectItem></SelectContent></Select></div>
                     </div>
                     <div className="lg:col-span-4 space-y-2"><Label htmlFor="leyenda">Leyenda/Observaciones del estudio</Label><Textarea id="leyenda" value={formData.leyenda || ''} onChange={handleChange}/></div>
-                    <div className="lg:col-span-4 space-y-2"><Label htmlFor="descripcionCientifica">Descripción científica sobre la aplicación y funcionamiento del estudio</Label><Textarea id="descripcionCientifica" value={formData.descripcionCientifica || ''} onChange={handleChange}/></div>
+                    <div className="lg:col-span-4 space-y-2"><Label htmlFor="descripcionCientifica">Descripción científica</Label><Textarea id="descripcionCientifica" value={formData.descripcionCientifica || ''} onChange={handleChange}/></div>
                 </CardContent>
             </Card>
 
              <Card>
                 <CardHeader className="bg-primary/10">
-                    <CardTitle className="text-base text-primary">Datos de Facturación para el estudio (Aplicable solo para México)</CardTitle>
+                    <CardTitle className="text-base text-primary">Datos de Facturación (México)</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2"><Label htmlFor="claveServicioSat">Clave del Servicio</Label><Select value={formData.claveServicioSat} onValueChange={(v) => handleSelectChange('claveServicioSat', v)}><SelectTrigger><SelectValue placeholder="Seleccione"/></SelectTrigger><SelectContent><SelectItem value="85121500">85121500 - Servicios de laboratorios médicos</SelectItem></SelectContent></Select></div>
@@ -467,7 +459,7 @@ export default function EditEstudioPage() {
                         <DialogTitle>{editingParamIndex !== null ? 'Editar' : 'Agregar'} Parámetro</DialogTitle>
                     </DialogHeader>
                     <ParameterForm
-                        initialData={editingParamIndex !== null ? formData.parameters?.[editingParamIndex] : initialNewParam}
+                        initialData={editingParamIndex !== null && formData.parameters ? formData.parameters[editingParamIndex] : initialNewParam}
                         onSave={handleSaveParameter}
                     />
                 </DialogContent>
@@ -476,146 +468,41 @@ export default function EditEstudioPage() {
         </TabsContent>
          <TabsContent value="integran" className="pt-4 space-y-6">
             <Card>
-                <CardHeader>
-                    <CardTitle className="text-base text-primary">Configuración</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle className="text-base text-primary">Configuración</CardTitle></CardHeader>
                 <CardContent className="space-y-4">
-                     <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                            <Label>¿Se está registrando un examen con sub-exámenes?</Label>
-                            <Info className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                         <RadioGroup value={formData.tieneSubestudios ? 'yes' : 'no'} onValueChange={(v) => handleSelectChange('tieneSubestudios', v === 'yes')} className="flex gap-4 mt-2">
-                             <RadioGroupItem value="yes" id="subexam-yes-edit"/><Label htmlFor="subexam-yes-edit">Si</Label>
-                             <RadioGroupItem value="no" id="subexam-no-edit"/><Label htmlFor="subexam-no-edit">No</Label>
-                         </RadioGroup>
-                        <p className="text-xs text-muted-foreground">Al seleccionar la opción Sí, en el módulo de Entrega de Resultado podrá capturar los resultados por separado para cada uno de los estudios que lo integran. Así mismo en el módulo de Entrega de Resultados podrá realizar la impresión de forma individual de cada uno de los estudios que lo conforman.</p>
-                    </div>
-                     <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                            <Label>¿Se está registrando un paquete?</Label>
-                            <Info className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <RadioGroup value={formData.esPaquete ? 'yes' : 'no'} onValueChange={(v) => handleSelectChange('esPaquete', v === 'yes')} className="flex gap-4 mt-2">
-                             <RadioGroupItem value="yes" id="pkg-yes-edit"/><Label htmlFor="pkg-yes-edit">Si</Label>
-                             <RadioGroupItem value="no" id="pkg-no-edit"/><Label htmlFor="pkg-no-edit">No</Label>
-                         </RadioGroup>
-                         <p className="text-xs text-muted-foreground">Al ser afirmativa, en el módulo de Solicitud de Exámenes; podremos elegir los parámetros que lo conforman, a petición del paciente. Por ejemplo Qs 35; podremos seleccionar solo los estudios que necesitemos.</p>
-                    </div>
+                     <div className="space-y-2"><div className="flex items-center gap-2"><Label>¿Se está registrando un examen con sub-exámenes?</Label><Info className="h-4 w-4 text-muted-foreground" /></div><RadioGroup value={formData.tieneSubestudios ? 'yes' : 'no'} onValueChange={(v) => handleSelectChange('tieneSubestudios', v === 'yes')} className="flex gap-4 mt-2"><RadioGroupItem value="yes" id="subexam-yes-edit"/><Label htmlFor="subexam-yes-edit">Si</Label><RadioGroupItem value="no" id="subexam-no-edit"/><Label htmlFor="subexam-no-edit">No</Label></RadioGroup><p className="text-xs text-muted-foreground">Al seleccionar la opción Sí, podrá capturar los resultados por separado para cada uno de los estudios que lo integran.</p></div>
+                     <div className="space-y-2"><div className="flex items-center gap-2"><Label>¿Se está registrando un paquete?</Label><Info className="h-4 w-4 text-muted-foreground" /></div><RadioGroup value={formData.esPaquete ? 'yes' : 'no'} onValueChange={(v) => handleSelectChange('esPaquete', v === 'yes')} className="flex gap-4 mt-2"><RadioGroupItem value="yes" id="pkg-yes-edit"/><Label htmlFor="pkg-yes-edit">Si</Label><RadioGroupItem value="no" id="pkg-no-edit"/><Label htmlFor="pkg-no-edit">No</Label></RadioGroup><p className="text-xs text-muted-foreground">Al ser afirmativa, en la Solicitud de Exámenes podremos elegir los parámetros que lo conforman.</p></div>
                 </CardContent>
             </Card>
              <Card>
-                <CardHeader>
-                    <CardTitle className="text-base text-primary">Búsqueda y Asignación de Estudios</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div>
-                        <h4 className="font-semibold">Instrucciones:</h4>
-                        <ul className="list-disc list-inside text-sm text-muted-foreground">
-                            <li>Para agregar el estudio deberá realizar la búsqueda por su código ó bien por nombre y seleccionarlo, pasando de forma automática a la lista que se muestra a la derecha.</li>
-                            <li>Si desea eliminarlo, seleccione el estudio deseado de la lista y de clic en el botón Quitar estudio interno de la lista</li>
-                            <li>Si desea cambiar el orden en el que se muestran los estudios, seleccione las flechas ubicadas en el costado derecho de la lista</li>
-                        </ul>
-                    </div>
+                <CardHeader><CardTitle className="text-base text-primary">Búsqueda y Asignación de Estudios</CardTitle></CardHeader>
+                <CardContent className="space-y-4 pt-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="study-search">Nombre del estudio:</Label>
-                                <Input id="study-search" value={studySearchTerm} onChange={(e) => setEstudioSearchTerm(e.target.value)} placeholder="Buscar por nombre o código"/>
-                            </div>
+                            <div className="space-y-2"><Label htmlFor="study-search">Nombre del estudio:</Label><Input id="study-search" value={studySearchTerm} onChange={(e) => setEstudioSearchTerm(e.target.value)} placeholder="Buscar por nombre o código"/></div>
                             {studySearchTerm && (
-                                <div className="border rounded-md max-h-40 overflow-y-auto">
-                                    {filteredStudies.map(study => (
-                                        <div key={study.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => addIntegratedEstudio(study)}>
-                                            {study.nombre} ({study.codigo})
-                                        </div>
-                                    ))}
-                                </div>
+                                <div className="border rounded-md max-h-40 overflow-y-auto">{filteredStudies.map(study => (<div key={study.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => addIntegratedEstudio(study)}>{study.nombre} ({study.codigo})</div>))}</div>
                             )}
                         </div>
-                         <div className="space-y-2">
-                             <Label>Estudios integrados:</Label>
-                            <div className="border rounded-md h-48 overflow-y-auto p-1 space-y-1">
-                                {formData.integratedStudies?.map(study => (
-                                     <div key={study.id}
-                                          className={`p-2 rounded-md cursor-pointer ${Number(selectedIntegratedEstudio) === study.id ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`}
-                                          onClick={() => setSelectedIntegratedEstudio(String(study.id))}>
-                                         {study.nombre}
-                                     </div>
-                                ))}
-                            </div>
-                            <div className="flex justify-between">
-                                <Button type="button" variant="destructive" size="sm" onClick={removeIntegratedEstudio} disabled={!selectedIntegratedEstudio}>
-                                    <Trash2 className="mr-2 h-4 w-4"/> Quitar estudio de la lista
-                                </Button>
-                                <div className="flex gap-2">
-                                    <Button type="button" size="icon" variant="outline"><ArrowUp/></Button>
-                                    <Button type="button" size="icon" variant="outline"><ArrowDown/></Button>
-                                </div>
-                            </div>
-                        </div>
+                         <div className="space-y-2"><Label>Estudios integrados:</Label><div className="border rounded-md h-48 overflow-y-auto p-1 space-y-1">{formData.integratedStudies?.map(study => (<div key={study.id} className={`p-2 rounded-md cursor-pointer ${Number(selectedIntegratedEstudio) === study.id ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`} onClick={() => setSelectedIntegratedEstudio(String(study.id))}>{study.nombre}</div>))}</div><div className="flex justify-between"><Button type="button" variant="destructive" size="sm" onClick={removeIntegratedEstudio} disabled={!selectedIntegratedEstudio}><Trash2 className="mr-2 h-4 w-4"/> Quitar</Button><div className="flex gap-2"><Button type="button" size="icon" variant="outline"><ArrowUp/></Button><Button type="button" size="icon" variant="outline"><ArrowDown/></Button></div></div></div>
                     </div>
                 </CardContent>
              </Card>
         </TabsContent>
         <TabsContent value="sinonimos" className="pt-4">
             <Card>
-                <CardHeader className="bg-primary/10">
-                    <CardTitle className="text-base text-primary">Sinónimos de Identificación del Estudio</CardTitle>
-                </CardHeader>
+                <CardHeader><CardTitle className="text-base text-primary">Sinónimos de Identificación del Estudio</CardTitle></CardHeader>
                 <CardContent className="pt-6 space-y-4">
-                    <div className="space-y-2">
-                        {(formData.sinonimo || []).map((synonym, index) => (
-                            <div key={index} className="flex items-center gap-2">
-                                <Input
-                                    value={synonym}
-                                    onChange={(e) => handleSynonymChange(index, e.target.value)}
-                                    placeholder={`Sinónimo ${index + 1}`}
-                                />
-                                <Button type="button" variant="destructive" size="icon" onClick={() => removeSynonym(index)}>
-                                    <Trash2 className="h-4 w-4" />
-                                </Button>
-                            </div>
-                        ))}
-                    </div>
-                    <Button type="button" onClick={addSynonym} className="bg-green-600 hover:bg-green-700">
-                        <Plus className="mr-2 h-4 w-4" /> Agregar Sinónimo
-                    </Button>
+                    <div className="space-y-2">{(formData.sinonimo || []).map((synonym, index) => (<div key={index} className="flex items-center gap-2"><Input value={synonym} onChange={(e) => handleSynonymChange(index, e.target.value)} placeholder={`Sinónimo ${index + 1}`}/><Button type="button" variant="destructive" size="icon" onClick={() => removeSynonym(index)}><Trash2 className="h-4 w-4" /></Button></div>))}</div>
+                    <Button type="button" onClick={addSynonym} className="bg-green-600 hover:bg-green-700"><Plus className="mr-2 h-4 w-4" /> Agregar Sinónimo</Button>
                 </CardContent>
             </Card>
         </TabsContent>
         <TabsContent value="muestras" className="pt-4">
             <Card>
-                 <CardHeader className="bg-primary/10">
-                    <CardTitle className="text-base text-primary">Muestras del Estudio</CardTitle>
-                </CardHeader>
+                 <CardHeader><CardTitle className="text-base text-primary">Muestras del Estudio</CardTitle></CardHeader>
                 <CardContent className="pt-6 space-y-4">
-                     <div className="overflow-x-auto">
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>TIPO DE MUESTRA</TableHead>
-                                    <TableHead>CONTENEDOR</TableHead>
-                                    <TableHead>INDICACIONES</TableHead>
-                                    <TableHead>COSTO</TableHead>
-                                    <TableHead>ELIMINAR</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {formData.muestras?.map((sample, index) => (
-                                    <TableRow key={index}>
-                                        <TableCell>{sample.type}</TableCell>
-                                        <TableCell>{sample.container}</TableCell>
-                                        <TableCell>{sample.indications}</TableCell>
-                                        <TableCell>{Number(sample.cost).toFixed(2)}</TableCell>
-                                        <TableCell>
-                                            <Button type="button" variant="destructive" size="icon" onClick={() => handleRemoveSample(index)}><Trash2/></Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
+                     <div className="overflow-x-auto"><Table><TableHeader><TableRow><TableHead>TIPO DE MUESTRA</TableHead><TableHead>CONTENEDOR</TableHead><TableHead>INDICACIONES</TableHead><TableHead>COSTO</TableHead><TableHead>ELIMINAR</TableHead></TableRow></TableHeader><TableBody>{formData.muestras?.map((sample, index) => (<TableRow key={index}><TableCell>{sample.type}</TableCell><TableCell>{sample.container}</TableCell><TableCell>{sample.indications}</TableCell><TableCell>{Number(sample.cost).toFixed(2)}</TableCell><TableCell><Button type="button" variant="destructive" size="icon" onClick={() => handleRemoveSample(index)}><Trash2/></Button></TableCell></TableRow>))}</TableBody></Table></div>
                      <div className="p-4 border rounded-md space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
                             <div className="space-y-2"><Label>Tipo de Muestra</Label><Input value={newSample.type} onChange={(e) => setNewSample({...newSample, type: e.target.value})} placeholder="Ej. Sangre"/></div>
