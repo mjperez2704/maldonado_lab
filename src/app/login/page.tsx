@@ -17,7 +17,7 @@ import { getNombreEmpleadoById } from '@/services/empleadosServicio';
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const [email, setEmail] = useState('admin@megaspots.com');
+  const [email, setEmail] = useState('admin@mega-lims.com');
   const [contrasena, setContrasena] = useState('supersecretpassword');
   const [loading, setLoading] = useState(false);
 
@@ -40,7 +40,7 @@ export default function LoginPage() {
 
         toast({
           title: "Inicio de Sesión Exitoso",
-          description: 'Bienvenido,' + nombre + '.'
+          description: 'Bienvenido.'
         });
 
         // Redirigimos al nuevo dashboard
@@ -76,7 +76,7 @@ export default function LoginPage() {
               <Info className="h-4 w-4" />
               <AlertTitle>Usuario de Prueba</AlertTitle>
               <AlertDescription>
-                Email: admin@megaspots.com <br/> Pass: supersecretpassword
+                Email: admin@mega-lims.com <br/> Pass: supersecretpassword
               </AlertDescription>
             </Alert>
             <form onSubmit={handleLogin} className="space-y-4">

@@ -3,27 +3,27 @@ import { executeQuery } from '@/lib/db';
 
 interface CompraProducto {
     nombre: string;
-    unitPrice: number;
-    quantity: number;
+    precio: number;
+    cantidad: number;
     totalPrice: number;
 }
 
 interface CompraPago {
-    date: string;
-    amount: number;
-    method: string;
+    fecha: string;
+    monto: number;
+    metodo: string;
 }
 
 export interface Compras {
   id: number;
-  date: string;
-  branch: string;
-  provider: string;
+  fecha: string;
+  sucursal_id: number;
+  proveedor_id: number;
   notas: string;
   productos: CompraProducto[];
   pagos: CompraPago[];
   subtotal: number;
-  tax: number; // Renombrado de impuesto
+  impuesto: number; // Renombrado de impuesto
   total: number;
   pagado: number;
   adeudo: number;
@@ -45,9 +45,9 @@ export async function getCompras(): Promise<Compras[]> {
 }
 
 export async function createPurchase(purchase: Omit<Compras, 'id'>): Promise<void> {
-    const { date, branch, provider, notas, productos, pagos, subtotal, tax, total, pagado, adeudo } = purchase;
-    const query = 'INSERT INTO compras (date, branch, provider, notas, productos, pagos, subtotal, tax, total, pagado, adeudo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    await executeQuery(query, [date, branch, provider, notas, JSON.stringify(productos), JSON.stringify(pagos), subtotal, tax, total, pagado, adeudo]);
+    const { fecha, sucursal_id, proveedor_id, notas, productos, pagos, subtotal, impuesto, total, pagado, adeudo } = purchase;
+    const query = 'INSERT INTO compras (fecha, sucursal_id, proveedor_id, notas, productos, pagos, subtotal, impuesto, total, pagado, adeudo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+    await executeQuery(query, [fecha, sucursal_id, proveedor_id, notas, JSON.stringify(productos), JSON.stringify(pagos), subtotal, impuesto, total, pagado, adeudo]);
 }
 
 export async function getPurchaseById(id: string): Promise<Compras | null> {
@@ -64,9 +64,9 @@ export async function getPurchaseById(id: string): Promise<Compras | null> {
 }
 
 export async function updatePurchase(id: string, purchase: Omit<Compras, 'id'>): Promise<void> {
-    const { date, branch, provider, notas, productos, pagos, subtotal, tax, total, pagado, adeudo } = purchase;
-    const query = 'UPDATE compras SET date = ?, branch = ?, provider = ?, notas = ?, productos = ?, pagos = ?, subtotal = ?, tax = ?, total = ?, pagado = ?, adeudo = ? WHERE id = ?';
-    await executeQuery(query, [date, branch, provider, notas, JSON.stringify(productos), JSON.stringify(pagos), subtotal, tax, total, pagado, adeudo, id]);
+    const { fecha, sucursal_id, proveedor_id, notas, productos, pagos, subtotal, impuesto, total, pagado, adeudo } = purchase;
+    const query = 'UPDATE compras SET fecha = ?, sucursal_id = ?, provider = ?, notas = ?, productos = ?, pagos = ?, subtotal = ?, impuesto = ?, total = ?, pagado = ?, adeudo = ? WHERE id = ?';
+    await executeQuery(query, [fecha, sucursal_id, proveedor_id, notas, JSON.stringify(productos), JSON.stringify(pagos), subtotal, impuesto, total, pagado, adeudo, id]);
 }
 
 

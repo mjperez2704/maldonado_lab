@@ -14,7 +14,9 @@
             "nombre": "mega_lims",
             "database": "megaspots_lims",
             "usernombre": "megaspots_lims",
-            "password": "megaspots_lims"
+            "password": "megaspots_lims",
+            "name": "mega_lims",
+            "username": "megaspots_lims"
         }
     ]
 }

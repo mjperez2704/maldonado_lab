@@ -22,24 +22,24 @@ import { useToast } from "@/hooks/use-toast";
 
 const purchaseProductSchema = z.object({
   nombre: z.string().min(1, "El nombre del producto es requerido."),
-  unitPrice: z.coerce.number().min(0.01, "El precio unitario debe ser mayor a 0."),
-  quantity: z.coerce.number().min(1, "La cantidad debe ser al menos 1."),
+  precio: z.coerce.number().min(0.01, "El precio unitario debe ser mayor a 0."),
+  cantidad: z.coerce.number().min(1, "La cantidad debe ser al menos 1."),
 });
 
 const purchasePaymentSchema = z.object({
-    date: z.string().min(1, "La fecha es requerida."),
-    amount: z.coerce.number().min(0.01, "El monto debe ser mayor a 0."),
-    method: z.string().min(1, "El método de pago es requerido."),
+    fecha: z.string().min(1, "La fecha es requerida."),
+    monto: z.coerce.number().min(0.01, "El monto debe ser mayor a 0."),
+    metodo: z.string().min(1, "El método de pago es requerido."),
 });
 
 const purchaseSchema = z.object({
-  date: z.string().min(1, "La fecha es requerida."),
-  branch: z.string().min(1, "La sucursal es requerida."),
-  provider: z.string().min(1, "El proveedor es requerido."),
-  notes: z.string().optional(),
-  products: z.array(purchaseProductSchema).min(1, "Debe agregar al menos un producto."),
-  payments: z.array(purchasePaymentSchema).min(1, "Debe agregar al menos un pago."),
-  tax: z.coerce.number().min(0).optional().default(0),
+  fecha: z.string().min(10, "La fecha es requerida."),
+  sucursal_id: z.coerce.number().min(1,"El id de la sucursal debe ser númerico entero."),
+  proveedor_id: z.coerce.number().min(1,"El id del proveedor debe ser númerico entero."),
+  notas: z.string().optional(),
+  productos: z.array(purchaseProductSchema).min(1, "Debe agregar al menos un producto."),
+  pagos: z.array(purchasePaymentSchema).min(1, "Debe agregar al menos un pago."),
+  impuesto: z.coerce.number().min(0).optional().default(0),
 });
 
 type PurchaseFormValues = z.infer<typeof purchaseSchema>;
@@ -52,29 +52,29 @@ export default function CreatePurchasePage() {
     const form = useForm<PurchaseFormValues>({
         resolver: zodResolver(purchaseSchema),
         defaultValues: {
-            date: new Date().toISOString().split('T')[0],
-            branch: '',
-            provider: '',
-            notes: '',
-            products: [{ nombre: '', unitPrice: 0, quantity: 1 }],
-            payments: [{ date: new Date().toISOString().split('T')[0], amount: 0, method: '' }],
-            tax: 0,
+            fecha: '',
+            sucursal_id: 1,
+            proveedor_id: 1,
+            notas: '',
+            productos: [{ nombre: '', precio: 0, cantidad: 1 }],
+            pagos: [{ fecha: new Date().toISOString().split('T')[0], monto: 0, metodo: '' }],
+            impuesto: 0,
         },
     });
 
-    const { fields: productFields, append: appendProduct, remove: removeProduct } = useFieldArray({ control: form.control, name: "products" });
-    const { fields: paymentFields, append: appendPayment, remove: removePayment } = useFieldArray({ control: form.control, name: "payments" });
+    const { fields: productFields, append: appendProduct, remove: removeProduct } = useFieldArray({ control: form.control, name: "productos" });
+    const { fields: paymentFields, append: appendPayment, remove: removePayment } = useFieldArray({ control: form.control, name: "pagos" });
 
-    const watchedProducts = useWatch({ control: form.control, name: 'products' });
-    const watchedPayments = useWatch({ control: form.control, name: 'payments' });
-    const watchedTax = useWatch({ control: form.control, name: 'tax' });
+    const watchedProducts = useWatch({ control: form.control, name: 'productos' });
+    const watchedPayments = useWatch({ control: form.control, name: 'pagos' });
+    const watchedTax = useWatch({ control: form.control, name: 'impuesto' });
 
     const subtotal = React.useMemo(() => 
-        (watchedProducts || []).reduce((acc, p) => acc + (p.unitPrice || 0) * (p.quantity || 0), 0), 
+        (watchedProducts || []).reduce((acc, p) => acc + (p.precio || 0) * (p.cantidad || 0), 0), 
     [watchedProducts]);
 
     const totalPaid = React.useMemo(() => 
-        (watchedPayments || []).reduce((acc, p) => acc + (p.amount || 0), 0),
+        (watchedPayments || []).reduce((acc, p) => acc + (p.monto || 0), 0),
     [watchedPayments]);
     
     const total = subtotal + (watchedTax || 0);
@@ -88,12 +88,14 @@ export default function CreatePurchasePage() {
         try {
             const purchaseData: Omit<Compras, 'id'> = {
                 ...data,
-                notas: data.notes || '',
-                productos: data.products.map(p => ({...p, totalPrice: p.unitPrice * p.quantity })),
-                subtotal,
-                total,
-                pagado: totalPaid,
-                adeudo: adeudo,
+                notas: data.notas || '',
+                productos: data.productos.map(p => ({ ...p, totalPrice: p.precio * p.cantidad })),
+                pagos: data.pagos.map(p => ({ ...p, monto: p.monto })),
+                subtotal: subtotal,
+                impuesto: 0,
+                total: 0,
+                pagado: 0,
+                adeudo: 0
             };
             await createPurchase(purchaseData);
             toast({ title: "Éxito", description: "Compra creada correctamente." });
@@ -125,16 +127,16 @@ export default function CreatePurchasePage() {
         </CardHeader>
         <CardContent className="flex flex-col gap-8 pt-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <FormField control={form.control} name="date" render={({ field }) => (
+                <FormField control={form.control} name="fecha" render={({ field }) => (
                     <FormItem><FormLabel>Fecha</FormLabel><div className="relative"><FormControl><Input type="date" {...field} /></FormControl><CalendarIcon className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" /></div><FormMessage /></FormItem>
                 )}/>
-                <FormField control={form.control} name="branch" render={({ field }) => (
-                    <FormItem><FormLabel>Sucursal</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Seleccionar sucursal" /></SelectTrigger></FormControl><SelectContent><SelectItem value="main">Sucursal Principal</SelectItem><SelectItem value="secondary">Sucursal Secundaria</SelectItem></SelectContent></Select><FormMessage /></FormItem>
+                <FormField control={form.control} name="sucursal_id" render={({ field }) => (
+                    <FormItem><FormLabel>Sucursal</FormLabel><Select onValueChange={field.onChange} defaultValue="1"><FormControl><SelectTrigger><SelectValue placeholder="Seleccionar sucursal" /></SelectTrigger></FormControl><SelectContent><SelectItem value="1">Sucursal Principal</SelectItem><SelectItem value="secondary">Sucursal Secundaria</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                 )}/>
-                <FormField control={form.control} name="provider" render={({ field }) => (
-                    <FormItem><FormLabel>Proveedor</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Seleccionar proveedor" /></SelectTrigger></FormControl><SelectContent>{providers.map(p => (<SelectItem key={p.id} value={p.nombre}>{p.nombre}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>
+                <FormField control={form.control} name="proveedor_id" render={({ field }) => (
+                    <FormItem><FormLabel>Proveedor</FormLabel><Select onValueChange={field.onChange} defaultValue="1"><FormControl><SelectTrigger><SelectValue placeholder="Seleccionar proveedor" /></SelectTrigger></FormControl><SelectContent><SelectItem value="1">Proveedor Principal</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                 )}/>
-                <FormField control={form.control} name="notes" render={({ field }) => (
+                <FormField control={form.control} name="notas" render={({ field }) => (
                     <FormItem className="md:col-span-3"><FormLabel>Nota</FormLabel><FormControl><Textarea placeholder="Nota" {...field} /></FormControl><FormMessage /></FormItem>
                 )}/>
             </div>
@@ -142,7 +144,7 @@ export default function CreatePurchasePage() {
             <div className="space-y-4">
                 <div className="flex justify-between items-center pb-2 border-b">
                     <h3 className="font-semibold text-lg">Productos</h3>
-                    <Button onClick={() => appendProduct({ nombre: '', unitPrice: 0, quantity: 1 })} size="icon" type="button" className="bg-primary hover:bg-primary/90">
+                    <Button onClick={() => appendProduct({ nombre: '', precio: 0, cantidad: 1 })} size="icon" type="button" className="bg-primary hover:bg-primary/90">
                         <Plus />
                     </Button>
                 </div>
@@ -152,12 +154,12 @@ export default function CreatePurchasePage() {
                         <TableBody>
                            {productFields.map((field, index) => {
                                 const product = watchedProducts[index];
-                                const totalPrice = (product?.unitPrice || 0) * (product?.quantity || 0);
+                                const totalPrice = (product?.precio || 0) * (product?.cantidad || 0);
                                 return (
                                 <TableRow key={field.id}>
-                                   <TableCell><FormField control={form.control} name={`products.${index}.nombre`} render={({ field }) => (<FormItem><FormControl><Input placeholder="Producto" {...field} /></FormControl><FormMessage/></FormItem>)}/></TableCell>
-                                   <TableCell><FormField control={form.control} name={`products.${index}.unitPrice`} render={({ field }) => (<FormItem><FormControl><Input type="number" placeholder="0.00" {...field} onFocus={handleFocus} /></FormControl><FormMessage/></FormItem>)}/></TableCell>
-                                   <TableCell><FormField control={form.control} name={`products.${index}.quantity`} render={({ field }) => (<FormItem><FormControl><Input type="number" placeholder="0" {...field} onFocus={handleFocus} /></FormControl><FormMessage/></FormItem>)}/></TableCell>
+                                   <TableCell><FormField control={form.control} name={`productos.${index}.nombre`} render={({ field }) => (<FormItem><FormControl><Input placeholder="Producto" {...field} /></FormControl><FormMessage/></FormItem>)}/></TableCell>
+                                   <TableCell><FormField control={form.control} name={`productos.${index}.precio`} render={({ field }) => (<FormItem><FormControl><Input type="number" placeholder="0.00" {...field} onFocus={handleFocus} /></FormControl><FormMessage/></FormItem>)}/></TableCell>
+                                   <TableCell><FormField control={form.control} name={`productos.${index}.cantidad`} render={({ field }) => (<FormItem><FormControl><Input type="number" placeholder="0" {...field} onFocus={handleFocus} /></FormControl><FormMessage/></FormItem>)}/></TableCell>
                                    <TableCell><Input type="number" placeholder="0.00" value={Number(totalPrice.toFixed(2))} readOnly /></TableCell>
                                    <TableCell>{productFields.length > 1 && (<Button type="button" variant="destructive" size="icon" onClick={() => removeProduct(index)}><Trash2 /></Button>)}</TableCell>
                                </TableRow>
@@ -170,7 +172,7 @@ export default function CreatePurchasePage() {
             <div className="space-y-4">
                  <div className="flex justify-between items-center pb-2 border-b">
                     <h3 className="font-semibold text-lg">Pagos</h3>
-                    <Button onClick={() => appendPayment({ date: new Date().toISOString().split('T')[0], amount: 0, method: '' })} size="icon" type="button" className="bg-primary hover:bg-primary/90"><Plus /></Button>
+                    <Button onClick={() => appendPayment({ fecha: new Date().toISOString().split('T')[0], monto: 0, metodo: '' })} size="icon" type="button" className="bg-primary hover:bg-primary/90"><Plus /></Button>
                 </div>
                 <div className="overflow-x-auto">
                     <Table>
@@ -178,9 +180,9 @@ export default function CreatePurchasePage() {
                         <TableBody>
                            {paymentFields.map((field, index) => (
                                <TableRow key={field.id}>
-                                   <TableCell><FormField control={form.control} name={`payments.${index}.date`} render={({ field }) => (<FormItem><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>)}/></TableCell>
-                                   <TableCell><FormField control={form.control} name={`payments.${index}.amount`} render={({ field }) => (<FormItem><FormControl><Input type="number" placeholder="0.00" {...field} onFocus={handleFocus} /></FormControl><FormMessage /></FormItem>)}/></TableCell>
-                                   <TableCell><FormField control={form.control} name={`payments.${index}.method`} render={({ field }) => (<FormItem><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Seleccionar método" /></SelectTrigger></FormControl><SelectContent><SelectItem value="cash">Efectivo</SelectItem><SelectItem value="card">Tarjeta</SelectItem><SelectItem value="transfer">Transferencia</SelectItem></SelectContent></Select><FormMessage /></FormItem>)}/></TableCell>
+                                   <TableCell><FormField control={form.control} name={`pagos.${index}.fecha`} render={({ field }) => (<FormItem><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>)}/></TableCell>
+                                   <TableCell><FormField control={form.control} name={`pagos.${index}.monto`} render={({ field }) => (<FormItem><FormControl><Input type="number" placeholder="0.00" {...field} onFocus={handleFocus} /></FormControl><FormMessage /></FormItem>)}/></TableCell>
+                                   <TableCell><FormField control={form.control} name={`pagos.${index}.metodo`} render={({ field }) => (<FormItem><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Seleccionar método" /></SelectTrigger></FormControl><SelectContent><SelectItem value="cash">Efectivo</SelectItem><SelectItem value="card">Tarjeta</SelectItem><SelectItem value="transfer">Transferencia</SelectItem></SelectContent></Select><FormMessage /></FormItem>)}/></TableCell>
                                    <TableCell>{paymentFields.length > 1 && (<Button type="button" variant="destructive" size="icon" onClick={() => removePayment(index)}><Trash2 /></Button>)}</TableCell>
                                </TableRow>
                            ))}
@@ -193,7 +195,7 @@ export default function CreatePurchasePage() {
                 <CardHeader><CardTitle className="text-lg">Resumen de la Compra</CardTitle></CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <div className="flex items-center justify-between p-3 bg-background rounded-lg"><Label>Total parcial</Label><Input className="text-right border-0 bg-transparent w-24" value={Number(subtotal.toFixed(2))} readOnly/></div>
-                     <FormField control={form.control} name="tax" render={({ field }) => (
+                     <FormField control={form.control} name="impuesto" render={({ field }) => (
                         <FormItem className="flex items-center justify-between p-3 bg-background rounded-lg"><FormLabel>Impuestos</FormLabel><FormControl><Input type="number" className="text-right border-0 bg-transparent w-24" {...field} onFocus={handleFocus} /></FormControl></FormItem>
                      )}/>
                     <div className="flex items-center justify-between p-3 bg-background rounded-lg"><Label>Total</Label><Input className="text-right border-0 bg-transparent w-24" value={Number(total.toFixed(2))} readOnly/></div>

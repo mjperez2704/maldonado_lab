@@ -120,7 +120,7 @@ function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (par
                 <div className="space-y-1 col-span-1"><Label>FC</Label><Input type="number" placeholder="ej. 1.0" value={param.factorConversion} onChange={(e) => setParam({...param, factorConversion: parseFloat(e.target.value) || 0})}/></div>
                 <div className="space-y-1 col-span-1"><Label>U.I</Label><Input placeholder="ej. mU/L" value={param.unidadConversion} onChange={(e) => setParam({...param, unidadConversion: e.target.value})}/></div>
                 <div className="col-span-full md:col-span-5"><Label>Tipo de Valor de Referencia</Label><RadioGroup value={param.tipo_referencia} onValueChange={(v) => setParam({...param, tipo_referencia: v})} className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
-                    <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo Biologico de Referencia" id="ref-intervalo" /><Label htmlFor="ref-intervalo">Intervalo BR</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo BR" id="ref-intervalo" /><Label htmlFor="ref-intervalo">Intervalo BR</Label></div>
                     <div className="flex items-center space-x-2"><RadioGroupItem value="Mixto" id="ref-mixto" /><Label htmlFor="ref-mixto">Mixto</Label></div>
                     <div className="flex items-center space-x-2"><RadioGroupItem value="Criterio R" id="ref-criterio" /><Label htmlFor="ref-criterio">Criterio R</Label></div>
                     <div className="flex items-center space-x-2"><RadioGroupItem value="Sin valor de referencia" id="ref-sin-valor" /><Label htmlFor="ref-sin-valor">Sin valor de referencia</Label></div>
@@ -236,7 +236,7 @@ export default function CreateEstudioPage() {
     };
 
     const handleConfigChange = (id: keyof Estudio['configuracion'], value: boolean) => {
-        setFormData(prev => ({ ...prev, config: { ...prev.configuracion, [id]: value } }));
+        setFormData(prev => ({ ...prev, configuracion: { ...prev.configuracion, [id]: value } }));
     };
 
     const handleSaveParameter = (param: ParametroEstudio) => {
@@ -328,7 +328,7 @@ export default function CreateEstudioPage() {
         try {
             const finalData = {
                 ...formData,
-                synonyms: formData.sinonimo?.filter(s => s.trim() !== '')
+                sinonimos: formData.sinonimo?.filter(s => s.trim() !== '')
             };
             await crearEstudio(finalData);
             toast({ title: "Éxito", description: "Estudio creado correctamente." });
@@ -420,9 +420,10 @@ export default function CreateEstudioPage() {
                             <SelectItem value="POTENCIOMETRIA">POTENCIOMETRIA</SelectItem>
                             <SelectItem value="TURBIDIMETRIA">TURBIDIMETRIA</SelectItem>
                         </SelectContent></Select></div>
-                    <div className="space-y-2"><Label htmlFor="internalCost">Costo interno p/prueba</Label><Input id="internalCost" type="number" value={formData.costoInterno} onChange={handleChange}/></div>
-                    <div className="space-y-2"><Label>Tiempo de entrega</Label><div className="flex gap-2"><Input id="deliveryTime" type="number" className="w-1/2" value={formData.tiempoEntrega} onChange={handleChange}/><Select value={formData.unidadEntrega} onValueChange={(v) => handleSelectChange('unidadEntrega', v as 'dias' | 'horas')}><SelectTrigger className="w-1/2"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="horas">Horas</SelectItem><SelectItem value="dias">Días</SelectItem></SelectContent></Select></div></div>
-                    <div className="space-y-2"><Label htmlFor="processTime">Tiempo de Proceso</Label>
+                    <div className="space-y-2"><Label htmlFor="costoInterno">Costo interno p/prueba</Label><Input id="costoInterno" type="number" value={formData.costoInterno} onChange={handleChange}/></div>
+                    <div className="space-y-2"><Label htmlFor="precio">Precio</Label><Input id="precio" type="number" value={formData.precio} onChange={handleChange}/></div>
+                    <div className="space-y-2"><Label>Tiempo de entrega</Label><div className="flex gap-2"><Input id="tiempoEntrega" type="number" className="w-1/2" value={formData.tiempoEntrega} onChange={handleChange}/><Select value={formData.unidadEntrega} onValueChange={(v) => handleSelectChange('unidadEntrega', v as 'dias' | 'horas')}><SelectTrigger className="w-1/2"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="horas">Horas</SelectItem><SelectItem value="dias">Días</SelectItem></SelectContent></Select></div></div>
+                    <div className="space-y-2"><Label htmlFor="tiempoProceso">Tiempo de Proceso</Label>
                         <Select value={formData.tiempoProceso} onValueChange={(v) => handleSelectChange('tiempoProceso', v)}><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent>
                         <SelectItem value="mismo_dia">Mismo día</SelectItem>
                         <SelectItem value="dia_siguiente">Día siguiente</SelectItem>
@@ -436,14 +437,14 @@ export default function CreateEstudioPage() {
                         <SelectItem value="15_dias">15 días</SelectItem>
                         <SelectItem value="30_dias">30 días</SelectItem>
                     </SelectContent></Select></div>
-                    <div className="space-y-2"><Label htmlFor="processDays">Días de Proceso</Label><Input id="diasProceso" value={formData.diasProceso} onChange={handleChange}/></div>
+                    <div className="space-y-2"><Label htmlFor="diasProceso">Días de Proceso</Label><Input id="diasProceso" value={formData.diasProceso} onChange={handleChange}/></div>
 
                     <div className="space-y-2 lg:col-span-4 grid grid-cols-1 lg:grid-cols-6 gap-6 items-center border-t pt-4">
                         <div className="lg:col-span-1"><Label>¿Este es un estudio subrogado?</Label><RadioGroup value={formData.esSubcontratado ? 'Si' : 'No'} onValueChange={(v) => handleSelectChange('esSubcontratado', v === 'Si')} className="flex gap-4 mt-2"><RadioGroupItem value="yes" id="sub-yes"/><Label htmlFor="sub-yes">Si</Label><RadioGroupItem value="no" id="sub-no"/><Label htmlFor="sub-no">No</Label></RadioGroup></div>
-                        <div className="space-y-2 lg:col-span-2"><Label htmlFor="outsourcedLabId">Lab. de Referencia</Label><Select value={formData.laboratorio_externo_id} onValueChange={(v) => handleSelectChange('laboratorio_externo_id', v)} disabled={!formData.esSubcontratado}><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent>{providers.map(p=><SelectItem key={p.id} value={String(p.id)}>{p.nombre}</SelectItem>)}</SelectContent></Select></div>
-                        <div className="space-y-2 lg:col-span-1"><Label htmlFor="outsourcedCode">Código</Label><Input id="outsourcedCode" value={formData.coidgoExterno} onChange={handleChange} disabled={!formData.esSubcontratado}/></div>
-                        <div className="space-y-2 lg:col-span-1"><Label htmlFor="outsourcedCost">Costo</Label><Input id="outsourcedCost" type="number" value={formData.costoExterno} onChange={handleChange} disabled={!formData.esSubcontratado}/></div>
-                        <div className="space-y-2 lg:col-span-1"><Label htmlFor="outsourcedDeliveryTime">Tiempo de entrega</Label><Select value={formData.tiempoEntregaExterno} onValueChange={(v) => handleSelectChange('tiempoEntregaExterno', v)} disabled={!formData.esSubcontratado}><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent>
+                        <div className="space-y-2 lg:col-span-2"><Label htmlFor="laboratorio_externo_id">Lab. de Referencia</Label><Select value={formData.laboratorio_externo_id} onValueChange={(v) => handleSelectChange('laboratorio_externo_id', v)} disabled={!formData.esSubcontratado}><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent>{providers.map(p=><SelectItem key={p.id} value={String(p.id)}>{p.nombre}</SelectItem>)}</SelectContent></Select></div>
+                        <div className="space-y-2 lg:col-span-1"><Label htmlFor="coidgoExterno">Código</Label><Input id="coidgoExterno" value={formData.coidgoExterno} onChange={handleChange} disabled={!formData.esSubcontratado}/></div>
+                        <div className="space-y-2 lg:col-span-1"><Label htmlFor="costoExterno">Costo</Label><Input id="costoExterno" type="number" value={formData.costoExterno} onChange={handleChange} disabled={!formData.esSubcontratado}/></div>
+                        <div className="space-y-2 lg:col-span-1"><Label htmlFor="tiempoEntregaExterno">Tiempo de entrega</Label><Select value={formData.tiempoEntregaExterno} onValueChange={(v) => handleSelectChange('tiempoEntregaExterno', v)} disabled={!formData.esSubcontratado}><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent>
                             <SelectItem value="1_dia">1 día</SelectItem>
                             <SelectItem value="2_dias">2 días</SelectItem>
                             <SelectItem value="3_dias">3 días</SelectItem>
@@ -453,8 +454,8 @@ export default function CreateEstudioPage() {
                             <SelectItem value="7_dias">7 días</SelectItem>
                         </SelectContent></Select></div>
                     </div>
-                    <div className="lg:col-span-4 space-y-2"><Label htmlFor="legend">Leyenda/Observaciones del estudio</Label><Textarea id="legend" value={formData.leyenda} onChange={handleChange}/></div>
-                    <div className="lg:col-span-4 space-y-2"><Label htmlFor="scientificDescription">Descripción científica sobre la aplicación y funcionamiento del estudio</Label><Textarea id="scientificDescription" value={formData.descripcionCientifica} onChange={handleChange}/></div>
+                    <div className="lg:col-span-4 space-y-2"><Label htmlFor="leyenda">Leyenda/Observaciones del estudio</Label><Textarea id="leyenda" value={formData.leyenda} onChange={handleChange}/></div>
+                    <div className="lg:col-span-4 space-y-2"><Label htmlFor="descripcionCientifica">Descripción científica sobre la aplicación y funcionamiento del estudio</Label><Textarea id="descripcionCientifica" value={formData.descripcionCientifica} onChange={handleChange}/></div>
                 </CardContent>
             </Card>
 
@@ -463,7 +464,7 @@ export default function CreateEstudioPage() {
                     <CardTitle className="text-base text-primary">Datos de Facturación para el estudio (Aplicable solo para México)</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2"><Label htmlFor="satServicioKey">Clave del Servicio</Label><Select value={formData.claveServicioSat} onValueChange={(v) => handleSelectChange('claveServicioSat', v)}><SelectTrigger><SelectValue placeholder="Seleccione"/></SelectTrigger><SelectContent>
+                    <div className="space-y-2"><Label htmlFor="claveServicioSat">Clave del Servicio</Label><Select value={formData.claveServicioSat} onValueChange={(v) => handleSelectChange('claveServicioSat', v)}><SelectTrigger><SelectValue placeholder="Seleccione"/></SelectTrigger><SelectContent>
                         <SelectItem value="85121500">85121500 - Servicios de laboratorios médicos</SelectItem>
                         <SelectItem value="85121800">85121800 - Servicios de laboratorio (Servicios de análisis clínicos en general).</SelectItem>
                         <SelectItem value="85121801">85121801 - Servicios de laboratorios de análisis de sangre.</SelectItem>
@@ -473,7 +474,7 @@ export default function CreateEstudioPage() {
                         <SelectItem value="85121805">85121805 - Servicios de laboratorios de análisis de orina.</SelectItem>
                         <SelectItem value="85121810">85121810 - Servicios de laboratorio de detección de drogas o alcohol.</SelectItem>
                     </SelectContent></Select></div>
-                    <div className="space-y-2"><Label htmlFor="satUnitKey">Clave de Unidad</Label><Select value={formData.claveUnidadSat} onValueChange={(v) => handleSelectChange('claveUnidadSat', v)}><SelectTrigger><SelectValue placeholder="Seleccione"/></SelectTrigger><SelectContent><SelectItem value="E48">E48 - Unidad de servicio</SelectItem></SelectContent></Select></div>
+                    <div className="space-y-2"><Label htmlFor="claveUnidadSat">Clave de Unidad</Label><Select value={formData.claveUnidadSat} onValueChange={(v) => handleSelectChange('claveUnidadSat', v)}><SelectTrigger><SelectValue placeholder="Seleccione"/></SelectTrigger><SelectContent><SelectItem value="E48">E48 - Unidad de servicio</SelectItem></SelectContent></Select></div>
                 </CardContent>
             </Card>
 

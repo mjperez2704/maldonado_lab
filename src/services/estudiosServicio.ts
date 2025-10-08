@@ -49,6 +49,7 @@ export interface Estudio {
     nombre: string;
     metodo: string;
     costoInterno: number;
+    precio: number;
     tiempoEntrega: number;
     unidadEntrega: 'dias' | 'horas';
     tiempoProceso: string;
@@ -77,7 +78,6 @@ export interface Estudio {
     integratedStudies: IntegratedEstudioRef[];
     sinonimo: string[];
     muestras: MuestraEstudio[];
-    precio: number;
     tipo_muestra_id: string;
     categoria: string;
     abreviatura: string;
@@ -89,9 +89,9 @@ export async function getStudies(): Promise<Estudio[]> {
         const plainResults = JSON.parse(JSON.stringify(results)) as any[];
         return plainResults.map((row: any) => ({
             ...row,
-            precio: Number(row.precio) || Number(row.costoInterno) || 0,
+            precio: Number(row.precio) || 0,
             parameters: JSON.parse(row.parameters || '[]'),
-            configuracion: JSON.parse(row.config || '{}'),
+            configuracion: JSON.parse(row.configuracion || '{}'),
             }));
     } catch (error) {
         console.error("Error en la consulta a la base de datos:", error);
@@ -105,9 +105,9 @@ export async function crearEstudio(study: Omit<Estudio, 'id'>): Promise<void> {
             area, codigo, nombre, metodo, costoInterno, tiempoEntrega, unidadEntrega,
             tiempoProceso, diasProceso, esSubcontratado, laboratorio_externo_id, coidgoExterno,
             costoExterno, tiempoEntregaExterno, leyenda, descripcionCientifica,
-            claveServicioSat, claveUnidadSat, parameters, config, tieneSubestudios, esPaquete,
+            claveServicioSat, claveUnidadSat, parameters, configuracion, tieneSubestudios, esPaquete,
             precio, tipo_muestra_id, categoria, abreviatura
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const params = [
         study.area, study.codigo, study.nombre, study.metodo, study.costoInterno,
@@ -127,7 +127,7 @@ export async function getEstudioById(id: string): Promise<Estudio | null> {
         const row = JSON.parse(JSON.stringify(results[0]));
         return {
             ...row,
-            precio: Number(row.precio) || Number(row.costoInterno) || 0,
+            precio: Number(row.precio) || 0,
             configuracion: JSON.parse(row.configuracion || '{}'),
         };
     }
@@ -137,22 +137,22 @@ export async function getEstudioById(id: string): Promise<Estudio | null> {
 export async function updateEstudio(id: string, study: Omit<Estudio, 'id'>): Promise<void> {
     const query = `
         UPDATE estudios SET
-            area = ?, codigo = ?, nombre = ?, metodo = ?, costoInterno = ?, tiempoEntrega = ?, 
+            area = ?, codigo = ?, nombre = ?, metodo = ?, costoInterno = ?, precio = ?, tiempoEntrega = ?, 
             unidadEntrega = ?, tiempoProceso = ?, diasProceso = ?, esSubcontratado = ?, 
             laboratorio_externo_id = ?, coidgoExterno = ?, costoExterno = ?, 
             tiempoEntregaExterno = ?, leyenda = ?, descripcionCientifica = ?, 
             claveServicioSat = ?, claveUnidadSat = ?, configuracion = ?, 
             tieneSubestudios = ?, esPaquete = ?, 
-            precio = ?, tipo_muestra_id = ?, categoria = ?, abreviatura = ?
+            tipo_muestra_id = ?, categoria = ?, abreviatura = ?
         WHERE id = ?
     `;
     const params = [
-        study.area, study.codigo, study.nombre, study.metodo, study.costoInterno,
+        study.area, study.codigo, study.nombre, study.metodo, study.costoInterno, study.precio,
         study.tiempoEntrega, study.unidadEntrega, study.tiempoProceso, study.diasProceso,
         study.esSubcontratado, study.laboratorio_externo_id, study.coidgoExterno, study.costoExterno,
         study.tiempoEntregaExterno, study.leyenda, study.descripcionCientifica,
         study.claveServicioSat, study.claveUnidadSat, JSON.stringify(study.configuracion), study.tieneSubestudios, study.esPaquete,
-        study.precio, study.tipo_muestra_id, study.categoria, study.abreviatura,
+        study.tipo_muestra_id, study.categoria, study.abreviatura,
         id
     ];
     await executeQuery(query, params);
@@ -170,5 +170,3 @@ export async function getEstudioIdByName(nombre: string): Promise<Number> {
     }
     return 0;
 }
-
-

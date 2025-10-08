@@ -19,7 +19,8 @@ export async function login({ email, contrasena }: { email: string; contrasena: 
   }
 
   // Comparación de contraseña encriptada
-  const isPasswordValid = await bcrypt.compare(contrasena, user.contrasena);
+  //const isPasswordValid = await bcrypt.compare(contrasena, user.contrasena);
+  const isPasswordValid = user.contrasena === contrasena;
 
   if (!isPasswordValid) {
     return null; // Contraseña incorrecta
