@@ -8,21 +8,18 @@ export interface ParametroEstudio {
     nombre: string;
     unidad_medida: string;
     costo: number;
-    factor?: string; // Mantener opcional
+    factor?: string;
     tipo_referencia: string;
     sexo: 'Ambos' | 'Masculino' | 'Femenino';
     edad_inicio: number;
     edad_fin: number;
     unidad_edad: 'Anos' | 'Meses' | 'Dias';
-    referencia_inicio_a?: string; // Simplificado para uso general
-    referencia_fin_a?: string;    // Simplificado para uso general
-    texto_referencia?: string;    // Para Criterio R
-    factorConversion?: number;
-    unidadConversion?: string;
+    referencia_inicio_a?: string; 
+    referencia_fin_a?: string;   
+    texto_referencia?: string;    
     posiblesValores?: string[];
     valorDefault?: string;
     valorReferencia?: string;
-    referenceText?: string;
 }
 
 export interface IntegratedEstudioRef {
@@ -101,7 +98,7 @@ export async function crearEstudio(study: Omit<Estudio, 'id'>): Promise<void> {
     const query = `
         INSERT INTO estudios (
             area, codigo, nombre, metodo, costoInterno, tiempoEntrega, unidadEntrega,
-            tiempoProceso, diasProceso, esSubcontratado, laboratorio_externo_id, coidgoExterno,
+            tiempoProceso, diasProceso, esSubcontratado, laboratorio_externo_id, codigoExterno,
             costoExterno, tiempoEntregaExterno, leyenda, descripcionCientifica,
             claveServicioSat, claveUnidadSat, parameters, configuracion, tieneSubestudios, esPaquete,
             precio, tipo_muestra_id, categoria, abreviatura, integratedStudies, sinonimo, muestras
@@ -142,7 +139,7 @@ export async function updateEstudio(id: string, study: Omit<Estudio, 'id'>): Pro
         UPDATE estudios SET
             area = ?, codigo = ?, nombre = ?, metodo = ?, costoInterno = ?, precio = ?, tiempoEntrega = ?, 
             unidadEntrega = ?, tiempoProceso = ?, diasProceso = ?, esSubcontratado = ?, 
-            laboratorio_externo_id = ?, coidgoExterno = ?, costoExterno = ?, 
+            laboratorio_externo_id = ?, codigoExterno = ?, costoExterno = ?, 
             tiempoEntregaExterno = ?, leyenda = ?, descripcionCientifica = ?, 
             claveServicioSat = ?, claveUnidadSat = ?, configuracion = ?, 
             tieneSubestudios = ?, esPaquete = ?, 

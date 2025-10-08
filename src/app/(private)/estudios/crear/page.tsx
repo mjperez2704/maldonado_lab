@@ -20,7 +20,7 @@ import { getProveedores, Proveedor } from "@/services/proveedoresServicio";
 import { getStudies as getAllStudies } from "@/services/estudiosServicio";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 const initialFormData: Omit<Estudio, 'id'> = {
     area: '',
@@ -66,6 +66,7 @@ const initialNewParam: Omit<ParametroEstudio, 'estudio_id'> = {
     nombre: '',
     unidad_medida: '',
     costo: 0,
+    factor: '',
     tipo_referencia: 'Intervalo',
     sexo: 'Ambos',
     edad_inicio: 0,
@@ -92,14 +93,16 @@ function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (par
     };
 
     const handleSave = () => {
-        onSave({ ...param, estudio_id: 0 }); // estudio_id will be handled by the parent
+        onSave({ ...param, estudio_id: 0 }); 
     };
 
     return (
         <div className="space-y-4">
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-1"><Label>Parámetro</Label><Input placeholder="Nombre del Parámetro" value={param.nombre} onChange={(e) => setParam({...param, nombre: e.target.value})}/></div>
+             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="space-y-1 lg:col-span-2"><Label>Parámetro</Label><Input placeholder="Nombre del Parámetro" value={param.nombre} onChange={(e) => setParam({...param, nombre: e.target.value})}/></div>
                 <div className="space-y-1"><Label>Unidad de Medida</Label><Input placeholder="ej. mg/dL" value={param.unidad_medida} onChange={(e) => setParam({...param, unidad_medida: e.target.value})}/></div>
+                <div className="space-y-1"><Label>Costo</Label><Input type="number" placeholder="0.00" value={param.costo} onChange={(e) => setParam({...param, costo: parseFloat(e.target.value) || 0})}/></div>
+                <div className="space-y-1"><Label>Factor Conv.</Label><Input placeholder="FC" value={param.factor} onChange={(e) => setParam({...param, factor: e.target.value})}/></div>
              </div>
              <div className="col-span-full"><Label>Tipo de Valor de Referencia</Label><RadioGroup value={param.tipo_referencia} onValueChange={(v) => setParam({...param, tipo_referencia: v})} className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
                     <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo" id="ref-intervalo" /><Label htmlFor="ref-intervalo">Intervalo</Label></div>
