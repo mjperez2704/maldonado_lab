@@ -77,7 +77,7 @@ export default function StudiesPage() {
         }
         return estudios.filter(study =>
             study.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            (study.code && study.code.toLowerCase().includes(searchTerm.toLowerCase()))
+            (study.codigo && study.codigo.toLowerCase().includes(searchTerm.toLowerCase()))
         );
     }, [searchTerm, estudios]);
 
@@ -196,7 +196,7 @@ export default function StudiesPage() {
                         </TableHead>
                         <TableHead>Área</TableHead>
                         <TableHead>Método</TableHead>
-                        <TableHead>Costo Interno</TableHead>
+                        <TableHead>Precio</TableHead>
                         <TableHead className="text-right">Acción</TableHead>
                     </TableRow>
                     </TableHeader>
@@ -209,8 +209,8 @@ export default function StudiesPage() {
                         <TableCell>{index + 1}</TableCell>
                         <TableCell>{study.nombre}</TableCell>
                         <TableCell>{study.area}</TableCell>
-                        <TableCell>{study.method || 'N/A'}</TableCell>
-                            <TableCell>${Number((study.internalCost || 0)).toFixed(2)}</TableCell>
+                        <TableCell>{study.metodo || 'N/A'}</TableCell>
+                            <TableCell>${Number((study.precio || 0)).toFixed(2)}</TableCell>
                         <TableCell>
                             <div className="flex items-center justify-end gap-2">
                             <Button variant="outline" size="icon" onClick={() => handleEdit(String(study.id))}>

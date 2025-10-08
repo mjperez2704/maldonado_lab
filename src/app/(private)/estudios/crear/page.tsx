@@ -14,7 +14,8 @@ import { Microscope, Info, Plus, Trash2, Save, Check, HelpCircle, ArrowDown, Arr
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
-import { crearEstudio, Estudio, ParametroEstudio, IntegratedEstudioRef, MuestraEstudio } from "@/services/estudiosServicio";
+import { crearEstudio, Estudio } from "@/services/estudiosServicio";
+import type { ParametroEstudio, ValoresReferencia, IntegratedEstudioRef, MuestraEstudio, ParametroEstudioForm } from '@/types/study';
 import { getCategories, Category } from "@/services/categoriasServicio";
 import { getProveedores, Proveedor } from "@/services/proveedoresServicio";
 import { getStudies as getAllStudies } from "@/services/estudiosServicio";
@@ -34,7 +35,7 @@ const initialFormData: Omit<Estudio, 'id'> = {
     diasProceso: '',
     esSubcontratado: false,
     laboratorio_externo_id: '',
-    coidgoExterno: '',
+    codigoExterno: '',
     costoExterno: 0,
     tiempoEntregaExterno: '',
     leyenda: '',
@@ -58,67 +59,99 @@ const initialFormData: Omit<Estudio, 'id'> = {
     muestras: [],
     precio: 0,
     tipo_muestra_id: '',
-    categoria: '',
+    categoria_id: '',
     abreviatura: '',
+    indicaciones: ''
 };
 
-const initialNewParam: Omit<ParametroEstudio, 'estudio_id'> = {
-    nombre: '',
-    unidad_medida: '',
+const initialNewParam: ParametroEstudioForm = {
+    nombre_parametro: '',
     costo: 0,
-    factor: '',
-    tipo_referencia: 'Intervalo',
-    sexo: 'Ambos',
-    edad_inicio: 0,
-    edad_fin: 99,
-    unidad_edad: 'Anos',
-    referencia_inicio_a: '',
-    referencia_fin_a: '',
-    posiblesValores: [],
+    factor_conversion: '',
+    unidad_medida: '',
+    unidad_internacional: '',
+    valoresReferencia: {
+        tipo_referencia: 'Sin_referencia',
+        sexo: 'Ambos',
+        edad_inicio: 0,
+        edad_fin: 99,
+        unidad_edad: 'Anos',
+        valor_inicio: '',
+        valor_fin: '',
+        texto_criterio: '',
+        posibles_valores_form: {
+            valores_opciones: [],
+            valor_predeterminado: '_NULL_',
+            valor_referencia: '',
+        },
+        texto_reporte_resultados: '',
+    }
 };
 
-function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (param: ParametroEstudio) => void, initialData?: Omit<ParametroEstudio, 'estudio_id'> }) {
-    const [param, setParam] = useState<Omit<ParametroEstudio, 'estudio_id'>>(initialData);
+function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (param: ParametroEstudioForm) => void, initialData?: ParametroEstudioForm }) {
+    const [param, setParam] = useState<ParametroEstudioForm>(initialData);
     const [newPossibleValue, setNewPossibleValue] = useState('');
 
+    useEffect(() => {
+        setParam(initialData);
+    }, [initialData]);
+
     const handleAddPossibleValue = () => {
-        if (newPossibleValue.trim()) {
-            setParam(prev => ({ ...prev, posiblesValores: [...(prev.posiblesValores || []), newPossibleValue.trim()] }));
+        if (newPossibleValue.trim() && !param.valoresReferencia.posibles_valores_form.valores_opciones.includes(newPossibleValue.trim())) {
+            setParam(prev => ({
+                ...prev,
+                valoresReferencia: {
+                    ...prev.valoresReferencia,
+                    posibles_valores_form: {
+                        ...prev.valoresReferencia.posibles_valores_form,
+                        valores_opciones: [...prev.valoresReferencia.posibles_valores_form.valores_opciones, newPossibleValue.trim()]
+                    }
+                }
+            }));
             setNewPossibleValue('');
         }
     };
     
     const handleRemovePossibleValue = (valueToRemove: string) => {
-        setParam(prev => ({ ...prev, posiblesValores: (prev.posiblesValores || []).filter(v => v !== valueToRemove) }));
+        setParam(prev => ({
+            ...prev,
+            valoresReferencia: {
+                ...prev.valoresReferencia,
+                posibles_valores_form: {
+                    ...prev.valoresReferencia.posibles_valores_form,
+                    valores_opciones: prev.valoresReferencia.posibles_valores_form.valores_opciones.filter(v => v !== valueToRemove)
+                }
+            }
+        }));
     };
 
     const handleSave = () => {
-        onSave({ ...param, estudio_id: 0 }); 
+        onSave(param); 
     };
 
     return (
         <div className="space-y-4">
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="space-y-1 lg:col-span-2"><Label>Parámetro</Label><Input placeholder="Nombre del Parámetro" value={param.nombre} onChange={(e) => setParam({...param, nombre: e.target.value})}/></div>
+                <div className="space-y-1 lg:col-span-2"><Label>Parámetro</Label><Input placeholder="Nombre del Parámetro" value={param.nombre_parametro} onChange={(e) => setParam({...param, nombre_parametro: e.target.value})}/></div>
                 <div className="space-y-1"><Label>Unidad de Medida</Label><Input placeholder="ej. mg/dL" value={param.unidad_medida} onChange={(e) => setParam({...param, unidad_medida: e.target.value})}/></div>
                 <div className="space-y-1"><Label>Costo</Label><Input type="number" placeholder="0.00" value={param.costo} onChange={(e) => setParam({...param, costo: parseFloat(e.target.value) || 0})}/></div>
-                <div className="space-y-1"><Label>Factor Conv.</Label><Input placeholder="FC" value={param.factor} onChange={(e) => setParam({...param, factor: e.target.value})}/></div>
+                <div className="space-y-1"><Label>Factor Conv.</Label><Input placeholder="FC" value={param.factor_conversion} onChange={(e) => setParam({...param, factor_conversion: e.target.value})}/></div>
              </div>
-             <div className="col-span-full"><Label>Tipo de Valor de Referencia</Label><RadioGroup value={param.tipo_referencia} onValueChange={(v) => setParam({...param, tipo_referencia: v})} className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
+             <div className="col-span-full"><Label>Tipo de Valor de Referencia</Label><RadioGroup value={param.valoresReferencia.tipo_referencia} onValueChange={(v) => setParam(prev => ({ ...prev, valoresReferencia: {...prev.valoresReferencia, tipo_referencia: v as any}}))} className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
                     <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo" id="ref-intervalo" /><Label htmlFor="ref-intervalo">Intervalo</Label></div>
                     <div className="flex items-center space-x-2"><RadioGroupItem value="Mixto" id="ref-mixto" /><Label htmlFor="ref-mixto">Mixto</Label></div>
                     <div className="flex items-center space-x-2"><RadioGroupItem value="Criterio" id="ref-criterio" /><Label htmlFor="ref-criterio">Criterio</Label></div>
                     <div className="flex items-center space-x-2"><RadioGroupItem value="Sin_referencia" id="ref-sin-valor" /><Label htmlFor="ref-sin-valor">Sin referencia</Label></div>
                 </RadioGroup></div>
 
-            {param.tipo_referencia === 'Intervalo' && (
+            {param.valoresReferencia.tipo_referencia === 'Intervalo' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-md">
-                    <div className="space-y-2"><Label>Género</Label><RadioGroup value={param.sexo} onValueChange={(v) => setParam({...param, sexo: v as any})} className="flex pt-2 gap-4"><div className="flex items-center space-x-2"><RadioGroupItem value="Masculino" id="gender-h"/><Label htmlFor="gender-h">Hombre</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Femenino" id="gender-m"/><Label htmlFor="gender-m">Mujer</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Ambos" id="gender-a"/><Label htmlFor="gender-a">Ambos</Label></div></RadioGroup></div>
-                    <div className="space-y-2"><Label>Edad</Label><div className="flex items-center gap-2"><Input placeholder="De" type="number" value={param.edad_inicio} onChange={(e) => setParam({...param, edad_inicio: Number(e.target.value)})}/><span>a</span><Input placeholder="A" type="number" value={param.edad_fin} onChange={(e) => setParam({...param, edad_fin: Number(e.target.value)})}/><Select value={param.unidad_edad} onValueChange={(v) => setParam({...param, unidad_edad: v as any})}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="Dias">Días</SelectItem><SelectItem value="Meses">Meses</SelectItem><SelectItem value="Anos">Años</SelectItem></SelectContent></Select></div></div>
-                    <div className="md:col-span-2 space-y-2"><Label>Intervalo de Referencia</Label><div className="flex items-center gap-2"><Input placeholder="Valor Mínimo" value={param.referencia_inicio_a || ''} onChange={(e) => setParam({...param, referencia_inicio_a: e.target.value})}/><span>-</span><Input placeholder="Valor Máximo" value={param.referencia_fin_a || ''} onChange={(e) => setParam({...param, referencia_fin_a: e.target.value})}/></div></div>
+                    <div className="space-y-2"><Label>Género</Label><RadioGroup value={param.valoresReferencia.sexo} onValueChange={(v) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, sexo: v as any}}))} className="flex pt-2 gap-4"><div className="flex items-center space-x-2"><RadioGroupItem value="Masculino" id="gender-h"/><Label htmlFor="gender-h">Hombre</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Femenino" id="gender-m"/><Label htmlFor="gender-m">Mujer</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Ambos" id="gender-a"/><Label htmlFor="gender-a">Ambos</Label></div></RadioGroup></div>
+                    <div className="space-y-2"><Label>Edad</Label><div className="flex items-center gap-2"><Input placeholder="De" type="number" value={param.valoresReferencia.edad_inicio} onChange={(e) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, edad_inicio: Number(e.target.value)}}))}/><span>a</span><Input placeholder="A" type="number" value={param.valoresReferencia.edad_fin} onChange={(e) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, edad_fin: Number(e.target.value)}}))}/><Select value={param.valoresReferencia.unidad_edad} onValueChange={(v) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, unidad_edad: v as any}}))}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="Dias">Días</SelectItem><SelectItem value="Meses">Meses</SelectItem><SelectItem value="Anos">Años</SelectItem></SelectContent></Select></div></div>
+                    <div className="md:col-span-2 space-y-2"><Label>Intervalo de Referencia</Label><div className="flex items-center gap-2"><Input placeholder="Valor Mínimo" value={param.valoresReferencia.valor_inicio} onChange={(e) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, valor_inicio: e.target.value}}))}/><span>-</span><Input placeholder="Valor Máximo" value={param.valoresReferencia.valor_fin} onChange={(e) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, valor_fin: e.target.value}}))}/></div></div>
                 </div>
             )}
-            {param.tipo_referencia === 'Mixto' && (
+            {param.valoresReferencia.tipo_referencia === 'Mixto' && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-md">
                     <div className="space-y-2">
                         <Label>Valores Posibles</Label>
@@ -127,7 +160,7 @@ function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (par
                             <Button type="button" size="sm" onClick={handleAddPossibleValue}>Agregar</Button>
                         </div>
                         <div className="border rounded-md p-2 min-h-[100px] space-y-1">
-                            {(param.posiblesValores || []).map((val, i) => (
+                            {param.valoresReferencia.posibles_valores_form.valores_opciones.map((val, i) => (
                                 <div key={i} className="flex justify-between items-center p-1 hover:bg-background rounded-md">
                                     <span>{val}</span>
                                     <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemovePossibleValue(val)}><Trash2 className="h-4 w-4 text-red-500"/></Button>
@@ -138,35 +171,35 @@ function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (par
                     <div className="space-y-4">
                         <div className="space-y-2">
                             <Label>Valor Predeterminado (Opcional)</Label>
-                            <Select value={param.valorDefault} onValueChange={(v) => setParam({...param, valorDefault: v})}>
+                            <Select value={param.valoresReferencia.posibles_valores_form.valor_predeterminado} onValueChange={(v) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, posibles_valores_form: {...prev.valoresReferencia.posibles_valores_form, valor_predeterminado: v}}}))}>
                                 <SelectTrigger><SelectValue placeholder="Seleccione un valor predeterminado"/></SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="_NULL_">Ninguno</SelectItem>
-                                    {(param.posiblesValores || []).map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                                    {param.valoresReferencia.posibles_valores_form.valores_opciones.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                         </div>
                             <div className="space-y-2">
                             <Label>Valor de Referencia</Label>
-                            <Select value={param.valorReferencia} onValueChange={(v) => setParam({...param, valorReferencia: v})}>
+                            <Select value={param.valoresReferencia.posibles_valores_form.valor_referencia} onValueChange={(v) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, posibles_valores_form: {...prev.valoresReferencia.posibles_valores_form, valor_referencia: v}}}))}>
                                 <SelectTrigger><SelectValue placeholder="Seleccione el valor de referencia"/></SelectTrigger>
                                 <SelectContent>
-                                    {(param.posiblesValores || []).map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                                    {param.valoresReferencia.posibles_valores_form.valores_opciones.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
                                 </SelectContent>
                             </Select>
                         </div>
                     </div>
                 </div>
             )}
-            {param.tipo_referencia === 'Criterio' && (
+            {param.valoresReferencia.tipo_referencia === 'Criterio' && (
                 <div className="p-4 bg-muted/50 rounded-md">
                     <div className="space-y-2">
                         <Label htmlFor="referenceText">Texto de Referencia (Criterio)</Label>
                         <Textarea
                             id="referenceText"
                             placeholder="Ej: Menor de 1.0 ng/mL"
-                            value={param.texto_referencia || ''}
-                            onChange={(e) => setParam({...param, texto_referencia: e.target.value})}
+                            value={param.valoresReferencia.texto_criterio}
+                            onChange={(e) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, texto_criterio: e.target.value}}))}
                         />
                     </div>
                 </div>
@@ -188,7 +221,7 @@ export default function CreateEstudioPage() {
     const [loading, setLoading] = useState(false);
     
     const [isParamModalOpen, setIsParamModalOpen] = useState(false);
-    const [editingParamIndex, setEditingParamIndex] = useState<number | null>(null);
+    const [editingParam, setEditingParam] = useState<{ param: ParametroEstudioForm, index: number } | null>(null);
 
     const [newSample, setNewSample] = useState<MuestraEstudio>({ type: '', container: '', indications: '', cost: 0 });
     const [studySearchTerm, setEstudioSearchTerm] = useState('');
@@ -223,20 +256,20 @@ export default function CreateEstudioPage() {
         setFormData(prev => ({ ...prev, configuracion: { ...prev.configuracion, [id]: value } }));
     };
 
-    const handleSaveParameter = (param: ParametroEstudio) => {
-        if (editingParamIndex !== null) {
+    const handleSaveParameter = (param: ParametroEstudioForm) => {
+        if (editingParam !== null) {
             const updatedParameters = [...(formData.parameters || [])];
-            updatedParameters[editingParamIndex] = param;
+            updatedParameters[editingParam.index] = param;
             setFormData(prev => ({ ...prev, parameters: updatedParameters }));
         } else {
             setFormData(prev => ({...prev, parameters: [...(prev.parameters || []), param]}));
         }
         setIsParamModalOpen(false);
-        setEditingParamIndex(null);
+        setEditingParam(null);
     };
 
     const handleEditParameter = (index: number) => {
-        setEditingParamIndex(index);
+        setEditingParam({ param: formData.parameters[index], index });
         setIsParamModalOpen(true);
     };
     
@@ -322,14 +355,14 @@ export default function CreateEstudioPage() {
         }
     };
     
-    const getParameterDisplayReference = (param: ParametroEstudio) => {
-        switch (param.tipo_referencia) {
+    const getParameterDisplayReference = (param: ParametroEstudioForm) => {
+        switch (param.valoresReferencia.tipo_referencia) {
             case 'Intervalo':
-                return `(${param.sexo}) ${param.referencia_inicio_a} - ${param.referencia_fin_a}`;
+                return `(${param.valoresReferencia.sexo}) ${param.valoresReferencia.valor_inicio} - ${param.valoresReferencia.valor_fin}`;
             case 'Mixto':
-                return param.valorReferencia || 'N/A';
+                return param.valoresReferencia.posibles_valores_form.valor_referencia || 'N/A';
             case 'Criterio':
-                return param.texto_referencia || 'N/A';
+                return param.valoresReferencia.texto_criterio || 'N/A';
             default:
                 return 'N/A';
         }
@@ -406,7 +439,7 @@ export default function CreateEstudioPage() {
                     <div className="space-y-2 lg:col-span-4 grid grid-cols-1 lg:grid-cols-6 gap-6 items-center border-t pt-4">
                         <div className="lg:col-span-1"><Label>¿Este es un estudio subrogado?</Label><RadioGroup value={formData.esSubcontratado ? 'yes' : 'no'} onValueChange={(v) => handleSelectChange('esSubcontratado', v === 'yes')} className="flex gap-4 mt-2"><RadioGroupItem value="yes" id="sub-yes"/><Label htmlFor="sub-yes">Si</Label><RadioGroupItem value="no" id="sub-no"/><Label htmlFor="sub-no">No</Label></RadioGroup></div>
                         <div className="space-y-2 lg:col-span-2"><Label htmlFor="laboratorio_externo_id">Lab. de Referencia</Label><Select value={formData.laboratorio_externo_id} onValueChange={(v) => handleSelectChange('laboratorio_externo_id', v)} disabled={!formData.esSubcontratado}><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent>{providers.map(p=><SelectItem key={p.id} value={String(p.id)}>{p.nombre}</SelectItem>)}</SelectContent></Select></div>
-                        <div className="space-y-2 lg:col-span-1"><Label htmlFor="coidgoExterno">Código</Label><Input id="coidgoExterno" value={formData.coidgoExterno} onChange={handleChange} disabled={!formData.esSubcontratado}/></div>
+                        <div className="space-y-2 lg:col-span-1"><Label htmlFor="coidgoExterno">Código</Label><Input id="coidgoExterno" value={formData.codigoExterno} onChange={handleChange} disabled={!formData.esSubcontratado}/></div>
                         <div className="space-y-2 lg:col-span-1"><Label htmlFor="costoExterno">Costo</Label><Input id="costoExterno" type="number" value={formData.costoExterno} onChange={handleChange} disabled={!formData.esSubcontratado}/></div>
                         <div className="space-y-2 lg:col-span-1"><Label htmlFor="tiempoEntregaExterno">Tiempo de entrega</Label><Select value={formData.tiempoEntregaExterno} onValueChange={(v) => handleSelectChange('tiempoEntregaExterno', v)} disabled={!formData.esSubcontratado}><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent><SelectItem value="1_dia">1 día</SelectItem></SelectContent></Select></div>
                     </div>
@@ -428,7 +461,7 @@ export default function CreateEstudioPage() {
             <Card>
                 <CardHeader className="bg-primary/10 flex flex-row items-center justify-between">
                     <CardTitle className="text-base text-primary">Parámetros del Estudio</CardTitle>
-                    <Button type="button" onClick={() => { setEditingParamIndex(null); setIsParamModalOpen(true); }}><Plus className="mr-2"/> Agregar Parámetro</Button>
+                    <Button type="button" onClick={() => { setEditingParam(null); setIsParamModalOpen(true); }}><Plus className="mr-2"/> Agregar Parámetro</Button>
                 </CardHeader>
                 <CardContent className="pt-6 space-y-4">
                     <div className="overflow-x-auto">
@@ -444,7 +477,7 @@ export default function CreateEstudioPage() {
                             <TableBody>
                                 {formData.parameters?.map((param, index) => (
                                     <TableRow key={index}>
-                                        <TableCell>{param.nombre}</TableCell>
+                                        <TableCell>{param.nombre_parametro}</TableCell>
                                         <TableCell>{param.unidad_medida}</TableCell>
                                         <TableCell>{getParameterDisplayReference(param)}</TableCell>
                                         <TableCell className="text-right">
@@ -462,10 +495,10 @@ export default function CreateEstudioPage() {
             <Dialog open={isParamModalOpen} onOpenChange={setIsParamModalOpen}>
                 <DialogContent className="max-w-4xl">
                     <DialogHeader>
-                        <DialogTitle>{editingParamIndex !== null ? 'Editar' : 'Agregar'} Parámetro</DialogTitle>
+                        <DialogTitle>{editingParam !== null ? 'Editar' : 'Agregar'} Parámetro</DialogTitle>
                     </DialogHeader>
                     <ParameterForm
-                        initialData={editingParamIndex !== null && formData.parameters ? formData.parameters[editingParamIndex] : initialNewParam}
+                        initialData={editingParam ? editingParam.param : initialNewParam}
                         onSave={handleSaveParameter}
                     />
                 </DialogContent>
