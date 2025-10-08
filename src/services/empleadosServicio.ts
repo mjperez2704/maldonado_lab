@@ -24,6 +24,14 @@ export async function getEmpleados(): Promise<empleado[]> {
     }
 }
 
+export async function getNombreEmpleadoById(empleado_id: number){
+    const results = await executeQuery<empleado>('SELECT nombre FROM empleados WHERE id = ?',[empleado_id])
+    if ( results ) {
+        return results.nombre;
+    }
+    return 'Usuario';
+}
+
 export async function createEmpleado(empleado: Omit<empleado, 'id'>): Promise<void> {
     const { nombre, usuario, email, contrasena, telefono, sucursal_id, puesto } = empleado;
     const hashedcontrasena = contrasena ? await bcrypt.hash(contrasena, 10) : undefined;

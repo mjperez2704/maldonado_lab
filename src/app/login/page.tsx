@@ -12,6 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
 import { login } from '@/services/authServicio';
+import { getNombreEmpleadoById } from '@/services/empleadosServicio';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,13 +32,15 @@ export default function LoginPage() {
         // --- Manejo de Sesión y Permisos (Básico) ---
         // NOTA: Esto es para desarrollo. En producción se usan cookies seguras (httpOnly).
         sessionStorage.setItem('userData', JSON.stringify({
-          nombre: user.nombre,
+          id: user.id,
           role: user.position // Guardamos el rol (puesto)
         }));
 
+        const nombre = await getNombreEmpleadoById(user.id);
+
         toast({
           title: "Inicio de Sesión Exitoso",
-          description: `Bienvenido, ${user.nombre}.`,
+          description: `Bienvenido, ${nombre}.`,
         });
 
         // Redirigimos al nuevo dashboard
