@@ -102,7 +102,7 @@ function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (par
                             <Select value={param.valorDefault} onValueChange={(v) => setParam({...param, valorDefault: v})}>
                                 <SelectTrigger><SelectValue placeholder="Seleccione un valor predeterminado"/></SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="">Ninguno</SelectItem>
+                                    <SelectItem value="_NULL_">Ninguno</SelectItem>
                                     {(param.posiblesValores || []).map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
                                 </SelectContent>
                             </Select>
