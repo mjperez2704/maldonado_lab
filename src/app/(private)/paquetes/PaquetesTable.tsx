@@ -27,13 +27,13 @@ import {
   Trash2,
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from "@/components/ui/pagination";
-import { deletePackage, Package } from '@/services/packageServicio';
+import { deletePaquete, Paquetes } from '@/services/paquetesServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useLoader } from '@/hooks/useLoader';
 
-export default function PaquetesTable({ initialPackages }: { initialPackages: Package[] }) {
-  const [paquetes, setPackages] = useState<Package[]>(initialPackages);
+export default function PaquetesTable({ initialPackages }: { initialPackages: Paquetes[] }) {
+  const [paquetes, setPackages] = useState<Paquetes[]>(initialPackages);
   const router = useRouter();
   const { toast } = useToast();
   const loader = useLoader();
@@ -42,7 +42,7 @@ export default function PaquetesTable({ initialPackages }: { initialPackages: Pa
     if (confirm('¿Estás seguro de que quieres eliminar este paquete?')) {
         loader.start('delete');
         try {
-            await deletePackage(id);
+            await deletePaquete(id);
             setPackages(paquetes.filter(p => p.id !== id));
             toast({ title: "Éxito", description: "Paquete eliminado." });
         } catch (error) {
@@ -124,9 +124,9 @@ export default function PaquetesTable({ initialPackages }: { initialPackages: Pa
                       <Checkbox />
                   </TableCell>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell>{item.shortcut}</TableCell>
-                  <TableCell>{item.price} MXN</TableCell>
+                  <TableCell>{item.nombre}</TableCell>
+                  <TableCell>{item.abreviatura}</TableCell>
+                  <TableCell>{item.precio} MXN</TableCell>
                   <TableCell>
                       <div className="flex items-center justify-end gap-2">
                       <Button variant="outline" size="icon" onClick={() => handleEdit(item.id)}>

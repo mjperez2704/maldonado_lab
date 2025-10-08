@@ -10,18 +10,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { FlaskConical, UserSearch, Search, Trash2, Calendar, User, Microscope, DollarSign, Tag, Save, Package, Newspaper } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
-import { getPatients, Paciente } from "@/services/patientServicio";
-import { getStudies, Estudio } from "@/services/studyServicio";
-import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/packageServicio";
+import { getPatients, Paciente } from "@/services/pacienteServicio";
+import { getStudies, Estudio } from "@/services/estudiosServicio";
+import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/paquetesServicio";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { createQuote, QuoteCreation } from "@/services/quoteServicio";
+import { createQuote, QuoteCreation } from "@/services/cotizacionesServicio";
 import Link from "next/link";
 import { CreatePatientForm } from "../../pacientes/CreatePatientForm";
 
 type CartItem = {
     id: string;
-    name: string;
+    nombre: string;
     price: number;
     type: 'study' | 'package';
 };
@@ -105,13 +105,13 @@ export default function CreateQuotePage() {
 
         const studyToAdd = estudios.find(s => String(s.id) === itemId);
         if (studyToAdd) {
-            setCart(prev => [...prev, {id: itemId, name: studyToAdd.nombre, price: Number(studyToAdd.precio), type: 'study'}]);
+            setCart(prev => [...prev, {id: itemId, nombre: studyToAdd.nombre, price: Number(studyToAdd.precio), type: 'study'}]);
             return;
         }
 
         const packageToAdd = paquetes.find(p => String(p.id) === itemId);
         if (packageToAdd) {
-            setCart(prev => [...prev, {id: itemId, name: packageToAdd.nombre, price: Number(packageToAdd.precio), type: 'package'}]);
+            setCart(prev => [...prev, {id: itemId, nombre: packageToAdd.nombre, price: Number(packageToAdd.precio), type: 'package'}]);
         }
     };
 
@@ -141,8 +141,8 @@ export default function CreateQuotePage() {
         }
         setLoading(true);
 
-        const estudiosInCart = cart.filter(i => i.type === 'study').map(i => i.name);
-        const paquetesInCart = cart.filter(i => i.type === 'package').map(i => i.name);
+        const estudiosInCart = cart.filter(i => i.type === 'study').map(i => i.nombre);
+        const paquetesInCart = cart.filter(i => i.type === 'package').map(i => i.nombre);
 
         try {
             const newQuote: QuoteCreation = {
@@ -257,7 +257,7 @@ export default function CreateQuotePage() {
                                         <TableBody>
                                             {cart.length > 0 ? cart.map(item => (
                                                 <TableRow key={`${item.id}-${item.type}`}>
-                                                    <TableCell>{item.name}</TableCell>
+                                                    <TableCell>{item.nombre}</TableCell>
                                                     <TableCell className="capitalize">{item.type === 'study' ? 'Estudio' : 'Paquete'}</TableCell>
                                                     <TableCell className="text-right">${Number(item.price.toFixed(2))}</TableCell>
                                                     <TableCell className="text-right">

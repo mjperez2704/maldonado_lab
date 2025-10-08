@@ -28,7 +28,7 @@ import {
   ArrowUpDown
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { deleteBranch, Branch } from '@/services/branchServicio';
+import { deleteBranch, Branch } from '@/services/sucursalServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useLoader } from '@/hooks/useLoader';
@@ -129,7 +129,7 @@ export default function BranchesTable({ initialBranches }: { initialBranches: Br
                       <Checkbox />
                   </TableCell>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell>{branch.name}</TableCell>
+                  <TableCell>{branch.nombre}</TableCell>
                   <TableCell>{branch.phone}</TableCell>
                   <TableCell>{branch.address}</TableCell>
                   <TableCell>

@@ -13,8 +13,8 @@ import {
   Plus,
   Users
 } from "lucide-react"
-import { getPatients } from '@/services/patientServicio';
-import { Patient } from '@/services/patientServicio';
+import { getPatients } from '@/services/pacienteServicio';
+import { Patient } from '@/services/pacienteServicio';
 import PatientsTable from './PatientsTable';
 
 export default async function PatientsPage() {

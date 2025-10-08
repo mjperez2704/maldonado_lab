@@ -1,34 +1,34 @@
 "use server";
 
 import { executeQuery } from '@/lib/db';
-import type { Antibiotic } from '@/types/antibiotic';
+import type { Antibiotico } from '@/types/antibiotic';
 import type { ServerActionResponse } from '@/types/api';
 
-export async function getAntibiotics(): Promise<Antibiotic[]> {
+export async function getAntibioticos(): Promise<Antibiotico[]> {
     try {
         const results = await executeQuery('SELECT * FROM antibioticos');
-        return JSON.parse(JSON.stringify(results)) as Antibiotic[];
+        return JSON.parse(JSON.stringify(results)) as Antibiotico[];
     } catch (error) {
-        console.error("Database query failed:", error);
+        console.error("Error en la consulta a la base de datos:", error);
         return [];
     }
 }
 
-export async function createAntibiotic(antibiotic: Omit<Antibiotic, 'id'>): Promise<void> {
-    const { name, shortcut, commercialName, administrationRoute, presentation, laboratory } = antibiotic;
+export async function createAntibiotic(antibiotic: Omit<Antibiotico, 'id'>): Promise<void> {
+    const { nombre, abreviatura, nombreComercial, viaAdministracion, presentacion, laboratorio } = antibiotic;
     const query = 'INSERT INTO antibioticos (nombre, acceso directo, nombreComercial, viaAdministracion, presentación, laboratorio) VALUES (?, ?, ?, ?, ?, ?)';
-    await executeQuery(query, [name, shortcut, commercialName, administrationRoute, presentation, laboratory]);
+    await executeQuery(query, [nombre, abreviatura, nombreComercial, viaAdministracion, presentacion, laboratorio]);
 }
 
-export async function getAntibioticById(id: number): Promise<Antibiotic | null> {
-    const results = await executeQuery<Antibiotic[]>('SELECT * FROM antibioticos WHERE id = ?', [id]);
+export async function getAntibioticById(id: number): Promise<Antibiotico | null> {
+    const results = await executeQuery<Antibiotico[]>('SELECT * FROM antibioticos WHERE id = ?', [id]);
     if (results.length > 0) {
         return JSON.parse(JSON.stringify(results[0]));
     }
     return null;
 }
 
-export async function updateAntibiotic(id: number, antibiotic: Partial<Omit<Antibiotic, 'id'>>): Promise<void> {
+export async function updateAntibiotic(id: number, antibiotic: Partial<Omit<Antibiotico, 'id'>>): Promise<void> {
     const fields = Object.keys(antibiotic) as (keyof typeof antibiotic)[];
     if (fields.length === 0) {
         return;

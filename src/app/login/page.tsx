@@ -31,13 +31,13 @@ export default function LoginPage() {
         // --- Manejo de Sesión y Permisos (Básico) ---
         // NOTA: Esto es para desarrollo. En producción se usan cookies seguras (httpOnly).
         sessionStorage.setItem('userData', JSON.stringify({
-          name: user.name,
+          nombre: user.nombre,
           role: user.position // Guardamos el rol (puesto)
         }));
 
         toast({
           title: "Inicio de Sesión Exitoso",
-          description: `Bienvenido, ${user.name}.`,
+          description: `Bienvenido, ${user.nombre}.`,
         });
 
         // Redirigimos al nuevo dashboard

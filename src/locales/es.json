@@ -24,7 +24,7 @@
         "social": "Social",
         "images": "Logotipos"
       },
-      "lab_name": "Nombre del laboratorio",
+      "lab_nombre": "Nombre del laboratorio",
       "currency": "Moneda",
       "select_currency": "Seleccione la moneda",
       "currency_mxn": "Peso Mexicano (MXN)",

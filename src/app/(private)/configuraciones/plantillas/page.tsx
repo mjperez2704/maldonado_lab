@@ -11,9 +11,9 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 
 // Datos simulados de plantillas
 const templates = [
-    { id: 1, name: "Reporte General", description: "Plantilla estándar para resultados de estudios." },
-    { id: 2, name: "Reporte de Cultivos", description: "Plantilla específica para microbiología." },
-    { id: 3, name: "Formato de Consentimiento", description: "Consentimiento informado para pacientes." },
+    { id: 1, nombre: "Reporte General", description: "Plantilla estándar para resultados de estudios." },
+    { id: 2, nombre: "Reporte de Cultivos", description: "Plantilla específica para microbiología." },
+    { id: 3, nombre: "Formato de Consentimiento", description: "Consentimiento informado para pacientes." },
 ];
 
 export default function ReportTemplatesPage() {
@@ -51,7 +51,7 @@ export default function ReportTemplatesPage() {
                     <TableBody>
                         {templates.map((template) => (
                             <TableRow key={template.id}>
-                                <TableCell className="font-medium">{template.name}</TableCell>
+                                <TableCell className="font-medium">{template.nombre}</TableCell>
                                 <TableCell>{template.description}</TableCell>
                                 <TableCell className="text-right">
                                     <DropdownMenu>

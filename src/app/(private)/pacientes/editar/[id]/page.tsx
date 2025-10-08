@@ -11,7 +11,7 @@ import { User, Trash2, Globe, Mail, Phone, Calendar, MapPin, FileText, CreditCar
 import Image from 'next/image';
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { getPatientById, updatePatient, Patient } from "@/services/patientServicio";
+import { getPatientById, updatePatient, Patient } from "@/services/pacienteServicio";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,7 +22,7 @@ import { useLoader } from "@/hooks/useLoader";
 import { differenceInYears, differenceInMonths, differenceInDays, parseISO, isValid, isAfter } from 'date-fns';
 
 const patientSchema = z.object({
-  name: z.string().min(1, "El nombre es requerido."),
+  nombre: z.string().min(1, "El nombre es requerido."),
   nationality: z.string().min(1, "La nacionalidad es requerida."),
   ine: z.string().min(1, "INE es requerido.").or(z.literal('')),
   curp: z.string().optional(),
@@ -49,7 +49,7 @@ export default function EditPatientPage() {
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(patientSchema),
     defaultValues: {
-      name: '',
+      nombre: '',
       nationality: 'mexicana',
       ine: '',
       curp: '',
@@ -203,7 +203,7 @@ export default function EditPatientPage() {
                   <CardTitle>Información del Paciente</CardTitle>
                 </CardHeader>
                 <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6">
-                  <FormField control={form.control} name="name" render={({field}) => (
+                  <FormField control={form.control} name="nombre" render={({field}) => (
                       <FormItem><FormLabel>Nombre</FormLabel>
                         <div className="flex items-center border rounded-md"><span
                             className="px-3 text-muted-foreground"><User className="h-5 w-5"/></span><FormControl><Input

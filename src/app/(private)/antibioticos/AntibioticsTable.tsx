@@ -29,7 +29,7 @@ import {
   ArrowUpDown
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { deleteAntibiotic } from '@/services/antibioticServicio';
+import { deleteAntibiotic } from '@/services/antibioticosServicio';
 import { Antibiotic } from '@/types/antibiotic';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -132,7 +132,7 @@ export default function AntibioticsTable({ initialAntibiotics }: { initialAntibi
                       <Checkbox />
                   </TableCell>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell>{item.name}</TableCell>
+                  <TableCell>{item.nombre}</TableCell>
                   <TableCell>{item.shortcut}</TableCell>
                   <TableCell>{item.commercialName}</TableCell>
                   <TableCell>

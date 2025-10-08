@@ -22,7 +22,7 @@ import {
   ArrowUpDown
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { deletePatient, Patient } from '@/services/patientServicio';
+import { deletePatient, Patient } from '@/services/pacienteServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useLoader } from '@/hooks/useLoader';
@@ -102,7 +102,7 @@ export default function PatientsTable({ initialPatients }: { initialPatients: Pa
                       <Checkbox />
                   </TableCell>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell>{item.name}</TableCell>
+                  <TableCell>{item.nombre}</TableCell>
                   <TableCell>{item.email}</TableCell>
                   <TableCell>{item.phone}</TableCell>
                   <TableCell className="capitalize">{item.gender}</TableCell>

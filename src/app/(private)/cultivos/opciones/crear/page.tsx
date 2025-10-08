@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Check, Plus, ClipboardList, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createCultureOption } from "@/services/cultureOptionServicio";
+import { createCultureOption } from "@/services/cultivosOpcionesServicio";
 import Link from "next/link";
 
 export default function CreateCultureOptionPage() {
@@ -62,8 +62,8 @@ export default function CreateCultureOptionPage() {
         <CardContent className="flex flex-col gap-8 pt-6">
            <form onSubmit={handleSubmit} className="flex flex-col gap-8">
             <div className="space-y-2">
-                <Label htmlFor="name">Título</Label>
-                <Input id="name" placeholder="Título" value={title} onChange={(e) => setTitle(e.target.value)} />
+                <Label htmlFor="nombre">Título</Label>
+                <Input id="nombre" placeholder="Título" value={title} onChange={(e) => setTitle(e.target.value)} />
             </div>
 
             <div className="space-y-4">

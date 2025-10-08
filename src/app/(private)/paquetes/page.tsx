@@ -12,12 +12,12 @@ import {
   Plus,
   Package as PackageIcon
 } from "lucide-react"
-import { getPackages } from '@/services/packageServicio';
+import { getPaquetesEstudios } from '@/services/paquetesServicio';
 import PaquetesTable from './PaquetesTable';
 
 
 export default async function PackagesPage() {
-  const paquetes = await getPackages();
+  const paquetes = await getPaquetesEstudios();
 
   return (
     <div className="flex flex-col gap-4 py-8">

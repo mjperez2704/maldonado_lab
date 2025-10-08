@@ -1,5 +1,5 @@
 
-import { getReciboById } from '@/services/reciboServicio';
+import { getReciboById } from '@/services/recibosServicio';
 import { NextResponse } from 'next/server';
 
 export async function GET(

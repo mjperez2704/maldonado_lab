@@ -28,12 +28,12 @@ import {
   ArrowUpDown
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from "@/components/ui/pagination";
-import { deleteProduct, Product } from '@/services/productServicio';
+import { deleteProduct, Producto } from '@/services/productosServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useLoader } from '@/hooks/useLoader';
 
-interface ProductWithValue extends Product {
+interface ProductWithValue extends Producto {
     purchases?: number;
     in?: number;
     out?: number;
@@ -141,9 +141,9 @@ export default function ProductsTable({ initialProducts }: { initialProducts: Pr
                         <Checkbox />
                     </TableCell>
                     <TableCell>{index + 1}</TableCell>
-                    <TableCell>{item.name}</TableCell>
+                    <TableCell>{item.nombre}</TableCell>
                     <TableCell>{item.sku}</TableCell>
-                    <TableCell>{item.initialStock}</TableCell>
+                    <TableCell>{item.stockInicial}</TableCell>
                     <TableCell>{item.purchases || 0}</TableCell>
                     <TableCell>{item.in || 0}</TableCell>
                     <TableCell>{item.out || 0}</TableCell>
@@ -177,7 +177,7 @@ export default function ProductsTable({ initialProducts }: { initialProducts: Pr
                     <PaginationLink href="#" isActive>1</PaginationLink>
                     </PaginationItem>
                     <PaginationItem>
-                    <PaginationLink href="#">Próximo</PaginationLink>
+                    <PaginationLink href="#">Siguiente</PaginationLink>
                     </PaginationItem>
                 </PaginationContent>
             </Pagination>

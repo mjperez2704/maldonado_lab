@@ -9,16 +9,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Newspaper, User, Microscope, DollarSign, Tag, Save, Package, Trash2 } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
-import { getStudies, Estudio } from "@/services/studyServicio";
-import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/packageServicio";
+import { getStudies, Estudio } from "@/services/estudiosServicio";
+import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/paquetesServicio";
 import { useRouter, useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { getQuoteById, updateQuote } from "@/services/quoteServicio";
+import { getQuoteById, updateQuote } from "@/services/cotizacionesServicio";
 import Link from "next/link";
 
 type CartItem = {
     id: string;
-    name: string;
+    nombre: string;
     price: number;
     type: 'study' | 'package';
 };
@@ -53,11 +53,11 @@ export default function EditQuotePage() {
                     const initialCart: CartItem[] = [];
                     quoteData.estudios?.forEach((studyName: any) => {
                         const study = estudiosData.find((s: { nombre: any; }) => s.nombre === studyName);
-                        if(study) initialCart.push({ id: String(study.id), name: study.nombre, price: study.precio, type: 'study' });
+                        if(study) initialCart.push({ id: String(study.id), nombre: study.nombre, price: study.precio, type: 'study' });
                     });
                     quoteData.paquetes?.forEach((packageName: any) => {
                         const pkg = paquetesData.find((p: { nombre: any; }) => p.nombre === packageName);
-                        if(pkg) initialCart.push({ id: String(pkg.id), name: pkg.nombre, price: pkg.precio, type: 'package' });
+                        if(pkg) initialCart.push({ id: String(pkg.id), nombre: pkg.nombre, price: pkg.precio, type: 'package' });
                     });
                     setCart(initialCart);
                 } else {
@@ -88,13 +88,13 @@ export default function EditQuotePage() {
 
         const studyToAdd = estudios.find(s => String(s.id) === itemId);
         if (studyToAdd) {
-            setCart(prev => [...prev, {id: itemId, name: studyToAdd.nombre, price: studyToAdd.precio, type: 'study'}]);
+            setCart(prev => [...prev, {id: itemId, nombre: studyToAdd.nombre, price: studyToAdd.precio, type: 'study'}]);
             return;
         }
 
         const packageToAdd = paquetes.find(p => String(p.id) === itemId);
         if (packageToAdd) {
-            setCart(prev => [...prev, {id: itemId, name: packageToAdd.nombre, price: packageToAdd.precio, type: 'package'}]);
+            setCart(prev => [...prev, {id: itemId, nombre: packageToAdd.nombre, price: packageToAdd.precio, type: 'package'}]);
         }
     };
 
@@ -118,8 +118,8 @@ export default function EditQuotePage() {
         }
         setLoading(true);
 
-        const estudiosInCart = cart.filter(i => i.type === 'study').map(i => i.name);
-        const paquetesInCart = cart.filter(i => i.type === 'package').map(i => i.name);
+        const estudiosInCart = cart.filter(i => i.type === 'study').map(i => i.nombre);
+        const paquetesInCart = cart.filter(i => i.type === 'package').map(i => i.nombre);
 
         try {
             const updatedQuote = {
@@ -192,7 +192,7 @@ export default function EditQuotePage() {
                                     <TableBody>
                                         {cart.length > 0 ? cart.map(item => (
                                             <TableRow key={`${item.id}-${item.type}`}>
-                                                <TableCell>{item.name}</TableCell>
+                                                <TableCell>{item.nombre}</TableCell>
                                                 <TableCell className="capitalize">{item.type === 'study' ? 'Estudio' : 'Paquete'}</TableCell>
                                                 <TableCell className="text-right">${Number(item.price.toFixed(2))}</TableCell>
                                                 <TableCell className="text-right">

@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
-import { createConvenio } from "@/services/convenioServicio";
+import { createConvenio } from "@/services/conveniosServicio";
 
 const HandshakeIcon = () => (
     <svg
@@ -52,7 +52,7 @@ const convenioSchema = z.object({
   items: z.array(z.object({
     type: z.string(),
     id: z.number(),
-    name: z.string(),
+    nombre: z.string(),
     price: z.string(),
   })).optional()
 });

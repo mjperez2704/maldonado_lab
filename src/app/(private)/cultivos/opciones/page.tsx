@@ -37,7 +37,7 @@ import {
   ArrowUpDown
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { getCultureOptions, deleteCultureOption, CultureOption } from '@/services/cultureOptionServicio';
+import { getCultureOptions, deleteCultureOption, CultureOption } from '@/services/cultivosOpcionesServicio';
 import { useRouter } from 'next/navigation';
 
 export default function CultureOptionsPage() {
@@ -87,7 +87,8 @@ export default function CultureOptionsPage() {
         </div>
       </div>
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
+        {/*<CardHeader className="flex flex-row items-center justify-between">*/}
+        <CardHeader className="flex flex-row items-center justify-between bg-primary text-primary-foreground rounded-t-lg p-4">
           <CardTitle>Tabla de opciones de cultivos</CardTitle>
           <Button asChild>
             <Link href="/cultivos/opciones/crear">
@@ -161,7 +162,7 @@ export default function CultureOptionsPage() {
                             <Checkbox />
                         </TableCell>
                         <TableCell>{index + 1}</TableCell>
-                        <TableCell>{item.title}</TableCell>
+                        <TableCell>{item.titulo}</TableCell>
                         <TableCell>
                             <div className="flex items-center justify-end gap-2">
                             <Button variant="outline" size="icon" disabled>

@@ -28,13 +28,13 @@ import {
   ArrowUpDown
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { deleteProvider, Provider } from '@/services/providerServicio';
+import { deleteProvider, Proveedor } from '@/services/proveedoresServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useLoader } from '@/hooks/useLoader';
 
-export default function ProvidersTable({ initialProviders }: { initialProviders: Provider[] }) {
-    const [providers, setProviders] = useState<Provider[]>(initialProviders);
+export default function ProvidersTable({ initialProviders }: { initialProviders: Proveedor[] }) {
+    const [providers, setProviders] = useState<Proveedor[]>(initialProviders);
     const router = useRouter();
     const { toast } = useToast();
     const loader = useLoader();
@@ -107,7 +107,7 @@ export default function ProvidersTable({ initialProviders }: { initialProviders:
                       <Checkbox />
                   </TableCell>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell>{item.name}</TableCell>
+                  <TableCell>{item.nombre}</TableCell>
                   <TableCell>{item.phone}</TableCell>
                   <TableCell>{item.email}</TableCell>
                   <TableCell>{item.address}</TableCell>

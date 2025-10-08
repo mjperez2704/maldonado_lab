@@ -12,12 +12,12 @@ import {
   Plus,
   Pill,
 } from "lucide-react"
-import { getAntibiotics } from '@/services/antibioticServicio';
+import { getAntibioticos } from '@/services/antibioticosServicio';
 /*import { Antibiotic } from '@/types/antibiotic';*/
 import AntibioticsTable from './AntibioticsTable';
 
 export default async function AntibioticsPage() {
-  const antibiotics = await getAntibiotics();
+  const antibiotics = await getAntibioticos();
 
   return (
     <div className="flex flex-col gap-4 py-8">

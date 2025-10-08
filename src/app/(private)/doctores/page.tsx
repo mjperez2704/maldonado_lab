@@ -12,12 +12,12 @@ import {
   Plus,
   PlusSquare
 } from "lucide-react"
-import { getDoctors } from '@/services/doctorServicio';
+import { getDoctores } from '@/services/doctoresServicio';
 import DoctorsTable from './DoctorsTable';
 
 
 export default async function DoctorsPage() {
-    const doctors = await getDoctors();
+    const doctors = await getDoctores();
 
     return (
         <div className="flex flex-col gap-4 py-8">

@@ -38,11 +38,11 @@ import {
   Home,
 } from "lucide-react";
 import DashboardClientComponent from "@/app/dashboard-client";
-import { getAntibiotics } from "@/services/antibioticServicio";
-import { getConvenios } from "@/services/convenioServicio";
-import { getCultures } from "@/services/cultureServicio";
-import { getPatients } from "@/services/patientServicio";
-import { getStudies } from "@/services/studyServicio";
+import { getAntibioticos } from "@/services/antibioticosServicio";
+import { getConvenios } from "@/services/conveniosServicio";
+import { getCultures } from "@/services/cultivosServicio";
+import { getPatients } from "@/services/pacienteServicio";
+import { getStudies } from "@/services/estudiosServicio";
 
 
 const HandshakeIcon = () => (
@@ -151,7 +151,7 @@ export default async function HomePage() {
     const [estudios, cultures, antibiotics, patients, convenios] = await Promise.all([
         getStudies(),
         getCultures(),
-        getAntibiotics(),
+        getAntibioticos(),
         getPatients(),
         getConvenios(),
     ]);

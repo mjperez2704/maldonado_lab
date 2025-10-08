@@ -9,18 +9,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { FlaskConical, UserSearch, Search, Trash2, Calendar, User, Microscope, DollarSign, Tag, Save, Package } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
-import { getPatients, Paciente } from "@/services/patientServicio";
-import { getStudies, Estudio } from "@/services/studyServicio";
-import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/packageServicio";
-import { getDoctores, Doctor } from "@/services/doctorServicio";
+import { getPatients, Paciente } from "@/services/pacienteServicio";
+import { getStudies, Estudio } from "@/services/estudiosServicio";
+import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/paquetesServicio";
+import { getDoctores, Doctor } from "@/services/doctoresServicio";
 import { useRouter, useParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { getReciboById, updateRecibo, Recibo } from "@/services/reciboServicio";
+import { getReciboById, updateRecibo, Recibo } from "@/services/recibosServicio";
 import Link from "next/link";
 
 type CartItem = {
     id: string;
-    name: string;
+    nombre: string;
     price: number;
     type: 'study' | 'package';
 };
@@ -63,11 +63,11 @@ export default function EditTestRequestPage() {
                     const initialCart: CartItem[] = [];
                     reciboData.estudios.forEach((studyName: any) => {
                         const study = estudiosData.find((s: { nombre: any; }) => s.nombre === studyName);
-                        if (study) initialCart.push({ id: String(study.id), name: study.nombre, price: Number(study.precio), type: 'study' });
+                        if (study) initialCart.push({ id: String(study.id), nombre: study.nombre, price: Number(study.precio), type: 'study' });
                     });
                     reciboData.paquetes.forEach((packageName: any) => {
                         const pkg = paquetesData.find((p: { nombre: any; }) => p.nombre === packageName);
-                        if (pkg) initialCart.push({ id: String(pkg.id), name: pkg.nombre, price: Number(pkg.precio), type: 'package' });
+                        if (pkg) initialCart.push({ id: String(pkg.id), nombre: pkg.nombre, price: Number(pkg.precio), type: 'package' });
                     });
                     setCart(initialCart);
                     
@@ -99,13 +99,13 @@ export default function EditTestRequestPage() {
 
         const studyToAdd = estudios.find(s => String(s.id) === itemId);
         if (studyToAdd) {
-            setCart(prev => [...prev, {id: String(studyToAdd.id), name: studyToAdd.nombre, price: Number(studyToAdd.precio), type: 'study'}]);
+            setCart(prev => [...prev, {id: String(studyToAdd.id), nombre: studyToAdd.nombre, price: Number(studyToAdd.precio), type: 'study'}]);
             return;
         }
 
         const packageToAdd = paquetes.find(p => String(p.id) === itemId);
         if (packageToAdd) {
-            setCart(prev => [...prev, {id: String(packageToAdd.id), name: packageToAdd.nombre, price: Number(packageToAdd.precio), type: 'package'}]);
+            setCart(prev => [...prev, {id: String(packageToAdd.id), nombre: packageToAdd.nombre, price: Number(packageToAdd.precio), type: 'package'}]);
         }
     };
 
@@ -131,8 +131,8 @@ export default function EditTestRequestPage() {
         try {
             const updatedData: Partial<Omit<Recibo, 'id'>> = {
                 ...recibo,
-                estudios: cart.filter(i => i.type === 'study').map(i => i.name),
-                paquetes: cart.filter(i => i.type === 'package').map(i => i.name),
+                estudios: cart.filter(i => i.type === 'study').map(i => i.nombre),
+                paquetes: cart.filter(i => i.type === 'package').map(i => i.nombre),
                 doctor: selectedDoctor,
                 deliveryDate,
                 subtotal,
@@ -202,7 +202,7 @@ export default function EditTestRequestPage() {
                                     <TableBody>
                                         {cart.length > 0 ? cart.map(item => (
                                             <TableRow key={`${item.id}-${item.type}`}>
-                                                <TableCell>{item.name}</TableCell>
+                                                <TableCell>{item.nombre}</TableCell>
                                                 <TableCell className="capitalize">{item.type === 'study' ? 'Estudio' : 'Paquete'}</TableCell>
                                                 <TableCell className="text-right">${Number(item.price).toFixed(2)}</TableCell>
                                                 <TableCell className="text-right">

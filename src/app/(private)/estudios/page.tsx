@@ -37,7 +37,7 @@ import {
   ArrowUpDown,
   Microscope
 } from "lucide-react"
-import { getStudies, deleteEstudio, Estudio } from '@/services/studyServicio';
+import { getStudies, deleteEstudio, Estudio } from '@/services/estudiosServicio';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useRouter } from 'next/navigation';
 import { useToast } from "@/hooks/use-toast";
@@ -76,7 +76,7 @@ export default function StudiesPage() {
             return estudios;
         }
         return estudios.filter(study =>
-            study.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            study.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (study.code && study.code.toLowerCase().includes(searchTerm.toLowerCase()))
         );
     }, [searchTerm, estudios]);
@@ -207,7 +207,7 @@ export default function StudiesPage() {
                             <Checkbox />
                         </TableCell>
                         <TableCell>{index + 1}</TableCell>
-                        <TableCell>{study.name}</TableCell>
+                        <TableCell>{study.nombre}</TableCell>
                         <TableCell>{study.area}</TableCell>
                         <TableCell>{study.method || 'N/A'}</TableCell>
                             <TableCell>${Number((study.internalCost || 0)).toFixed(2)}</TableCell>

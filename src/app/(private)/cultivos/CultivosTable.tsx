@@ -28,7 +28,7 @@ import {
   Trash2,
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { deleteCulture, Culture } from '@/services/cultureServicio';
+import { deleteCulture, Culture } from '@/services/cultivosServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 
@@ -125,7 +125,7 @@ export default function CultivosTable({ initialCultivos }: { initialCultivos: Cu
                   </TableCell>
                   <TableCell>{index + 1}</TableCell>
                   <TableCell>{cultivo.categoria}</TableCell>
-                  <TableCell>{cultivo.name}</TableCell>
+                  <TableCell>{cultivo.nombre}</TableCell>
                   <TableCell>{cultivo.tipo_muestra_id}</TableCell>
                   <TableCell>{Number((cultivo.price || 0)).toFixed(2)} MXN</TableCell>
                   <TableCell>

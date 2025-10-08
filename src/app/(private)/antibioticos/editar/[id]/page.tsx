@@ -13,13 +13,13 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Check, Pill } from "lucide-react";
-import { getAntibioticById, updateAntibiotic } from "@/services/antibioticServicio";
+import { getAntibioticById, updateAntibiotic } from "@/services/antibioticosServicio";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useLoader } from "@/hooks/useLoader";
 
 const antibioticSchema = z.object({
-  name: z.string().min(1, { message: "El nombre es requerido." }),
+  nombre: z.string().min(1, { message: "El nombre es requerido." }),
   shortcut: z.string().optional(),
   commercialName: z.string().optional(),
   administrationRoute: z.string().min(1, { message: "La vía de administración es requerida." }),
@@ -39,7 +39,7 @@ export default function EditAntibioticPage() {
     const form = useForm<AntibioticFormValues>({
         resolver: zodResolver(antibioticSchema),
         defaultValues: {
-            name: '',
+            nombre: '',
             shortcut: '',
             commercialName: '',
             administrationRoute: '',
@@ -115,7 +115,7 @@ export default function EditAntibioticPage() {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                         <FormField control={form.control} name="name" render={({ field }) => (
+                         <FormField control={form.control} name="nombre" render={({ field }) => (
                             <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input placeholder="Nombre del antibiótico" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={form.control} name="shortcut" render={({ field }) => (

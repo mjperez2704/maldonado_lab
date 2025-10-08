@@ -35,7 +35,7 @@ import {
   ArrowUpDown
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { getProveedores } from '@/services/providerServicio';
+import { getProveedores } from '@/services/proveedoresServicio';
 import ProvidersTable from './ProvidersTable';
 
 

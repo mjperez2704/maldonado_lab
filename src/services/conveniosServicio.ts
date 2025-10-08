@@ -5,7 +5,7 @@ export interface Convenio {
     id: number;
     title: string;
     descuento: number;
-    items?: { type: string, id: number, name: string, price: string }[];
+    items?: { type: string, id: number, nombre: string, price: string }[];
 }
 
 export async function getConvenios(): Promise<Convenio[]> {

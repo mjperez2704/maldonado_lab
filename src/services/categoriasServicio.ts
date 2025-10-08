@@ -3,7 +3,7 @@ import { executeQuery } from '@/lib/db';
 
 export interface Category {
   id: number;
-  name: string;
+  nombre: string;
 }
 
 export async function getCategories(): Promise<Category[]> {

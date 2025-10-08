@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Check, Package as PackageIcon, X, Search } from "lucide-react";
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { getPackageById, updatePackage, Package } from "@/services/packageServicio";
+import { getPackageById, updatePackage, Package } from "@/services/paquetesServicio";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,12 +16,12 @@ import * as z from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useLoader } from "@/hooks/useLoader";
-import { getStudies, Estudio } from "@/services/studyServicio";
-import { getCultures, Culture } from "@/services/cultureServicio";
+import { getStudies, Estudio } from "@/services/estudiosServicio";
+import { getCultures, Culture } from "@/services/cultivosServicio";
 import { Badge } from "@/components/ui/badge";
 
 const packageSchema = z.object({
-  name: z.string().min(1, { message: "El nombre es requerido." }),
+  nombre: z.string().min(1, { message: "El nombre es requerido." }),
   shortcut: z.string().optional(),
   price: z.coerce.number().min(0, "El precio no puede ser negativo."),
   tests: z.array(z.string()).optional(),
@@ -61,7 +61,7 @@ export default function EditPackagePage() {
             ]).then(([pkg, estudiosData, culturesData]) => {
                 if (pkg) {
                     form.reset({
-                        name: pkg.name,
+                        nombre: pkg.nombre,
                         shortcut: pkg.shortcut || '',
                         price: pkg.price,
                         tests: pkg.tests || [],
@@ -85,11 +85,11 @@ export default function EditPackagePage() {
     const selectedCultures = form.watch('cultures') || [];
 
     const filteredStudies = useMemo(() => 
-        studySearch ? allStudies.filter(s => s.name.toLowerCase().includes(studySearch.toLowerCase()) && !selectedTests.includes(s.name)) : [],
+        studySearch ? allStudies.filter(s => s.nombre.toLowerCase().includes(studySearch.toLowerCase()) && !selectedTests.includes(s.nombre)) : [],
     [studySearch, allStudies, selectedTests]);
 
     const filteredCultures = useMemo(() =>
-        cultureSearch ? allCultures.filter(c => c.name.toLowerCase().includes(cultureSearch.toLowerCase()) && !selectedCultures.includes(c.name)) : [],
+        cultureSearch ? allCultures.filter(c => c.nombre.toLowerCase().includes(cultureSearch.toLowerCase()) && !selectedCultures.includes(c.nombre)) : [],
     [cultureSearch, allCultures, selectedCultures]);
 
     const addTest = (testName: string) => {
@@ -159,7 +159,7 @@ export default function EditPackagePage() {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <FormField control={form.control} name="name" render={({ field }) => (
+                        <FormField control={form.control} name="nombre" render={({ field }) => (
                             <FormItem><FormLabel>Nombre del paquete</FormLabel><FormControl><Input placeholder="Nombre del paquete" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={form.control} name="shortcut" render={({ field }) => (
@@ -187,8 +187,8 @@ export default function EditPackagePage() {
                                 {filteredStudies.length > 0 && (
                                     <div className="absolute z-10 w-full mt-1 bg-card border rounded-md shadow-lg max-h-48 overflow-y-auto">
                                         {filteredStudies.map(study => (
-                                            <div key={study.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => addTest(study.name)}>
-                                                {study.name}
+                                            <div key={study.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => addTest(study.nombre)}>
+                                                {study.nombre}
                                             </div>
                                         ))}
                                     </div>
@@ -219,8 +219,8 @@ export default function EditPackagePage() {
                                 {filteredCultures.length > 0 && (
                                     <div className="absolute z-10 w-full mt-1 bg-card border rounded-md shadow-lg max-h-48 overflow-y-auto">
                                         {filteredCultures.map(culture => (
-                                            <div key={culture.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => addCulture(culture.name)}>
-                                                {culture.name}
+                                            <div key={culture.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => addCulture(culture.nombre)}>
+                                                {culture.nombre}
                                             </div>
                                         ))}
                                     </div>

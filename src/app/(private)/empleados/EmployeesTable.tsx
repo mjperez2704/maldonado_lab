@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Pencil, Trash2 } from "lucide-react"
-import { deleteEmployee, Employee } from '@/services/employeeServicio';
+import { deleteEmployee, Employee } from '@/services/empleadosServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useLoader } from '@/hooks/useLoader';
@@ -58,7 +58,7 @@ export default function EmployeesTable({ initialEmployees }: { initialEmployees:
         <TableBody>
           {employees.map((employee) => (
             <TableRow key={employee.id}>
-              <TableCell>{employee.name}</TableCell>
+              <TableCell>{employee.nombre}</TableCell>
               <TableCell>{employee.position}</TableCell>
               <TableCell>{employee.email}</TableCell>
               <TableCell>{employee.branch}</TableCell>

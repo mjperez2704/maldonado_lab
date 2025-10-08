@@ -1,6 +1,6 @@
 "use server";
 import { executeQuery } from '@/lib/db';
-import { getEstudioIdByName } from '@/services/studyServicio';
+import { getEstudioIdByName } from '@/services/estudiosServicio';
 
 export interface Paquetes {
     id: number;

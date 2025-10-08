@@ -31,8 +31,8 @@ import {
   Hash,
   Filter,
 } from "lucide-react"
-import { getQuotes, deleteQuote, updateQuote, Quote } from '@/services/quoteServicio';
-import { createRecibo } from '@/services/reciboServicio';
+import { getQuotes, deleteQuote, updateQuote, Quote } from '@/services/cotizacionesServicio';
+import { createRecibo } from '@/services/recibosServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 
@@ -62,7 +62,7 @@ export default function QuotesPage() {
     const filteredQuotes = useMemo(() => {
         return quotes.filter(quote => {
             const folioMatch = filters.folio ? quote.id.toString().toLowerCase().includes(filters.folio.toLowerCase()) : true;
-            const patientMatch = filters.patient ? quote.nombrePaciente.toLowerCase().includes(filters.patient.toLowerCase()) : true;
+            const patientMatch = filters.patient ? quote.paciente_nombre.toLowerCase().includes(filters.patient.toLowerCase()) : true;
             return folioMatch && patientMatch;
         });
     }, [quotes, filters]);
@@ -85,15 +85,15 @@ export default function QuotesPage() {
     };
 
     const handleConvertToRequest = async (quote: Quote) => {
-        if (quote.status === 'converted') {
+        if (quote.estado === 'convertida') {
             toast({ title: "Atención", description: "Esta cotización ya ha sido convertida."});
             return;
         }
 
         try {
             await createRecibo({
-                patientCode: quote.patientId,
-                nombrePaciente: quote.nombrePaciente,
+                codigoPaciente: quote.paciente_id,
+                nombrePaciente: quote.paciente_nombre,
                 estudios: quote.estudios,
                 paquetes: quote.paquetes,
                 subtotal: quote.subtotal,
@@ -101,11 +101,11 @@ export default function QuotesPage() {
                 total: quote.total,
                 pagado: 0,
                 adeudo: quote.total,
-            });
+            },1);
 
-            await updateQuote(String(quote.id), { status: 'converted' });
+            await updateQuote(String(quote.id), { estado: 'convertida' });
 
-            toast({ title: "Éxito", description: `La cotización ${quote.id.toString().substring(0,8)} ha sido convertida a solicitud.` });
+            toast({ title: "Éxito", description: `La cotización ${quote.id} ha sido convertida a solicitud.` });
             fetchQuotes(); // Refresh the list to show the new status
             router.push('/facturacion'); // Navigate to the billing/receipts page
 
@@ -188,20 +188,20 @@ export default function QuotesPage() {
                     ) : filteredQuotes.length > 0 ? (
                         filteredQuotes.map(quote => (
                             <TableRow key={quote.id}>
-                                <TableCell>{quote.id.toString().substring(0, 8)}</TableCell>
-                                <TableCell>{new Date(quote.date).toLocaleDateString()}</TableCell>
-                                <TableCell>{quote.nombrePaciente}</TableCell>
+                                <TableCell>{quote.id}</TableCell>
+                                <TableCell>{new Date(quote.fecha).toLocaleDateString()}</TableCell>
+                                <TableCell>{quote.paciente_nombre}</TableCell>
                                 <TableCell>${Number(quote.total.toFixed(2))}</TableCell>
                                 <TableCell>
-                                    <span className={`px-2 py-1 rounded-full text-xs capitalize ${quote.status === 'pending' ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800'}`}>
-                                        {quote.status}
+                                    <span className={`px-2 py-1 rounded-full text-xs capitalize ${quote.estado === 'generada' ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800'}`}>
+                                        {quote.estado}
                                     </span>
                                 </TableCell>
                                 <TableCell className="text-right flex gap-2 justify-end">
-                                    <Button variant="outline" size="icon" title="Convertir a Solicitud" onClick={() => handleConvertToRequest(quote)} disabled={quote.status === 'converted'}>
+                                    <Button variant="outline" size="icon" title="Convertir a Solicitud" onClick={() => handleConvertToRequest(quote)} disabled={quote.estado === 'convertida'}>
                                         <FileCheck className="h-4 w-4 text-green-600"/>
                                     </Button>
-                                    <Button variant="outline" size="icon" title="Editar Cotización" onClick={() => handleEdit(String(quote.id))} disabled={quote.status === 'converted'}>
+                                    <Button variant="outline" size="icon" title="Editar Cotización" onClick={() => handleEdit(String(quote.id))} disabled={quote.estado === 'convertida'}>
                                         <Pencil className="h-4 w-4"/>
                                     </Button>
                                     <Button variant="destructive" size="icon" title="Eliminar Cotización" onClick={() => handleDelete(String(quote.id))}>

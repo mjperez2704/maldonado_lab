@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { BadgePercent, Calendar, Check, DollarSign } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { getExpenseById, updateExpense, Expense } from "@/services/expenseServicio";
+import { getExpenseById, updateExpense, Expense } from "@/services/gastosServicio";
 import Link from "next/link";
 
 export default function EditExpensePage() {

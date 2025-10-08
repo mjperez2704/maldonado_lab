@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { BadgePercent, Calendar, Check, DollarSign } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createExpense, Expense } from "@/services/expenseServicio";
+import { createExpense, Expense } from "@/services/gastosServicio";
 import Link from "next/link";
 
 export default function CreateExpensePage() {

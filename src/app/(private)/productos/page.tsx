@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button"
 import Link from "next/link";
 import { Plus, Boxes } from "lucide-react"
-import { getProducts } from '@/services/productServicio';
+import { getProducts } from '@/services/productosServicio';
 import ProductsTable from './ProductsTable';
 
 

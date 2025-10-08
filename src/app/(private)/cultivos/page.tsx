@@ -12,7 +12,7 @@ import {
   Plus,
   TestTube
 } from "lucide-react"
-import { getCultures } from '@/services/cultureServicio';
+import { getCultures } from '@/services/cultivosServicio';
 import CultivosTable from './CultivosTable';
 
 export default async function CultivosPage() {

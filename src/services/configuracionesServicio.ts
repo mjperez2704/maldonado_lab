@@ -43,7 +43,7 @@ export interface EmailTemplate {
 export interface EmailSettings {
     host: string;
     port: number;
-    username: string;
+    usernombre: string;
     password?: string;
     encryption: 'ssl' | 'tls';
     fromAddress: string;

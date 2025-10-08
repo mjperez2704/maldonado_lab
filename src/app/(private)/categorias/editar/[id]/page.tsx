@@ -19,13 +19,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Check, ListTree } from "lucide-react";
-import { getCategoryById, updateCategory } from "@/services/categoriaServicio";
+import { getCategoryById, updateCategory } from "@/services/categoriasServicio";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useLoader } from "@/hooks/useLoader";
 
 const categoriaSchema = z.object({
-  name: z.string().min(1, { message: "El nombre es requerido." }),
+  nombre: z.string().min(1, { message: "El nombre es requerido." }),
 });
 
 type CategoryFormValues = z.infer<typeof categoriaSchema>;
@@ -40,7 +40,7 @@ export default function EditCategoryPage() {
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categoriaSchema),
     defaultValues: {
-      name: "",
+      nombre: "",
     },
   });
 
@@ -50,7 +50,7 @@ export default function EditCategoryPage() {
       getCategoryById(categoriaId)
         .then((categoriaData) => {
           if (categoriaData) {
-            form.setValue("name", categoriaData.name);
+            form.setValue("nombre", categoriaData.nombre);
           } else {
             toast({
               title: "Error",
@@ -75,7 +75,7 @@ export default function EditCategoryPage() {
   const onSubmit = async (data: CategoryFormValues) => {
     loader.start("update");
     try {
-      await updateCategory(categoriaId, data.name);
+      await updateCategory(categoriaId, data.nombre);
       toast({
         title: "Éxito",
         description: "La categoría se ha actualizado correctamente.",
@@ -120,7 +120,7 @@ export default function EditCategoryPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
-                name="name"
+                nombre="nombre"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Nombre</FormLabel>

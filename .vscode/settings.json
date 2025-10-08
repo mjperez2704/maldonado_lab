@@ -11,9 +11,9 @@
             "server": "195.250.27.25",
             "port": 3306,
             "driver": "MariaDB",
-            "name": "mega_lims",
+            "nombre": "mega_lims",
             "database": "megaspots_lims",
-            "username": "megaspots_lims",
+            "usernombre": "megaspots_lims",
             "password": "megaspots_lims"
         }
     ]

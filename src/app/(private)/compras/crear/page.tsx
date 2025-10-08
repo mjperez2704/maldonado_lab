@@ -11,8 +11,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Check, Plus, ShoppingCart, Calendar as CalendarIcon, Trash2 } from "lucide-react";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
-import { createPurchase, Purchase } from "@/services/purchaseServicio";
-import { getProveedores, Provider } from "@/services/providerServicio";
+import { createPurchase, Purchase } from "@/services/comprasServicio";
+import { getProveedores, Proveedor } from "@/services/proveedoresServicio";
 import Link from "next/link";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,7 +21,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 
 const purchaseProductSchema = z.object({
-  name: z.string().min(1, "El nombre del producto es requerido."),
+  nombre: z.string().min(1, "El nombre del producto es requerido."),
   unitPrice: z.coerce.number().min(0.01, "El precio unitario debe ser mayor a 0."),
   quantity: z.coerce.number().min(1, "La cantidad debe ser al menos 1."),
 });
@@ -47,7 +47,7 @@ type PurchaseFormValues = z.infer<typeof purchaseSchema>;
 export default function CreatePurchasePage() {
     const router = useRouter();
     const { toast } = useToast();
-    const [providers, setProviders] = useState<Provider[]>([]);
+    const [providers, setProviders] = useState<Proveedor[]>([]);
     
     const form = useForm<PurchaseFormValues>({
         resolver: zodResolver(purchaseSchema),
@@ -56,18 +56,18 @@ export default function CreatePurchasePage() {
             branch: '',
             provider: '',
             notes: '',
-            products: [{ name: '', unitPrice: 0, quantity: 1 }],
+            products: [{ nombre: '', unitPrice: 0, quantity: 1 }],
             payments: [{ date: new Date().toISOString().split('T')[0], amount: 0, method: '' }],
             tax: 0,
         },
     });
 
-    const { fields: productFields, append: appendProduct, remove: removeProduct } = useFieldArray({ control: form.control, name: "products" });
-    const { fields: paymentFields, append: appendPayment, remove: removePayment } = useFieldArray({ control: form.control, name: "payments" });
+    const { fields: productFields, append: appendProduct, remove: removeProduct } = useFieldArray({ control: form.control, nombre: "products" });
+    const { fields: paymentFields, append: appendPayment, remove: removePayment } = useFieldArray({ control: form.control, nombre: "payments" });
 
-    const watchedProducts = useWatch({ control: form.control, name: 'products' });
-    const watchedPayments = useWatch({ control: form.control, name: 'payments' });
-    const watchedTax = useWatch({ control: form.control, name: 'tax' });
+    const watchedProducts = useWatch({ control: form.control, nombre: 'products' });
+    const watchedPayments = useWatch({ control: form.control, nombre: 'payments' });
+    const watchedTax = useWatch({ control: form.control, nombre: 'tax' });
 
     const subtotal = React.useMemo(() => 
         (watchedProducts || []).reduce((acc, p) => acc + (p.unitPrice || 0) * (p.quantity || 0), 0), 
@@ -132,7 +132,7 @@ export default function CreatePurchasePage() {
                     <FormItem><FormLabel>Sucursal</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Seleccionar sucursal" /></SelectTrigger></FormControl><SelectContent><SelectItem value="main">Sucursal Principal</SelectItem><SelectItem value="secondary">Sucursal Secundaria</SelectItem></SelectContent></Select><FormMessage /></FormItem>
                 )}/>
                 <FormField control={form.control} name="provider" render={({ field }) => (
-                    <FormItem><FormLabel>Proveedor</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Seleccionar proveedor" /></SelectTrigger></FormControl><SelectContent>{providers.map(p => (<SelectItem key={p.id} value={p.name}>{p.name}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>
+                    <FormItem><FormLabel>Proveedor</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue placeholder="Seleccionar proveedor" /></SelectTrigger></FormControl><SelectContent>{providers.map(p => (<SelectItem key={p.id} value={p.nombre}>{p.nombre}</SelectItem>))}</SelectContent></Select><FormMessage /></FormItem>
                 )}/>
                 <FormField control={form.control} name="notes" render={({ field }) => (
                     <FormItem className="md:col-span-3"><FormLabel>Nota</FormLabel><FormControl><Textarea placeholder="Nota" {...field} /></FormControl><FormMessage /></FormItem>
@@ -142,7 +142,7 @@ export default function CreatePurchasePage() {
             <div className="space-y-4">
                 <div className="flex justify-between items-center pb-2 border-b">
                     <h3 className="font-semibold text-lg">Productos</h3>
-                    <Button onClick={() => appendProduct({ name: '', unitPrice: 0, quantity: 1 })} size="icon" type="button" className="bg-primary hover:bg-primary/90">
+                    <Button onClick={() => appendProduct({ nombre: '', unitPrice: 0, quantity: 1 })} size="icon" type="button" className="bg-primary hover:bg-primary/90">
                         <Plus />
                     </Button>
                 </div>
@@ -155,7 +155,7 @@ export default function CreatePurchasePage() {
                                 const totalPrice = (product?.unitPrice || 0) * (product?.quantity || 0);
                                 return (
                                 <TableRow key={field.id}>
-                                   <TableCell><FormField control={form.control} name={`products.${index}.name`} render={({ field }) => (<FormItem><FormControl><Input placeholder="Producto" {...field} /></FormControl><FormMessage/></FormItem>)}/></TableCell>
+                                   <TableCell><FormField control={form.control} name={`products.${index}.nombre`} render={({ field }) => (<FormItem><FormControl><Input placeholder="Producto" {...field} /></FormControl><FormMessage/></FormItem>)}/></TableCell>
                                    <TableCell><FormField control={form.control} name={`products.${index}.unitPrice`} render={({ field }) => (<FormItem><FormControl><Input type="number" placeholder="0.00" {...field} onFocus={handleFocus} /></FormControl><FormMessage/></FormItem>)}/></TableCell>
                                    <TableCell><FormField control={form.control} name={`products.${index}.quantity`} render={({ field }) => (<FormItem><FormControl><Input type="number" placeholder="0" {...field} onFocus={handleFocus} /></FormControl><FormMessage/></FormItem>)}/></TableCell>
                                    <TableCell><Input type="number" placeholder="0.00" value={Number(totalPrice.toFixed(2))} readOnly /></TableCell>

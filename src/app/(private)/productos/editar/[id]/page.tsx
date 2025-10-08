@@ -9,7 +9,7 @@ import { Switch } from "@/components/ui/switch";
 import { Boxes, Check, Calendar as CalendarIcon } from "lucide-react";
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from "next/navigation";
-import { getProductById, updateProduct } from "@/services/productServicio";
+import { getProductById, updateProduct } from "@/services/productosServicio";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,7 +19,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLoader } from "@/hooks/useLoader";
 
 const productSchema = z.object({
-  name: z.string().min(1, "El nombre es requerido."),
+  nombre: z.string().min(1, "El nombre es requerido."),
   sku: z.string().optional(),
   branch: z.string().min(1, "La sucursal es requerida."),
   categoria: z.string().min(1, "La categoría es requerida."),
@@ -107,7 +107,7 @@ export default function EditProductPage() {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <FormField control={form.control} name="name" render={({ field }) => (
+                        <FormField control={form.control} name="nombre" render={({ field }) => (
                             <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input placeholder="Nombre del producto" {...field} disabled={loader.status !== 'idle'}/></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={form.control} name="sku" render={({ field }) => (

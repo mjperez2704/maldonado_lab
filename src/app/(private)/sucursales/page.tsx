@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button"
 import Link from "next/link";
 import { Plus, Building } from "lucide-react"
-import { getBranches } from '@/services/branchServicio';
+import { getBranches } from '@/services/sucursalServicio';
 import BranchesTable from './BranchesTable';
 
 export default async function BranchesPage() {

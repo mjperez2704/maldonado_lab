@@ -14,15 +14,15 @@ import { Info, Plus, Trash2, Save, HelpCircle, ArrowUp, ArrowDown, Pencil } from
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from "next/navigation";
-import { getEstudioById, updateEstudio, getStudies as getAllStudies, Estudio, ParametroEstudio, IntegratedEstudioRef, MuestraEstudio } from "@/services/studyServicio";
-import { getCategories, Category } from "@/services/categoriaServicio";
-import { getProveedores, Provider } from "@/services/providerServicio";
+import { getEstudioById, updateEstudio, getStudies as getAllStudies, Estudio, ParametroEstudio, IntegratedEstudioRef, MuestraEstudio } from "@/services/estudiosServicio";
+import { getCategories, Category } from "@/services/categoriasServicio";
+import { getProveedores, Proveedor } from "@/services/proveedoresServicio";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 const initialNewParam: ParametroEstudio = {
-    name: '',
+    nombre: '',
     unit: '',
     cost: 0,
     factor: '',
@@ -67,7 +67,7 @@ function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (par
     return (
         <div className="space-y-4">
              <div className="grid grid-cols-1 md:grid-cols-5 gap-x-4 gap-y-2 items-end">
-                <div className="space-y-1 col-span-full md:col-span-1"><Label>Parámetro</Label><Input placeholder="Nombre" value={param.name} onChange={(e) => setParam({...param, name: e.target.value})}/></div>
+                <div className="space-y-1 col-span-full md:col-span-1"><Label>Parámetro</Label><Input placeholder="Nombre" value={param.nombre} onChange={(e) => setParam({...param, nombre: e.target.value})}/></div>
                 <div className="space-y-1 col-span-1"><Label>Unidad</Label><Input placeholder="ej. ml" value={param.unit} onChange={(e) => setParam({...param, unit: e.target.value})}/></div>
                 <div className="space-y-1 col-span-1"><Label>Costo</Label><Input type="number" placeholder="0.00" value={param.cost} onChange={(e) => setParam({...param, cost: parseFloat(e.target.value) || 0})}/></div>
                 <div className="space-y-1 col-span-1"><Label>FC</Label><Input type="number" placeholder="ej. 1.0" value={param.conversionFactor} onChange={(e) => setParam({...param, conversionFactor: parseFloat(e.target.value) || 0})}/></div>
@@ -154,7 +154,7 @@ export default function EditEstudioPage() {
     const [loading, setLoading] = useState(true);
 
     const [formData, setFormData] = useState<Omit<Estudio, 'id'>>({
-        area: '', code: '', name: '', method: '', internalCost: 0, deliveryTime: 0,
+        area: '', code: '', nombre: '', method: '', internalCost: 0, deliveryTime: 0,
         deliveryUnit: 'dias', processTime: '', processDays: '', isOutsourced: false,
         outsourcedLabId: '', outsourcedCode: '', outsourcedCost: 0, outsourcedDeliveryTime: '',
         legend: '', scientificDescription: '', satServicioKey: '', satUnitKey: '',
@@ -172,7 +172,7 @@ export default function EditEstudioPage() {
         price: 0, tipo_muestra_id: '', categoria: '', shortcut: '',
     });
     const [categories, setCategories] = useState<Category[]>([]);
-    const [providers, setProviders] = useState<Provider[]>([]);
+    const [providers, setProviders] = useState<Proveedor[]>([]);
     const [allStudies, setAllStudies] = useState<Estudio[]>([]);
     
     const [isParamModalOpen, setIsParamModalOpen] = useState(false);
@@ -258,13 +258,13 @@ export default function EditEstudioPage() {
 
     // --- Integrated Studies Logic ---
     const filteredStudies = allStudies.filter(study =>
-        (study.name.toLowerCase().includes(studySearchTerm.toLowerCase()) ||
+        (study.nombre.toLowerCase().includes(studySearchTerm.toLowerCase()) ||
          (study.code || '').toLowerCase().includes(studySearchTerm.toLowerCase())) &&
         !formData.integratedStudies?.some(is => is.id === study.id)
     ).slice(0, 10);
 
     const addIntegratedEstudio = (study: Estudio) => {
-        const newIntegratedEstudio: IntegratedEstudioRef = { id: study.id, name: study.name };
+        const newIntegratedEstudio: IntegratedEstudioRef = { id: study.id, nombre: study.nombre };
         setFormData(prev => ({
             ...prev,
             integratedStudies: [...(prev.integratedStudies || []), newIntegratedEstudio]
@@ -394,9 +394,9 @@ export default function EditEstudioPage() {
                     <CardTitle className="text-base text-primary">Datos Generales del Estudio</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div className="space-y-2 lg:col-span-1"><Label htmlFor="area">Área*</Label><Select value={formData.area} onValueChange={(v) => handleSelectChange('area', v)} required><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent>{categories.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}</SelectContent></Select></div>
+                    <div className="space-y-2 lg:col-span-1"><Label htmlFor="area">Área*</Label><Select value={formData.area} onValueChange={(v) => handleSelectChange('area', v)} required><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent>{categories.map(c => <SelectItem key={c.id} value={c.nombre}>{c.nombre}</SelectItem>)}</SelectContent></Select></div>
                     <div className="space-y-2 lg:col-span-1"><Label htmlFor="code">Código</Label><Input id="code" value={formData.code || ''} onChange={handleChange}/></div>
-                    <div className="space-y-2 lg:col-span-1"><Label htmlFor="name">Nombre*</Label><Input id="name" value={formData.name} onChange={handleChange} required/></div>
+                    <div className="space-y-2 lg:col-span-1"><Label htmlFor="nombre">Nombre*</Label><Input id="nombre" value={formData.nombre} onChange={handleChange} required/></div>
                     <div className="space-y-2 lg:col-span-1"><Label htmlFor="method">Método</Label><Input id="method" value={formData.method || ''} onChange={handleChange}/></div>
                     <div className="space-y-2"><Label htmlFor="internalCost">Costo interno p/prueba</Label><Input id="internalCost" type="number" value={formData.internalCost} onChange={handleChange}/></div>
                     <div className="space-y-2"><Label>Tiempo de entrega</Label><div className="flex gap-2"><Input id="deliveryTime" type="number" className="w-1/2" value={formData.deliveryTime} onChange={handleChange}/><Select value={formData.deliveryUnit} onValueChange={(v) => handleSelectChange('deliveryUnit', v as 'dias' | 'horas')}><SelectTrigger className="w-1/2"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="horas">Horas</SelectItem><SelectItem value="dias">Días</SelectItem></SelectContent></Select></div></div>
@@ -405,7 +405,7 @@ export default function EditEstudioPage() {
 
                     <div className="space-y-2 lg:col-span-4 grid grid-cols-1 lg:grid-cols-6 gap-6 items-center border-t pt-4">
                         <div className="lg:col-span-1"><Label>¿Este es un estudio subrogado?</Label><RadioGroup value={formData.isOutsourced ? 'yes' : 'no'} onValueChange={(v) => handleSelectChange('isOutsourced', v === 'yes')} className="flex gap-4 mt-2"><RadioGroupItem value="yes" id="sub-yes-edit"/><Label htmlFor="sub-yes-edit">Si</Label><RadioGroupItem value="no" id="sub-no-edit"/><Label htmlFor="sub-no-edit">No</Label></RadioGroup></div>
-                        <div className="space-y-2 lg:col-span-2"><Label htmlFor="outsourcedLabId">Lab. de Referencia</Label><Select value={formData.outsourcedLabId} onValueChange={(v) => handleSelectChange('outsourcedLabId', v)} disabled={!formData.isOutsourced}><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent>{providers.map(p=><SelectItem key={p.id} value={String(p.id)}>{p.name}</SelectItem>)}</SelectContent></Select></div>
+                        <div className="space-y-2 lg:col-span-2"><Label htmlFor="outsourcedLabId">Lab. de Referencia</Label><Select value={formData.outsourcedLabId} onValueChange={(v) => handleSelectChange('outsourcedLabId', v)} disabled={!formData.isOutsourced}><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent>{providers.map(p=><SelectItem key={p.id} value={String(p.id)}>{p.nombre}</SelectItem>)}</SelectContent></Select></div>
                         <div className="space-y-2 lg:col-span-1"><Label htmlFor="outsourcedCode">Código</Label><Input id="outsourcedCode" value={formData.outsourcedCode || ''} onChange={handleChange} disabled={!formData.isOutsourced}/></div>
                         <div className="space-y-2 lg:col-span-1"><Label htmlFor="outsourcedCost">Costo</Label><Input id="outsourcedCost" type="number" value={formData.outsourcedCost} onChange={handleChange} disabled={!formData.isOutsourced}/></div>
                         <div className="space-y-2 lg:col-span-1"><Label htmlFor="outsourcedDeliveryTime">Tiempo de entrega</Label><Select value={formData.outsourcedDeliveryTime} onValueChange={(v) => handleSelectChange('outsourcedDeliveryTime', v)} disabled={!formData.isOutsourced}><SelectTrigger><SelectValue placeholder="Seleccionar"/></SelectTrigger><SelectContent><SelectItem value="3_dias">3 días</SelectItem></SelectContent></Select></div>
@@ -444,7 +444,7 @@ export default function EditEstudioPage() {
                             <TableBody>
                                 {formData.parameters?.map((param, index) => (
                                     <TableRow key={index}>
-                                        <TableCell>{param.name}</TableCell>
+                                        <TableCell>{param.nombre}</TableCell>
                                         <TableCell>{param.unit}</TableCell>
                                         <TableCell>{getParameterDisplayReference(param)}</TableCell>
                                         <TableCell className="text-right">
@@ -525,7 +525,7 @@ export default function EditEstudioPage() {
                                 <div className="border rounded-md max-h-40 overflow-y-auto">
                                     {filteredStudies.map(study => (
                                         <div key={study.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => addIntegratedEstudio(study)}>
-                                            {study.name} ({study.code})
+                                            {study.nombre} ({study.code})
                                         </div>
                                     ))}
                                 </div>
@@ -538,7 +538,7 @@ export default function EditEstudioPage() {
                                      <div key={study.id}
                                           className={`p-2 rounded-md cursor-pointer ${Number(selectedIntegratedEstudio) === study.id ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`}
                                           onClick={() => setSelectedIntegratedEstudio(String(study.id))}>
-                                         {study.name}
+                                         {study.nombre}
                                      </div>
                                 ))}
                             </div>

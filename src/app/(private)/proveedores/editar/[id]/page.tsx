@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Check, User } from "lucide-react";
-import { getProviderById, updateProvider } from '@/services/providerServicio';
+import { getProviderById, updateProvider } from '@/services/proveedoresServicio';
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLoader } from '@/hooks/useLoader';
 
 const providerSchema = z.object({
-  name: z.string().min(1, { message: "El nombre es requerido." }),
+  nombre: z.string().min(1, { message: "El nombre es requerido." }),
   phone: z.string().optional(),
   email: z.string().email({ message: "Correo electrónico no válido." }).optional().or(z.literal('')),
   address: z.string().optional(),
@@ -35,7 +35,7 @@ export default function EditProviderPage() {
     const form = useForm<ProviderFormValues>({
         resolver: zodResolver(providerSchema),
         defaultValues: {
-            name: '',
+            nombre: '',
             phone: '',
             email: '',
             address: '',
@@ -104,7 +104,7 @@ export default function EditProviderPage() {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FormField control={form.control} name="name" render={({ field }) => (
+                        <FormField control={form.control} name="nombre" render={({ field }) => (
                             <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input placeholder="Nombre del proveedor" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={form.control} name="phone" render={({ field }) => (

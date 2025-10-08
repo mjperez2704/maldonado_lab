@@ -9,11 +9,11 @@ import Link from "next/link";
 import React from 'react';
 
 const systemReports = [
-    { name: "Solicitudes del Día", description: "Muestra todas las solicitudes de exámenes generadas hoy." },
-    { name: "Corte de Caja Diario", description: "Detalle de ingresos y egresos para el cierre de caja." },
-    { name: "Estudios por Paciente", description: "Historial de estudios realizados por un paciente específico." },
-    { name: "Resultados Pendientes", description: "Lista de solicitudes cuyos resultados aún no han sido capturados." },
-    { name: "Inventario de Productos", description: "Estado actual del stock de productos y reactivos." },
+    { nombre: "Solicitudes del Día", description: "Muestra todas las solicitudes de exámenes generadas hoy." },
+    { nombre: "Corte de Caja Diario", description: "Detalle de ingresos y egresos para el cierre de caja." },
+    { nombre: "Estudios por Paciente", description: "Historial de estudios realizados por un paciente específico." },
+    { nombre: "Resultados Pendientes", description: "Lista de solicitudes cuyos resultados aún no han sido capturados." },
+    { nombre: "Inventario de Productos", description: "Estado actual del stock de productos y reactivos." },
 ];
 
 export default function ReportsPage() {
@@ -44,8 +44,8 @@ export default function ReportsPage() {
             </TableHeader>
             <TableBody>
               {systemReports.map((report) => (
-                <TableRow key={report.name}>
-                  <TableCell className="font-medium">{report.name}</TableCell>
+                <TableRow key={report.nombre}>
+                  <TableCell className="font-medium">{report.nombre}</TableCell>
                   <TableCell>{report.description}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="outline" size="sm">Generar</Button>

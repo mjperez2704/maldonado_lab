@@ -2,7 +2,7 @@
 import { executeQuery } from '@/lib/db';
 
 interface CompraProducto {
-    name: string;
+    nombre: string;
     unitPrice: number;
     quantity: number;
     totalPrice: number;

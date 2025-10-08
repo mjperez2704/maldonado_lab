@@ -12,7 +12,7 @@ import {
   Plus,
   ShoppingCart
 } from "lucide-react"
-import { getPurchases } from '@/services/purchaseServicio';
+import { getPurchases } from '@/services/comprasServicio';
 import PurchasesTable from './PurchasesTable';
 
 export default async function PurchasesPage() {

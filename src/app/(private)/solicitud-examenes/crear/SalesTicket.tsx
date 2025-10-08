@@ -2,7 +2,7 @@
 "use client";
 
 import Image from 'next/image';
-import { ReciboCreation } from "@/services/reciboServicio";
+import { ReciboCreation } from "@/services/recibosServicio";
 
 interface SalesTicketProps {
     recibo: ReciboCreation;

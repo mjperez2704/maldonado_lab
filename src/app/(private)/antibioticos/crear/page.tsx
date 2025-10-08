@@ -12,18 +12,18 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Check, Pill } from "lucide-react";
-import { createAntibiotic } from "@/services/antibioticServicio";
+import { createAntibiotic } from "@/services/antibioticosServicio";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useLoader } from "@/hooks/useLoader";
 
 const antibioticSchema = z.object({
-  name: z.string().min(1, { message: "El nombre es requerido." }),
-  shortcut: z.string().optional(),
-  commercialName: z.string().optional(),
-  administrationRoute: z.string().min(1, { message: "La vía de administración es requerida." }),
-  presentation: z.string().optional(),
-  laboratory: z.string().optional(),
+  nombre: z.string().min(1, { message: "El nombre es requerido." }),
+  abreviatura: z.string().optional(),
+  nombreComercial: z.string().optional(),
+  viaAdministracion: z.string().min(1, { message: "La vía de administración es requerida." }),
+  presentacion: z.string().optional(),
+  laboratorio: z.string().optional(),
 });
 
 type AntibioticFormValues = z.infer<typeof antibioticSchema>;
@@ -36,12 +36,12 @@ export default function CreateAntibioticPage() {
     const form = useForm<AntibioticFormValues>({
         resolver: zodResolver(antibioticSchema),
         defaultValues: {
-            name: '',
-            shortcut: '',
-            commercialName: '',
-            administrationRoute: '',
-            presentation: '',
-            laboratory: '',
+            nombre: '',
+            abreviatura: '',
+            nombreComercial: '',
+            viaAdministracion: '',
+            presentacion: '',
+            laboratorio: '',
         }
     });
 
@@ -51,10 +51,10 @@ export default function CreateAntibioticPage() {
         try {
             const antibioticData = {
                 ...data,
-                shortcut: data.shortcut || '',
-                commercialName: data.commercialName || '',
-                presentation: data.presentation || '',
-                laboratory: data.laboratory || '',
+                abreviatura: data.abreviatura || '',
+                nombreComercial: data.nombreComercial || '',
+                presentacion: data.presentacion || '',
+                laboratorio: data.laboratorio || '',
             };
             await createAntibiotic(antibioticData);
             toast({
@@ -97,16 +97,16 @@ export default function CreateAntibioticPage() {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <FormField control={form.control} name="name" render={({ field }) => (
+                        <FormField control={form.control} name="nombre" render={({ field }) => (
                             <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input placeholder="Nombre del antibiótico" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={form.control} name="shortcut" render={({ field }) => (
+                        <FormField control={form.control} name="abreviatura" render={({ field }) => (
                             <FormItem><FormLabel>Atajo</FormLabel><FormControl><Input placeholder="Atajo" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={form.control} name="commercialName" render={({ field }) => (
+                        <FormField control={form.control} name="nombreComercial" render={({ field }) => (
                             <FormItem><FormLabel>Nombre Comercial</FormLabel><FormControl><Input placeholder="Nombre Comercial" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={form.control} name="administrationRoute" render={({ field }) => (
+                        <FormField control={form.control} name="viaAdministracion" render={({ field }) => (
                             <FormItem><FormLabel>Vía de Administración</FormLabel>
                                 <Select onValueChange={field.onChange} defaultValue={field.value} disabled={loader.status !== 'idle'}>
                                     <FormControl><SelectTrigger><SelectValue placeholder="Seleccionar vía" /></SelectTrigger></FormControl>
@@ -119,10 +119,10 @@ export default function CreateAntibioticPage() {
                                 </Select>
                             <FormMessage /></FormItem>
                         )}/>
-                        <FormField control={form.control} name="presentation" render={({ field }) => (
+                        <FormField control={form.control} name="presentacion" render={({ field }) => (
                             <FormItem><FormLabel>Presentación</FormLabel><FormControl><Input placeholder="Ej: 80mg, 500ml" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                         )}/>
-                        <FormField control={form.control} name="laboratory" render={({ field }) => (
+                        <FormField control={form.control} name="laboratorio" render={({ field }) => (
                             <FormItem><FormLabel>Laboratorio</FormLabel><FormControl><Input placeholder="Nombre del laboratorio" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                         )}/>
                     </div>

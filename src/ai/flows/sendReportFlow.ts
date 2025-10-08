@@ -5,7 +5,7 @@
  */
 'use server';
 
-import { getEmailSettings } from '@/services/settingsServicio';
+import { getEmailSettings } from '@/services/configuracionesServicio';
 import { SendEmailReportInput, SendEmailReportOutput } from '@/ai/schemas/reportSchema';
 
 
@@ -13,7 +13,7 @@ export async function sendEmailReport(input: SendEmailReportInput): Promise<Send
   const emailSettings = await getEmailSettings();
   const reportTemplate = emailSettings?.report || {
       subject: "Tus resultados de laboratorio están listos",
-      body: `Estimado/a {patient_name},
+      body: `Estimado/a {patient_nombre},
 
 Adjunto encontrarás tus resultados de laboratorio.
 
@@ -23,8 +23,8 @@ Saludos cordiales,
 MEGA LIMS`
   };
 
-  const subject = reportTemplate.subject.replace('{patient_name}', input.nombrePaciente);
-  let body = reportTemplate.body.replace('{patient_name}', input.nombrePaciente);
+  const subject = reportTemplate.subject.replace('{patient_nombre}', input.nombrePaciente);
+  let body = reportTemplate.body.replace('{patient_nombre}', input.nombrePaciente);
   
   const resultsText = input.results.map(r => `- ${r.studyName}: ${r.result} (Ref: ${r.reference})`).join('\n');
   

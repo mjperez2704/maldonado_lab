@@ -17,7 +17,7 @@ import {
   Plus,
   UserCheck,
 } from "lucide-react"
-import { getEmployees } from '@/services/employeeServicio';
+import { getEmployees } from '@/services/empleadosServicio';
 import EmployeesTable from './EmployeesTable';
 
 export default async function EmployeesPage() {

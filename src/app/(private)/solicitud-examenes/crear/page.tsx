@@ -13,13 +13,13 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { FlaskConical, UserSearch, Search, Trash2, Calendar, User, Microscope, DollarSign, Tag, Save, Package, PlusSquare, Plus } from "lucide-react";
 import React, { useState, useEffect, useMemo } from 'react';
-import { getPatients, Paciente } from "@/services/patientServicio";
-import { getStudies, Estudio } from "@/services/studyServicio";
-import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/packageServicio";
-import { getDoctores, Doctor, createDoctor } from "@/services/doctorServicio";
+import { getPatients, Paciente } from "@/services/pacienteServicio";
+import { getStudies, Estudio } from "@/services/estudiosServicio";
+import { getPaquetesEstudios, Paquetes as PackageType } from "@/services/paquetesServicio";
+import { getDoctores, Doctor, createDoctor } from "@/services/doctoresServicio";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { createRecibo, ReciboCreation } from "@/services/reciboServicio";
+import { createRecibo, ReciboCreation } from "@/services/recibosServicio";
 import Link from "next/link";
 import { SalesTicket } from "./SalesTicket";
 import { CreatePatientForm } from "../../pacientes/CreatePatientForm";
@@ -63,7 +63,7 @@ function CreateDoctorForm({ onSuccess }: { onSuccess: (doctor: Doctor) => void }
             form.reset();
             onSuccess(createdDoctor as Doctor);
         } catch (error) {
-            console.error("Error creating doctor:", error);
+            console.error("Error al crear médico:", error);
             toast({ title: "Error", description: "No se pudo crear el doctor.", variant: "destructive" });
         }
     };

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Check, PlusSquare } from "lucide-react";
-import { createDoctor } from '@/services/doctorServicio';
+import { createDoctor } from '@/services/doctoresServicio';
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -16,7 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLoader } from '@/hooks/useLoader';
 
 const doctorSchema = z.object({
-  name: z.string().min(1, { message: "El nombre es requerido." }),
+  nombre: z.string().min(1, { message: "El nombre es requerido." }),
   phone: z.string().optional(),
   email: z.string().email({ message: "Correo electrónico no válido." }).optional().or(z.literal('')),
   address: z.string().optional(),
@@ -34,7 +34,7 @@ export default function CreateDoctorPage() {
     const form = useForm<DoctorFormValues>({
         resolver: zodResolver(doctorSchema),
         defaultValues: {
-            name: '',
+            nombre: '',
             phone: '',
             email: '',
             address: '',
@@ -87,7 +87,7 @@ export default function CreateDoctorPage() {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <FormField control={form.control} name="name" render={({ field }) => (
+                        <FormField control={form.control} name="nombre" render={({ field }) => (
                             <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input placeholder="Nombre del doctor" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={form.control} name="phone" render={({ field }) => (

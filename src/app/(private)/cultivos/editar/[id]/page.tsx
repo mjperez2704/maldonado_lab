@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Check, Plus, TestTube, Trash2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { getCultureById, updateCulture, Culture } from "@/services/cultureServicio";
+import { getCultureById, updateCulture, Culture } from "@/services/cultivosServicio";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 
@@ -22,7 +22,7 @@ export default function EditCulturePage() {
     
     const [formData, setFormData] = useState<Omit<Culture, 'id'>>({
         categoria: '',
-        name: '',
+        nombre: '',
         tipo_muestra_id: '',
         price: 0,
         precautions: '',
@@ -130,8 +130,8 @@ export default function EditCulturePage() {
                         </Select>
                     </div>
                     <div className="space-y-2">
-                        <Label htmlFor="name">Nombre</Label>
-                        <Input id="name" value={formData.name} onChange={handleChange} />
+                        <Label htmlFor="nombre">Nombre</Label>
+                        <Input id="nombre" value={formData.nombre} onChange={handleChange} />
                     </div>
                     <div className="space-y-2">
                         <Label htmlFor="tipo_muestra_id">Tipo de ejemplo</Label>

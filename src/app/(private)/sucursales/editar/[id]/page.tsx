@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Building, Check } from "lucide-react";
-import { getBranchById, updateBranch } from "@/services/branchServicio";
+import { getBranchById, updateBranch } from "@/services/sucursalServicio";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,7 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useLoader } from "@/hooks/useLoader";
 
 const branchSchema = z.object({
-  name: z.string().min(1, "El nombre es requerido."),
+  nombre: z.string().min(1, "El nombre es requerido."),
   phone: z.string().optional(),
   address: z.string().optional(),
 });
@@ -35,7 +35,7 @@ export default function EditBranchPage() {
     const form = useForm<BranchFormValues>({
         resolver: zodResolver(branchSchema),
         defaultValues: {
-            name: '',
+            nombre: '',
             phone: '',
             address: '',
         }
@@ -114,7 +114,7 @@ export default function EditBranchPage() {
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-8">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <FormField control={form.control} name="name" render={({ field }) => (
+                        <FormField control={form.control} name="nombre" render={({ field }) => (
                             <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input placeholder="Nombre de la sucursal" {...field} disabled={loader.status !== 'idle'}/></FormControl><FormMessage /></FormItem>
                         )}/>
                         <FormField control={form.control} name="phone" render={({ field }) => (

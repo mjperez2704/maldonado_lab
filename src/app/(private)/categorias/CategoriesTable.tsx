@@ -28,7 +28,7 @@ import {
   ArrowUpDown
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink } from "@/components/ui/pagination";
-import { deleteCategory, Category } from '@/services/categoriaServicio';
+import { deleteCategory, Category } from '@/services/categoriasServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useLoader } from '@/hooks/useLoader';
@@ -125,7 +125,7 @@ export default function CategoriesTable({ initialCategories }: { initialCategori
                       <Checkbox />
                   </TableCell>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell>{item.name}</TableCell>
+                  <TableCell>{item.nombre}</TableCell>
                   <TableCell>
                       <div className="flex items-center justify-end gap-2">
                       <Button variant="outline" size="icon" onClick={() => handleEdit(item.id)}>

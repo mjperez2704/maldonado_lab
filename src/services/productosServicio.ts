@@ -10,7 +10,7 @@ export interface Producto {
   unidad_id: string;
   precio_compra: number;
   precio_venta: number;
-  stcokInicial: number;
+  stockInicial: number;
   alertaStock: number;
   fechaCaducidad?: string;
   diasAlertaCaducidad: number;
@@ -28,9 +28,9 @@ export async function getProducts(): Promise<Producto[]> {
 }
 
 export async function createProduct(product: Omit<Producto, 'id'>): Promise<void> {
-    const { nombre, sku, sucursal_id, categoria_id, unidad_id, precio_compra, precio_venta, stcokInicial, alertaStock, fechaCaducidad, diasAlertaCaducidad, alertaCaducidadActiva } = product;
+    const { nombre, sku, sucursal_id, categoria_id, unidad_id, precio_compra, precio_venta, stockInicial, alertaStock, fechaCaducidad, diasAlertaCaducidad, alertaCaducidadActiva } = product;
     const query = 'INSERT INTO productos (nombre, sku, sucursal_id, categoria_id, unidad_id, precio_compra, precio_venta, stcokInicial, alertaStock, fechaCaducidad, diasAlertaCaducidad, alertaCaducidadActiva) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    await executeQuery(query, [nombre, sku, sucursal_id, categoria_id, unidad_id, precio_compra, precio_venta, stcokInicial, alertaStock, fechaCaducidad || null, diasAlertaCaducidad, alertaCaducidadActiva]);
+    await executeQuery(query, [nombre, sku, sucursal_id, categoria_id, unidad_id, precio_compra, precio_venta, stockInicial, alertaStock, fechaCaducidad || null, diasAlertaCaducidad, alertaCaducidadActiva]);
 }
 
 export async function getProductById(id: number): Promise<Producto | null> {
@@ -39,9 +39,9 @@ export async function getProductById(id: number): Promise<Producto | null> {
 }
 
 export async function updateProduct(id: number, product: Partial<Omit<Producto, 'id'>>): Promise<void> {
-    const { nombre, sku, sucursal_id, categoria_id, unidad_id, precio_compra, precio_venta, stcokInicial, alertaStock, fechaCaducidad, diasAlertaCaducidad, alertaCaducidadActiva } = product;
+    const { nombre, sku, sucursal_id, categoria_id, unidad_id, precio_compra, precio_venta, stockInicial, alertaStock, fechaCaducidad, diasAlertaCaducidad, alertaCaducidadActiva } = product;
     const query = 'UPDATE productos SET nombre = ?, sku = ?, sucursal_id = ?, categoria_id = ?, unidad_id = ?, precio_compra = ?, precio_venta = ?, stcokInicial = ?, alertaStock = ?, fechaCaducidad = ?, diasAlertaCaducidad = ?, alertaCaducidadActiva = ? WHERE id = ?';
-    await executeQuery(query, [nombre, sku, sucursal_id, categoria_id, unidad_id, precio_compra, precio_venta, stcokInicial, alertaStock, fechaCaducidad || null, diasAlertaCaducidad, alertaCaducidadActiva, id]);
+    await executeQuery(query, [nombre, sku, sucursal_id, categoria_id, unidad_id, precio_compra, precio_venta, stockInicial, alertaStock, fechaCaducidad || null, diasAlertaCaducidad, alertaCaducidadActiva, id]);
 }
 
 

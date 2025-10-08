@@ -11,8 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ClipboardList, Search, Trash2 } from "lucide-react";
 import { useEffect, useState, useMemo } from 'react';
-import { getStudies, Estudio } from '@/services/studyServicio';
-import { getCategories, Category } from '@/services/categoriaServicio';
+import { getStudies, Estudio } from '@/services/estudiosServicio';
+import { getCategories, Category } from '@/services/categoriasServicio';
 import Link from "next/link";
 
 export default function PriceListPage() {
@@ -47,7 +47,7 @@ export default function PriceListPage() {
 
     if (searchTerm) {
         filtered = filtered.filter(study => 
-            study.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            study.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || 
             study.shortcut.toLowerCase().includes(searchTerm.toLowerCase())
         );
     }
@@ -61,12 +61,12 @@ export default function PriceListPage() {
             return a.shortcut.localeCompare(b.shortcut);
         }
         if (sortOrder === 'alpha') {
-            return a.name.localeCompare(b.name);
+            return a.nombre.localeCompare(b.nombre);
         }
         if (sortOrder === 'area') {
             const categoriaCompare = a.categoria.localeCompare(b.categoria);
             if (categoriaCompare !== 0) return categoriaCompare;
-            return a.name.localeCompare(b.name);
+            return a.nombre.localeCompare(b.nombre);
         }
         return 0;
     });
@@ -128,7 +128,7 @@ export default function PriceListPage() {
                             <SelectContent>
                                 <SelectItem value="all">Todas las categorías</SelectItem>
                                 {categories.map(cat => (
-                                    <SelectItem key={cat.id} value={cat.name}>{cat.name}</SelectItem>
+                                    <SelectItem key={cat.id} value={cat.nombre}>{cat.nombre}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
@@ -197,7 +197,7 @@ export default function PriceListPage() {
                                 ) : filteredAndSortedStudies.map((study) => (
                                     <TableRow key={study.id}>
                                         <TableCell>{study.shortcut}</TableCell>
-                                        <TableCell>{study.name}</TableCell>
+                                        <TableCell>{study.nombre}</TableCell>
                                         <TableCell>{study.categoria}</TableCell>
                                         <TableCell>
                                             <Input type="number" defaultValue={Number(study.price.toFixed(2))} className="w-24" onFocus={handleFocus} />

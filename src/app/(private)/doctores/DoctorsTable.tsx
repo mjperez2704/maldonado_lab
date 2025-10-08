@@ -38,7 +38,7 @@ import {
   Trash2,
 } from "lucide-react"
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
-import { deleteDoctor, Doctor } from '@/services/doctorServicio';
+import { deleteDoctor, Doctor } from '@/services/doctoresServicio';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { useLoader } from '@/hooks/useLoader';
@@ -146,7 +146,7 @@ export default function DoctorsTable({ initialDoctors }: { initialDoctors: Docto
                         </TableCell>
                         <TableCell>{index + 1}</TableCell>
                         <TableCell>{item.code}</TableCell>
-                        <TableCell>{item.name}</TableCell>
+                        <TableCell>{item.nombre}</TableCell>
                         <TableCell>{item.phone}</TableCell>
                         <TableCell>{item.email}</TableCell>
                         <TableCell>{item.address}</TableCell>
@@ -195,7 +195,7 @@ export default function DoctorsTable({ initialDoctors }: { initialDoctors: Docto
                 <AlertDialogHeader>
                     <AlertDialogTitle>Confirmar Eliminación</AlertDialogTitle>
                     <AlertDialogDescription>
-                        ¿Está seguro de querer eliminar al doctor: <span className="font-semibold">{doctorToDelete?.name}</span>? Esta acción no se puede deshacer.
+                        ¿Está seguro de querer eliminar al doctor: <span className="font-semibold">{doctorToDelete?.nombre}</span>? Esta acción no se puede deshacer.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

@@ -50,7 +50,7 @@ import {
   XCircle,
   CheckCircle2
 } from "lucide-react"
-import { getRecibos, Recibo } from '@/services/reciboServicio';
+import { getRecibos, Recibo } from '@/services/recibosServicio';
 import { useRouter } from 'next/navigation';
 
 export default function BillingPage() {

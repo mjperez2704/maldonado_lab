@@ -116,9 +116,9 @@ export default function CreateTemplatePage() {
             <Card>
                 <CardHeader className="flex-row items-center justify-between">
                     <div className="space-y-1.5">
-                        <Label htmlFor="template-name">Nombre de la Plantilla</Label>
+                        <Label htmlFor="template-nombre">Nombre de la Plantilla</Label>
                         <Input 
-                            id="template-name" 
+                            id="template-nombre" 
                             placeholder="Ej. Reporte General de Resultados" 
                             value={templateName}
                             onChange={(e) => setTemplateName(e.target.value)}

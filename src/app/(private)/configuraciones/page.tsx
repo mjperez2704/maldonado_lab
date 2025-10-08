@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Settings, BarChart, Barcode, Mail, MessageSquare, KeyRound, Check, Globe, Copyright, Phone, MapPin, Clock, Pencil, Languages, Wallet, Info, FileText as FileTextIcon, Database, Palette, Facebook, Twitter, Instagram, Youtube, Image as ImageIcon, Trash2, Eye } from "lucide-react";
 import React, { useEffect, useState, useRef } from 'react';
-import { getReportSettings, saveReportSettings, ReportSettings, saveEmailSettings, getEmailSettings, EmailSettings, getDbSettings, saveDbSettings, testDbConnection, DbSettings, getGeneralSettings, saveGeneralSettings, GeneralSettings, getWhatsappSettings, saveWhatsappSettings, WhatsappSettings, getSmsSettings, saveSmsSettings, SmsSettings, saveBarcodeSettings, getBarcodeSettings, BarcodeSettings, saveApiKeysSettings, getApiKeysSettings, ApiKeysSettings } from "@/services/settingsServicio";
+import { getReportSettings, saveReportSettings, ReportSettings, saveEmailSettings, getEmailSettings, EmailSettings, getDbSettings, saveDbSettings, testDbConnection, DbSettings, getGeneralSettings, saveGeneralSettings, GeneralSettings, getWhatsappSettings, saveWhatsappSettings, WhatsappSettings, getSmsSettings, saveSmsSettings, SmsSettings, saveBarcodeSettings, getBarcodeSettings, BarcodeSettings, saveApiKeysSettings, getApiKeysSettings, ApiKeysSettings } from "@/services/configuracionesServicio";
 import { useToast } from "@/hooks/use-toast";
 import Link from "next/link";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -38,7 +38,7 @@ const initialReportSettings: ReportSettings = {
 };
 
 const initialEmailSettings: EmailSettings = {
-    host: '', port: 0, username: '', password: '', encryption: 'ssl', fromAddress: '',
+    host: '', port: 0, usernombre: '', password: '', encryption: 'ssl', fromAddress: '',
     fromName: '', headerColor: '', footerColor: '',
     patientCode: { active: true, subject: '', body: '' },
     resetPassword: { active: false, subject: '', body: '' },
@@ -68,7 +68,7 @@ const initialSmsSettings: SmsSettings = {
         infobip: { apiKey: '', secretKey: '' }
     },
     templates: {
-        patientCode: { active: false, message: 'welcome {patient_name}, your patient code is {patient_code}' },
+        patientCode: { active: false, message: 'welcome {patient_nombre}, your patient code is {patient_code}' },
         testNotification: { active: false, message: '' }
     }
 };
@@ -91,7 +91,7 @@ function LogoInput({ label, imageUrl, onFileSelect }: LogoInputProps) {
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
         if (file) {
-            setFileName(file.name);
+            setFileName(file.nombre);
             onFileSelect(file);
         } else {
             setFileName("");
@@ -258,7 +258,7 @@ export default function SettingsPage() {
         setDbSettings(prev => ({...prev, [field]: value}));
     };
 
-    const handleEmailTemplateChange = (template: keyof Omit<EmailSettings, 'host' | 'port' | 'username' | 'password' | 'encryption' | 'fromAddress' | 'fromName' | 'headerColor' | 'footerColor'>, field: 'active' | 'subject' | 'body', value: any) => {
+    const handleEmailTemplateChange = (template: keyof Omit<EmailSettings, 'host' | 'port' | 'usernombre' | 'password' | 'encryption' | 'fromAddress' | 'fromName' | 'headerColor' | 'footerColor'>, field: 'active' | 'subject' | 'body', value: any) => {
         setEmailSettings(prev => ({
             ...prev,
             [template]: {
@@ -513,10 +513,10 @@ export default function SettingsPage() {
                               <TabsContent value="general" className="pt-6">
                                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                       <div className="space-y-2">
-                                          <Label htmlFor="lab-name">{t('settings.general.lab_name')}</Label>
+                                          <Label htmlFor="lab-nombre">{t('settings.general.lab_nombre')}</Label>
                                           <div className="flex items-center border rounded-md">
                                               <span className="px-3 text-muted-foreground"><Pencil className="h-5 w-5"/></span>
-                                              <Input id="lab-name" value={generalSettings.labName} onChange={(e) => handleGeneralSettingChange('labName', e.target.value)} className="border-0 focus-visible:ring-0" />
+                                              <Input id="lab-nombre" value={generalSettings.labName} onChange={(e) => handleGeneralSettingChange('labName', e.target.value)} className="border-0 focus-visible:ring-0" />
                                           </div>
                                       </div>
                                       <div className="space-y-2">
@@ -978,8 +978,8 @@ export default function SettingsPage() {
                                   <Input id="port" type="number" value={emailSettings.port} onChange={(e) => handleEmailSettingChange('port', parseInt(e.target.value) || 0)} />
                               </div>
                               <div className="space-y-2">
-                                  <Label htmlFor="email-username">Usuario</Label>
-                                  <Input id="username" value={emailSettings.username} onChange={(e) => handleEmailSettingChange('username', e.target.value)} />
+                                  <Label htmlFor="email-usernombre">Usuario</Label>
+                                  <Input id="usernombre" value={emailSettings.usernombre} onChange={(e) => handleEmailSettingChange('usernombre', e.target.value)} />
                               </div>
                               <div className="space-y-2">
                                   <Label htmlFor="email-password">Contraseña</Label>
@@ -1002,7 +1002,7 @@ export default function SettingsPage() {
                                   <Input id="fromAddress" value={emailSettings.fromAddress} onChange={(e) => handleEmailSettingChange('fromAddress', e.target.value)} />
                               </div>
                               <div className="space-y-2">
-                                  <Label htmlFor="email-from-name">Nombre de envío</Label>
+                                  <Label htmlFor="email-from-nombre">Nombre de envío</Label>
                                   <Input id="fromName" value={emailSettings.fromName} onChange={(e) => handleEmailSettingChange('fromName', e.target.value)} />
                               </div>
                               <div className="space-y-2">
@@ -1037,7 +1037,7 @@ export default function SettingsPage() {
                                           </Label>
                                       </div>
                                       <div className="text-red-500 text-sm">
-                                          <p>No cambiar las variables: {`{patient_code}`} {`{patient_name}`}</p>
+                                          <p>No cambiar las variables: {`{patient_code}`} {`{patient_nombre}`}</p>
                                       </div>
                                       <div className="space-y-2">
                                           <Label htmlFor="patient-code-subject">Asunto</Label>
@@ -1127,7 +1127,7 @@ export default function SettingsPage() {
                                           </Label>
                                       </div>
                                       <div className="text-red-500 text-sm">
-                                          <p>No cambie las variables: {`{patient_name}`} {`{patient_code}`}</p>
+                                          <p>No cambie las variables: {`{patient_nombre}`} {`{patient_code}`}</p>
                                       </div>
                                       <div className="space-y-2">
                                           <Label htmlFor="sms-patient-code-body">Mensaje</Label>
@@ -1168,7 +1168,7 @@ export default function SettingsPage() {
                                           </Label>
                                       </div>
                                       <div className="text-red-500 text-sm">
-                                          <p>No cambiar las variables: {`{patient_name}`} {`{receipt_link}`}</p>
+                                          <p>No cambiar las variables: {`{patient_nombre}`} {`{receipt_link}`}</p>
                                       </div>
                                       <div className="space-y-2">
                                           <Label htmlFor="whatsapp-receipt-message">Mensaje</Label>
@@ -1185,7 +1185,7 @@ export default function SettingsPage() {
                                           </Label>
                                       </div>
                                       <div className="text-red-500 text-sm">
-                                          <p>No cambiar las variables: {`{patient_name}`} {`{report_link}`}</p>
+                                          <p>No cambiar las variables: {`{patient_nombre}`} {`{report_link}`}</p>
                                       </div>
                                       <div className="space-y-2">
                                           <Label htmlFor="whatsapp-report-message">Mensaje</Label>

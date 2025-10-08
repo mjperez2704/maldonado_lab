@@ -29,7 +29,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `antibiotics` (
   `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `nombre` varchar(255) NOT NULL,
   `shortcut` varchar(50) DEFAULT NULL,
   `commercialName` varchar(255) DEFAULT NULL,
   `administrationRoute` varchar(100) DEFAULT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE `antibiotics` (
 
 CREATE TABLE `branches` (
   `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `nombre` varchar(255) NOT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `address` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
@@ -58,7 +58,7 @@ CREATE TABLE `branches` (
 
 CREATE TABLE `categories` (
   `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL
+  `nombre` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
@@ -99,7 +99,7 @@ CREATE TABLE `credit_notes` (
 CREATE TABLE `cultures` (
   `id` int(11) NOT NULL,
   `categoria` varchar(100) DEFAULT NULL,
-  `name` varchar(255) NOT NULL,
+  `nombre` varchar(255) NOT NULL,
   `tipo_muestra_id` varchar(100) DEFAULT NULL,
   `price` decimal(10,2) DEFAULT NULL,
   `precautions` text DEFAULT NULL,
@@ -128,7 +128,7 @@ CREATE TABLE `culture_options` (
 CREATE TABLE `doctors` (
   `id` int(11) NOT NULL,
   `code` varchar(50) DEFAULT NULL,
-  `name` varchar(255) NOT NULL,
+  `nombre` varchar(255) NOT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
   `address` text DEFAULT NULL,
@@ -146,8 +146,8 @@ CREATE TABLE `doctors` (
 
 CREATE TABLE `employees` (
   `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `username` varchar(100) NOT NULL,
+  `nombre` varchar(255) NOT NULL,
+  `usernombre` varchar(100) NOT NULL,
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `phone` varchar(20) DEFAULT NULL,
@@ -194,7 +194,7 @@ CREATE TABLE `operations` (
 
 CREATE TABLE `paquetes` (
   `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `nombre` varchar(255) NOT NULL,
   `shortcut` varchar(50) DEFAULT NULL,
   `price` decimal(10,2) DEFAULT NULL,
   `tests` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`tests`)),
@@ -210,7 +210,7 @@ CREATE TABLE `paquetes` (
 
 CREATE TABLE `patients` (
   `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `nombre` varchar(255) NOT NULL,
   `nationality` varchar(50) DEFAULT NULL,
   `ine` varchar(50) DEFAULT NULL,
   `curp` varchar(18) DEFAULT NULL,
@@ -233,7 +233,7 @@ CREATE TABLE `patients` (
 
 CREATE TABLE `products` (
   `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `nombre` varchar(255) NOT NULL,
   `sku` varchar(100) DEFAULT NULL,
   `branch` varchar(100) DEFAULT NULL,
   `categoria` varchar(100) DEFAULT NULL,
@@ -255,7 +255,7 @@ CREATE TABLE `products` (
 
 CREATE TABLE `providers` (
   `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
+  `nombre` varchar(255) NOT NULL,
   `phone` varchar(20) DEFAULT NULL,
   `email` varchar(255) DEFAULT NULL,
   `address` text DEFAULT NULL
@@ -336,7 +336,7 @@ CREATE TABLE `recibos` (
 
 CREATE TABLE `settings` (
   `id` int(11) NOT NULL,
-  `name` varchar(50) NOT NULL,
+  `nombre` varchar(50) NOT NULL,
   `value` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`value`)),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
@@ -351,7 +351,7 @@ CREATE TABLE `estudios` (
   `id` int(11) NOT NULL,
   `categoria` varchar(100) DEFAULT NULL,
   `code` varchar(50) DEFAULT NULL,
-  `name` varchar(255) NOT NULL,
+  `nombre` varchar(255) NOT NULL,
   `method` varchar(255) DEFAULT NULL,
   `internalCost` decimal(10,2) DEFAULT NULL,
   `deliveryTime` int(11) DEFAULT NULL,
@@ -389,7 +389,7 @@ CREATE TABLE `estudios` (
 
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(100) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
@@ -415,7 +415,7 @@ ALTER TABLE `branches`
 --
 ALTER TABLE `categories`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `name` (`name`);
+  ADD UNIQUE KEY `nombre` (`nombre`);
 
 --
 -- Indices de la tabla `convenios`
@@ -453,7 +453,7 @@ ALTER TABLE `doctors`
 --
 ALTER TABLE `employees`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `username` (`username`),
+  ADD UNIQUE KEY `usernombre` (`usernombre`),
   ADD UNIQUE KEY `email` (`email`);
 
 --

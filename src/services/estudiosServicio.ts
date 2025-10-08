@@ -9,7 +9,7 @@ export interface ParametroEstudio {
     costo: number;
     factor: string;
     tipo_referencia: string;
-    sexo: 'Hombre' | 'Mujer' | 'Ambos';
+    sexo: string;
     edad_inicio: number;
     edad_fin: number;
     unidad_edad: 'Anos' | 'Meses' | 'Dias';
@@ -17,12 +17,13 @@ export interface ParametroEstudio {
     referencia_fin_f?: string;
     referencia_inicio_m?: string;
     referencia_fin_m?: string;
-    referencia_inicio_a?: string; 
+    referencia_inicio_a?: string;
+    referencia_fin_a?: string; 
     texto_referencia?: string;
     factorConversion?: number;
     unidadConversion?: string;
     // New fields for 'Mixto' type
-    posibleaValores?: string[];
+    posiblesValores?: string[];
     valorDefault?: string;
     valorReferencia?: string;
     // New field for 'Criterio R' type
@@ -90,11 +91,8 @@ export async function getStudies(): Promise<Estudio[]> {
             ...row,
             precio: Number(row.precio) || Number(row.costoInterno) || 0,
             parameters: JSON.parse(row.parameters || '[]'),
-            config: JSON.parse(row.config || '{}'),
-            integratedStudies: JSON.parse(row.integratedStudies || '[]'),
-            synonyms: JSON.parse(row.synonyms || '[]'),
-            samples: JSON.parse(row.samples || '[]'),
-        }));
+            configuracion: JSON.parse(row.config || '{}'),
+            }));
     } catch (error) {
         console.error("Error en la consulta a la base de datos:", error);
         return [];
@@ -108,7 +106,7 @@ export async function crearEstudio(study: Omit<Estudio, 'id'>): Promise<void> {
             tiempoProceso, diasProceso, esSubcontratado, laboratorio_externo_id, coidgoExterno,
             costoExterno, tiempoEntregaExterno, leyenda, descripcionCientifica,
             claveServicioSat, claveUnidadSat, parameters, config, tieneSubestudios, esPaquete,
-            integratedStudies, synonyms, samples, price, tipo_muestra_id, categoria, shortcut
+            precio, tipo_muestra_id, categoria, abreviatura
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const params = [
@@ -118,8 +116,7 @@ export async function crearEstudio(study: Omit<Estudio, 'id'>): Promise<void> {
         study.tiempoEntregaExterno, study.leyenda, study.descripcionCientifica,
         study.claveServicioSat, study.claveUnidadSat, JSON.stringify(study.parameters),
         JSON.stringify(study.configuracion), study.tieneSubestudios, study.esPaquete,
-        JSON.stringify(study.integratedStudies), JSON.stringify(study.sinonimo),
-        JSON.stringify(study.muestras), study.precio, study.tipo_muestra_id, study.categoria, study.abreviatura,
+        study.precio, study.tipo_muestra_id, study.categoria, study.abreviatura,
     ];
     await executeQuery(query, params);
 }
@@ -130,12 +127,8 @@ export async function getEstudioById(id: string): Promise<Estudio | null> {
         const row = JSON.parse(JSON.stringify(results[0]));
         return {
             ...row,
-            price: Number(row.price) || Number(row.costoInterno) || 0,
-            parameters: JSON.parse(row.parameters || '[]'),
-            config: JSON.parse(row.config || '{}'),
-            integratedStudies: JSON.parse(row.integratedStudies || '[]'),
-            synonyms: JSON.parse(row.synonyms || '[]'),
-            samples: JSON.parse(row.samples || '[]'),
+            precio: Number(row.precio) || Number(row.costoInterno) || 0,
+            configuracion: JSON.parse(row.configuracion || '{}'),
         };
     }
     return null;

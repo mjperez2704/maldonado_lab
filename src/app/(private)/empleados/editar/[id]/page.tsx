@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Check, UserCheck } from "lucide-react";
 import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { getEmployeeById, updateEmployee } from "@/services/employeeServicio";
+import { getEmployeeById, updateEmployee } from "@/services/empleadosServicio";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,8 +18,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useLoader } from "@/hooks/useLoader";
 
 const employeeSchema = z.object({
-  name: z.string().min(1, { message: "El nombre es requerido." }),
-  username: z.string().min(1, { message: "El nombre de usuario es requerido." }),
+  nombre: z.string().min(1, { message: "El nombre es requerido." }),
+  usernombre: z.string().min(1, { message: "El nombre de usuario es requerido." }),
   email: z.string().email({ message: "Correo electrónico no válido." }),
   password: z.string().optional(),
   phone: z.string().optional(),
@@ -40,8 +40,8 @@ export default function EditEmployeePage() {
   const form = useForm<EmployeeFormValues>({
     resolver: zodResolver(employeeSchema),
     defaultValues: {
-      name: '',
-      username: '',
+      nombre: '',
+      usernombre: '',
       email: '',
       password: '',
       phone: '',
@@ -116,10 +116,10 @@ export default function EditEmployeePage() {
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <FormField control={form.control} name="name" render={({ field }) => (
+                  <FormField control={form.control} name="nombre" render={({ field }) => (
                       <FormItem><FormLabel>Nombre</FormLabel><FormControl><Input placeholder="Nombre completo" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                   )}/>
-                  <FormField control={form.control} name="username" render={({ field }) => (
+                  <FormField control={form.control} name="usernombre" render={({ field }) => (
                       <FormItem><FormLabel>Nombre de usuario</FormLabel><FormControl><Input placeholder="Nombre de usuario" {...field} disabled={loader.status !== 'idle'} /></FormControl><FormMessage /></FormItem>
                   )}/>
                   <FormField control={form.control} name="email" render={({ field }) => (

@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { User, Globe, Mail, Phone, Calendar, MapPin, FileText, CreditCard, VenetianMask, FileSignature, Save } from "lucide-react";
 import Image from 'next/image';
-import { createPatient, Patient } from "@/services/patientServicio";
+import { createPatient, Patient } from "@/services/pacienteServicio";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -18,7 +18,7 @@ import { useLoader } from '@/hooks/useLoader';
 import { differenceInYears, differenceInMonths, differenceInDays, parseISO, isValid, isAfter } from 'date-fns';
 
 const patientSchema = z.object({
-  name: z.string().min(1, "El nombre es requerido."),
+  nombre: z.string().min(1, "El nombre es requerido."),
   nationality: z.string().min(1, "La nacionalidad es requerida."),
   ine: z.string().optional(),
   curp: z.string().optional(),
@@ -47,7 +47,7 @@ export function CreatePatientForm({ onSuccess, initialName = '' }: CreatePatient
   const form = useForm<PatientFormValues>({
     resolver: zodResolver(patientSchema),
     defaultValues: {
-      name: initialName,
+      nombre: initialName,
       nationality: 'mexicana',
       ine: '',
       curp: '',
@@ -67,7 +67,7 @@ export function CreatePatientForm({ onSuccess, initialName = '' }: CreatePatient
   const watchedBirthDate = watch('birthDate');
     
   useEffect(() => {
-    reset({ ...form.getValues(), name: initialName });
+    reset({ ...form.getValues(), nombre: initialName });
   }, [initialName, reset, form]);
 
     useEffect(() => {
@@ -139,7 +139,7 @@ export function CreatePatientForm({ onSuccess, initialName = '' }: CreatePatient
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField control={form.control} name="name" render={({field}) => (
+              <FormField control={form.control} name="nombre" render={({field}) => (
                   <FormItem><FormLabel>Nombre</FormLabel>
                       <div className="flex items-center border rounded-md"><span
                           className="px-3 text-muted-foreground"><User className="h-5 w-5"/></span><FormControl><Input

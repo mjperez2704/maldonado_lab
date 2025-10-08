@@ -18,13 +18,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Check, ListTree } from "lucide-react";
-import { createCategory } from "@/services/categoriaServicio";
+import { createCategory } from "@/services/categoriasServicio";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { useLoader } from "@/hooks/useLoader";
 
 const categoriaSchema = z.object({
-  name: z.string().min(1, { message: "El nombre es requerido." }),
+  nombre: z.string().min(1, { message: "El nombre es requerido." }),
 });
 
 type CategoryFormValues = z.infer<typeof categoriaSchema>;
@@ -37,7 +37,7 @@ export default function CreateCategoryPage() {
   const form = useForm<CategoryFormValues>({
     resolver: zodResolver(categoriaSchema),
     defaultValues: {
-      name: "",
+      nombre: "",
     },
   });
 
@@ -45,7 +45,7 @@ export default function CreateCategoryPage() {
     let success = false;
     loader.start("create");
     try {
-      await createCategory(data.name);
+      await createCategory(data.nombre);
       toast({
         title: "Éxito",
         description: "La categoría se ha creado correctamente.",
@@ -87,7 +87,7 @@ export default function CreateCategoryPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
-                name="name"
+                nombre="nombre"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Nombre</FormLabel>

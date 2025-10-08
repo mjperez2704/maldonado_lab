@@ -25,8 +25,8 @@ import {
 } from "lucide-react";
 import React, { useEffect, useState } from 'react';
 import Link from "next/link";
-import { getRecibos, Recibo } from "@/services/reciboServicio";
-import { getExpenses, Expense } from "@/services/expenseServicio";
+import { getRecibos, Recibo } from "@/services/recibosServicio";
+import { getExpenses, Expense } from "@/services/gastosServicio";
 
 export default function CashCutPage() {
     const [recibos, setRecibos] = useState<Recibo[]>([]);

@@ -11,9 +11,9 @@ import { NotebookTabs, User, Calendar, DollarSign, Building, Save } from "lucide
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { createCreditNote } from "@/services/creditNoteServicio";
+import { createCreditNote } from "@/services/creditoNotasServicio";
 import { useToast } from "@/hooks/use-toast";
-import { getPatients, Patient } from "@/services/patientServicio";
+import { getPatients, Patient } from "@/services/pacienteServicio";
 
 
 export default function CreateCreditNotePage() {
@@ -135,8 +135,8 @@ export default function CreateCreditNotePage() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     {patients.map(p => (
-                                        <SelectItem key={p.id} value={p.name}>
-                                            {p.name}
+                                        <SelectItem key={p.id} value={p.nombre}>
+                                            {p.nombre}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>

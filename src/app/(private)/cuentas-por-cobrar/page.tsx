@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogC
 import { CreditCard, Search, Calendar, FileText, User, DollarSign, HandCoins } from "lucide-react";
 import Link from "next/link";
 import React, { useState, useEffect, useMemo } from "react";
-import { getRecibos, Recibo, updateRecibo } from "@/services/reciboServicio";
+import { getRecibos, Recibo, updateRecibo } from "@/services/recibosServicio";
 import { useToast } from "@/hooks/use-toast";
 
 export default function AccountsReceivablePage() {

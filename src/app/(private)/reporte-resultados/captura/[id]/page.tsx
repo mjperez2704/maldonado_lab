@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getReciboById, Recibo, TestResult, saveResults } from "@/services/reciboServicio";
-import { getStudies, Estudio } from "@/services/studyServicio";
+import { getReciboById, Recibo, TestResult, saveResults } from "@/services/recibosServicio";
+import { getStudies, Estudio } from "@/services/estudiosServicio";
 import { FileStack, Save, User, Calendar, Hash } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -46,16 +46,16 @@ export default function CaptureResultsPage() {
 
                     const initialResults: ResultInput[] = [];
                     const estudiosInRecibo = estudiosData.filter(s => 
-                        reciboData.estudios.includes(s.name) || 
-                        reciboData.paquetes.some(pkgName => pkgName === s.name)
+                        reciboData.estudios.includes(s.nombre) || 
+                        reciboData.paquetes.some(pkgName => pkgName === s.nombre)
                     );
 
                     estudiosInRecibo.forEach(study => {
-                        const existingMainResult = reciboData.results?.find(r => r.studyName === study.name && !r.parameterName);
+                        const existingMainResult = reciboData.results?.find(r => r.studyName === study.nombre && !r.parameterName);
                         // Don't add a row for the main study if it has parameters
                         if (!study.parameters || study.parameters.length === 0) {
                              initialResults.push({
-                                studyName: study.name,
+                                studyName: study.nombre,
                                 parameterName: '',
                                 result: existingMainResult?.result || '',
                                 reference: '', 
@@ -65,7 +65,7 @@ export default function CaptureResultsPage() {
 
                         if (study.parameters && study.parameters.length > 0) {
                             study.parameters.forEach(param => {
-                                const existingParamResult = reciboData.results?.find(r => r.studyName === study.name && r.parameterName === param.name);
+                                const existingParamResult = reciboData.results?.find(r => r.studyName === study.nombre && r.parameterName === param.nombre);
                                 
                                 let referenceValue = '';
                                 if (param.referenceType === 'Intervalo Biologico de Referencia') {
@@ -77,8 +77,8 @@ export default function CaptureResultsPage() {
                                 }
 
                                 initialResults.push({
-                                    studyName: study.name,
-                                    parameterName: param.name,
+                                    studyName: study.nombre,
+                                    parameterName: param.nombre,
                                     result: existingParamResult?.result || param.defaultValue || '',
                                     reference: existingParamResult?.reference || referenceValue,
                                     unit: existingParamResult?.unit || param.unit || ''
