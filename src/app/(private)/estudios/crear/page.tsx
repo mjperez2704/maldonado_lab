@@ -455,7 +455,23 @@ export default function CreateEstudioPage() {
                     <CardTitle className="text-base text-primary">Datos de Facturación (México)</CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2"><Label htmlFor="claveServicioSat">Clave del Servicio</Label><Select value={formData.claveServicioSat} onValueChange={(v) => handleSelectChange('claveServicioSat', v)}><SelectTrigger><SelectValue placeholder="Seleccione"/></SelectTrigger><SelectContent><SelectItem value="85121500">85121500 - Servicios de laboratorios médicos</SelectItem></SelectContent></Select></div>
+                    <div className="space-y-2"><Label htmlFor="claveServicioSat">Clave del Servicio</Label>
+                    <Select value={formData.claveServicioSat} onValueChange={(v) => handleSelectChange('claveServicioSat', v)}>
+                        <SelectTrigger>
+                        <SelectValue placeholder="Seleccione"/></SelectTrigger><SelectContent>
+                        <SelectItem value="85121800">85121800 - Laboratorios médicos</SelectItem>
+                        <SelectItem value="85121801">85121801 - Servicios de laboratorios de análisis de sangre</SelectItem>
+                        <SelectItem value="85121802">85121802 - Servicios de laboratorios bacteriológicos</SelectItem>
+                        <SelectItem value="85121803">85121803 - Servicios de laboratorios biológicos</SelectItem>
+                        <SelectItem value="85121804">85121804 - Servicios de laboratorios patológicos</SelectItem>
+                        <SelectItem value="85121805">85121805 - Servicios de laboratorios de análisis de orina</SelectItem>
+                        <SelectItem value="85121806">85121806 - Servicios de laboratorios neurológicos</SelectItem>
+                        <SelectItem value="85121807">85121807 - Servicios de laboratorios de ultrasonido</SelectItem>
+                        <SelectItem value="85121808">85121808 - Servicios de laboratorios de rayos x</SelectItem>
+                        <SelectItem value="85121809">85121809 - Servicios de bancos de sangre, esperma u órganos de trasplante</SelectItem>
+                        <SelectItem value="85121810">85121810 - Detección de drogas o alcohol</SelectItem>
+                        </SelectContent>
+                        </Select></div>
                     <div className="space-y-2"><Label htmlFor="claveUnidadSat">Clave de Unidad</Label><Select value={formData.claveUnidadSat} onValueChange={(v) => handleSelectChange('claveUnidadSat', v)}><SelectTrigger><SelectValue placeholder="Seleccione"/></SelectTrigger><SelectContent><SelectItem value="E48">E48 - Unidad de servicio</SelectItem></SelectContent></Select></div>
                 </CardContent>
             </Card>
