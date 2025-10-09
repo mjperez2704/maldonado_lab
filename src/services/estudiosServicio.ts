@@ -50,7 +50,7 @@ async function getParametersForStudy(estudioId: number): Promise<ParametroEstudi
         return acc;
     }, {} as Record<string, any[]>);
 
-    const finalParams: ParametroEstudioForm[] = Object.values(paramsGroupedByName).map(paramRows => {
+    const finalParams: ParametroEstudioForm[] = Object.values(paramsGroupedByName).map((paramRows: any) => {
         // Tomamos los datos del parámetro de la primera fila, ya que son los mismos para todas las reglas de VR
         const firstRow = paramRows[0];
         

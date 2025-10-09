@@ -13,8 +13,8 @@ import { Info, Plus, Trash2, Save, HelpCircle, ArrowUp, ArrowDown, Pencil } from
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from "next/navigation";
-import { getEstudioById, updateEstudio, getStudies as getAllStudies, Estudio } from "@/services/estudiosServicio";
-import { ParametroEstudioForm, IntegratedEstudioRef, MuestraEstudio } from '@/types/study';
+import { getEstudioById, updateEstudio, getStudies as getAllStudies } from "@/services/estudiosServicio";
+import { ParametroEstudioForm, IntegratedEstudioRef, MuestraEstudio, Estudio } from '@/types/study';
 import { getCategories, Category } from "@/services/categoriasServicio";
 import { getProveedores, Proveedor } from "@/services/proveedoresServicio";
 import Link from "next/link";
@@ -520,10 +520,10 @@ export default function EditEstudioPage() {
                         <div className="space-y-4">
                             <div className="space-y-2"><Label htmlFor="study-search">Nombre del estudio:</Label><Input id="study-search" value={studySearchTerm} onChange={(e) => setEstudioSearchTerm(e.target.value)} placeholder="Buscar por nombre o código"/></div>
                             {studySearchTerm && (
-                                <div className="border rounded-md max-h-40 overflow-y-auto">{filteredStudies.map(study => (<div key={study.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => addIntegratedEstudio(study)}>{study.nombre} ({study.codigo})</div>))}</div>
+                                <div className="border rounded-md max-h-40 overflow-y-auto">{filteredStudies.map(Estudio => (<div key={Estudio.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => addIntegratedEstudio(Estudio)}>{Estudio.nombre} ({Estudio.codigo})</div>))}</div>
                             )}
                         </div>
-                         <div className="space-y-2"><Label>Estudios integrados:</Label><div className="border rounded-md h-48 overflow-y-auto p-1 space-y-1">{formData.integratedStudies?.map(study => (<div key={study.id} className={`p-2 rounded-md cursor-pointer ${Number(selectedIntegratedEstudio) === study.id ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`} onClick={() => setSelectedIntegratedEstudio(String(study.id))}>{study.nombre}</div>))}</div><div className="flex justify-between"><Button type="button" variant="destructive" size="sm" onClick={removeIntegratedEstudio} disabled={!selectedIntegratedEstudio}><Trash2 className="mr-2 h-4 w-4"/> Quitar</Button><div className="flex gap-2"><Button type="button" size="icon" variant="outline"><ArrowUp/></Button><Button type="button" size="icon" variant="outline"><ArrowDown/></Button></div></div></div>
+                         <div className="space-y-2"><Label>Estudios integrados:</Label><div className="border rounded-md h-48 overflow-y-auto p-1 space-y-1">{formData.integratedStudies?.map(Estudio => (<div key={Estudio.id} className={`p-2 rounded-md cursor-pointer ${Number(selectedIntegratedEstudio) === Estudio.id ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`} onClick={() => setSelectedIntegratedEstudio(String(Estudio.id))}>{Estudio.nombre}</div>))}</div><div className="flex justify-between"><Button type="button" variant="destructive" size="sm" onClick={removeIntegratedEstudio} disabled={!selectedIntegratedEstudio}><Trash2 className="mr-2 h-4 w-4"/> Quitar</Button><div className="flex gap-2"><Button type="button" size="icon" variant="outline"><ArrowUp/></Button><Button type="button" size="icon" variant="outline"><ArrowDown/></Button></div></div></div>
                     </div>
                 </CardContent>
              </Card>
@@ -532,7 +532,7 @@ export default function EditEstudioPage() {
             <Card>
                 <CardHeader><CardTitle className="text-base text-primary">Sinónimos de Identificación del Estudio</CardTitle></CardHeader>
                 <CardContent className="pt-6 space-y-4">
-                    <div className="space-y-2">{(formData.sinonimo || []).map((synonym, index) => (<div key={index} className="flex items-center gap-2"><Input value={synonym} onChange={(e) => handleSynonymChange(index, e.target.value)} placeholder={`Sinónimo ${index + 1}`}/><Button type="button" variant="destructive" size="icon" onClick={() => removeSynonym(index)}><Trash2 className="h-4 w-4" /></Button></div>))}</div>
+                    <div className="space-y-2">{(formData.sinonimo || []).map((sinonimo, index) => (<div key={index} className="flex items-center gap-2"><Input value={sinonimo} onChange={(e) => handleSynonymChange(index, e.target.value)} placeholder={`Sinónimo ${index + 1}`}/><Button type="button" variant="destructive" size="icon" onClick={() => removeSynonym(index)}><Trash2 className="h-4 w-4" /></Button></div>))}</div>
                     <Button type="button" onClick={addSynonym} className="bg-green-600 hover:bg-green-700"><Plus className="mr-2 h-4 w-4" /> Agregar Sinónimo</Button>
                 </CardContent>
             </Card>

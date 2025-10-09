@@ -14,8 +14,8 @@ import { Microscope, Info, Plus, Trash2, Save, Check, HelpCircle, ArrowDown, Arr
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
-import { crearEstudio, Estudio } from "@/services/estudiosServicio";
-import { ParametroEstudioForm, ValoresReferencia, IntegratedEstudioRef, MuestraEstudio } from '@/types/study';
+import { crearEstudio } from "@/services/estudiosServicio";
+import { ParametroEstudioForm, ValoresReferencia, IntegratedEstudioRef, MuestraEstudio, Estudio } from '@/types/study';
 import { getCategories, Category } from "@/services/categoriasServicio";
 import { getProveedores, Proveedor } from "@/services/proveedoresServicio";
 import { getStudies as getAllStudies } from "@/services/estudiosServicio";
@@ -281,14 +281,14 @@ export default function CreateEstudioPage() {
         }));
     };
 
-    const filteredStudies = allStudies.filter(study =>
-        (study.nombre.toLowerCase().includes(studySearchTerm.toLowerCase()) ||
-         (study.codigo || '').toLowerCase().includes(studySearchTerm.toLowerCase())) &&
-        !formData.integratedStudies?.some(is => is.id === study.id)
+    const filteredStudies = allStudies.filter(Estudio =>
+        (Estudio.nombre.toLowerCase().includes(studySearchTerm.toLowerCase()) ||
+         (Estudio.codigo || '').toLowerCase().includes(studySearchTerm.toLowerCase())) &&
+        !formData.integratedStudies?.some(is => is.id === Estudio.id)
     ).slice(0, 10);
 
-    const addIntegratedEstudio = (study: Estudio) => {
-        const newIntegratedEstudio: IntegratedEstudioRef = { id: study.id, nombre: study.nombre };
+    const addIntegratedEstudio = (Estudio: Estudio) => {
+        const newIntegratedEstudio: IntegratedEstudioRef = { id: Estudio.id, nombre: Estudio.nombre };
         setFormData(prev => ({
             ...prev,
             integratedStudies: [...(prev.integratedStudies || []), newIntegratedEstudio]
@@ -349,7 +349,7 @@ export default function CreateEstudioPage() {
             setFormData(initialFormData);
             router.push('/estudios');
         } catch (error) {
-            console.error("Error creating study:", error);
+            console.error("Error creating Estudio:", error);
             toast({ title: "Error", description: "No se pudo crear el estudio.", variant: "destructive" });
         } finally {
             setLoading(false);
@@ -477,7 +477,7 @@ export default function CreateEstudioPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {formData.parameters?.map((param, index) => (
+                                {formData.parameters?.map((param: { nombre_parametro: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<React.AwaitedReactNode> | null | undefined; unidad_medida: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<React.AwaitedReactNode> | null | undefined; }, index: React.Key | null | undefined) => (
                                     <TableRow key={index}>
                                         <TableCell>{param.nombre_parametro}</TableCell>
                                         <TableCell>{param.unidad_medida}</TableCell>
@@ -520,12 +520,12 @@ export default function CreateEstudioPage() {
                 <CardContent className="space-y-4 pt-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-4">
-                            <div className="space-y-2"><Label htmlFor="study-search">Nombre del estudio:</Label><Input id="study-search" value={studySearchTerm} onChange={(e) => setEstudioSearchTerm(e.target.value)} placeholder="Buscar por nombre o código"/></div>
+                            <div className="space-y-2"><Label htmlFor="Estudio-search">Nombre del estudio:</Label><Input id="Estudio-search" value={studySearchTerm} onChange={(e) => setEstudioSearchTerm(e.target.value)} placeholder="Buscar por nombre o código"/></div>
                             {studySearchTerm && (
-                                <div className="border rounded-md max-h-40 overflow-y-auto">{filteredStudies.map(study => (<div key={study.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => addIntegratedEstudio(study)}>{study.nombre} ({study.codigo})</div>))}</div>
+                                <div className="border rounded-md max-h-40 overflow-y-auto">{filteredStudies.map(Estudio => (<div key={Estudio.id} className="p-2 hover:bg-accent cursor-pointer" onClick={() => addIntegratedEstudio(Estudio)}>{Estudio.nombre} ({Estudio.codigo})</div>))}</div>
                             )}
                         </div>
-                         <div className="space-y-2"><Label>Estudios integrados:</Label><div className="border rounded-md h-48 overflow-y-auto p-1 space-y-1">{formData.integratedStudies?.map(study => (<div key={study.id} className={`p-2 rounded-md cursor-pointer ${selectedIntegratedEstudio === String(study.id) ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`} onClick={() => setSelectedIntegratedEstudio(String(study.id))}>{study.nombre}</div>))}</div><div className="flex justify-between"><Button type="button" variant="destructive" size="sm" onClick={removeIntegratedEstudio} disabled={!selectedIntegratedEstudio}><Trash2 className="mr-2 h-4 w-4"/> Quitar</Button><div className="flex gap-2"><Button type="button" size="icon" variant="outline"><ArrowUp/></Button><Button type="button" size="icon" variant="outline"><ArrowDown/></Button></div></div></div>
+                         <div className="space-y-2"><Label>Estudios integrados:</Label><div className="border rounded-md h-48 overflow-y-auto p-1 space-y-1">{formData.integratedStudies?.map((Estudio: { id: React.Key | null | undefined; nombre: string | number | bigint | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | Promise<React.AwaitedReactNode> | null | undefined; }) => (<div key={Estudio.id} className={`p-2 rounded-md cursor-pointer ${selectedIntegratedEstudio === String(Estudio.id) ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'}`} onClick={() => setSelectedIntegratedEstudio(String(Estudio.id))}>{Estudio.nombre}</div>))}</div><div className="flex justify-between"><Button type="button" variant="destructive" size="sm" onClick={removeIntegratedEstudio} disabled={!selectedIntegratedEstudio}><Trash2 className="mr-2 h-4 w-4"/> Quitar</Button><div className="flex gap-2"><Button type="button" size="icon" variant="outline"><ArrowUp/></Button><Button type="button" size="icon" variant="outline"><ArrowDown/></Button></div></div></div>
                     </div>
                 </CardContent>
              </Card>

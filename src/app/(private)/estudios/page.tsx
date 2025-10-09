@@ -37,7 +37,8 @@ import {
   ArrowUpDown,
   Microscope
 } from "lucide-react"
-import { getStudies, deleteEstudio, Estudio } from '@/services/estudiosServicio';
+import { getStudies, deleteEstudio } from '@/services/estudiosServicio';
+import { Estudio } from '@/types/study';
 import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useRouter } from 'next/navigation';
 import { useToast } from "@/hooks/use-toast";
