@@ -15,54 +15,13 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/navigation";
 import { crearEstudio, Estudio } from "@/services/estudiosServicio";
-import type { ParametroEstudio, ValoresReferencia, IntegratedEstudioRef, MuestraEstudio, ParametroEstudioForm } from '@/types/study';
+import { ParametroEstudioForm, ValoresReferencia, IntegratedEstudioRef, MuestraEstudio } from '@/types/study';
 import { getCategories, Category } from "@/services/categoriasServicio";
 import { getProveedores, Proveedor } from "@/services/proveedoresServicio";
 import { getStudies as getAllStudies } from "@/services/estudiosServicio";
 import Link from "next/link";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-
-const initialFormData: Omit<Estudio, 'id'> = {
-    area: '',
-    codigo: '',
-    nombre: '',
-    metodo: '',
-    costoInterno: 0,
-    tiempoEntrega: 0,
-    unidadEntrega: 'dias',
-    tiempoProceso: '',
-    diasProceso: '',
-    esSubcontratado: false,
-    laboratorio_externo_id: '',
-    codigoExterno: '',
-    costoExterno: 0,
-    tiempoEntregaExterno: '',
-    leyenda: '',
-    descripcionCientifica: '',
-    claveServicioSat: '',
-    claveUnidadSat: '',
-    parameters: [],
-    configuracion: {
-        showInRequest: false,
-        canUploadDocuments: false,
-        printLabSignature: false,
-        printWebSignature: false,
-        hasEnglishHeaders: false,
-        printWithParams: false,
-        generateWorkOrder: false,
-    },
-    tieneSubestudios: false,
-    esPaquete: false,
-    integratedStudies: [],
-    sinonimo: [''],
-    muestras: [],
-    precio: 0,
-    tipo_muestra_id: '',
-    categoria_id: '',
-    abreviatura: '',
-    indicaciones: ''
-};
 
 const initialNewParam: ParametroEstudioForm = {
     nombre_parametro: '',
@@ -134,8 +93,9 @@ function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (par
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-1 lg:col-span-2"><Label>Parámetro</Label><Input placeholder="Nombre del Parámetro" value={param.nombre_parametro} onChange={(e) => setParam({...param, nombre_parametro: e.target.value})}/></div>
                 <div className="space-y-1"><Label>Unidad de Medida</Label><Input placeholder="ej. mg/dL" value={param.unidad_medida} onChange={(e) => setParam({...param, unidad_medida: e.target.value})}/></div>
-                <div className="space-y-1"><Label>Costo</Label><Input type="number" placeholder="0.00" value={param.costo} onChange={(e) => setParam({...param, costo: parseFloat(e.target.value) || 0})}/></div>
+                 <div className="space-y-1"><Label>Costo</Label><Input type="number" placeholder="0.00" value={param.costo} onChange={(e) => setParam({...param, costo: parseFloat(e.target.value) || 0})}/></div>
                 <div className="space-y-1"><Label>Factor Conv.</Label><Input placeholder="FC" value={param.factor_conversion} onChange={(e) => setParam({...param, factor_conversion: e.target.value})}/></div>
+                 <div className="space-y-1"><Label>Unidad Internacional</Label><Input placeholder="UI" value={param.unidad_internacional} onChange={(e) => setParam({...param, unidad_internacional: e.target.value})}/></div>
              </div>
              <div className="col-span-full"><Label>Tipo de Valor de Referencia</Label><RadioGroup value={param.valoresReferencia.tipo_referencia} onValueChange={(v) => setParam(prev => ({ ...prev, valoresReferencia: {...prev.valoresReferencia, tipo_referencia: v as any}}))} className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
                     <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo" id="ref-intervalo" /><Label htmlFor="ref-intervalo">Intervalo</Label></div>
@@ -210,6 +170,47 @@ function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (par
         </div>
     );
 }
+
+const initialFormData: Omit<Estudio, 'id'> = {
+    area: '',
+    codigo: '',
+    nombre: '',
+    metodo: '',
+    costoInterno: 0,
+    tiempoEntrega: 0,
+    unidadEntrega: 'dias',
+    tiempoProceso: '',
+    diasProceso: '',
+    esSubcontratado: false,
+    laboratorio_externo_id: '',
+    codigoExterno: '',
+    costoExterno: 0,
+    tiempoEntregaExterno: '',
+    leyenda: '',
+    descripcionCientifica: '',
+    claveServicioSat: '',
+    claveUnidadSat: '',
+    parameters: [],
+    configuracion: {
+        showInRequest: false,
+        canUploadDocuments: false,
+        printLabSignature: false,
+        printWebSignature: false,
+        hasEnglishHeaders: false,
+        printWithParams: false,
+        generateWorkOrder: false,
+    },
+    tieneSubestudios: false,
+    esPaquete: false,
+    integratedStudies: [],
+    sinonimo: [''],
+    muestras: [],
+    precio: 0,
+    tipo_muestra_id: '',
+    categoria_id: '',
+    abreviatura: '',
+    indicaciones: ''
+};
 
 export default function CreateEstudioPage() {
     const router = useRouter();
@@ -356,13 +357,14 @@ export default function CreateEstudioPage() {
     };
     
     const getParameterDisplayReference = (param: ParametroEstudioForm) => {
-        switch (param.valoresReferencia.tipo_referencia) {
+        const vr = param.valoresReferencia;
+        switch (vr.tipo_referencia) {
             case 'Intervalo':
-                return `(${param.valoresReferencia.sexo}) ${param.valoresReferencia.valor_inicio} - ${param.valoresReferencia.valor_fin}`;
+                return `(${vr.sexo}) ${vr.valor_inicio} - ${vr.valor_fin}`;
             case 'Mixto':
-                return param.valoresReferencia.posibles_valores_form.valor_referencia || 'N/A';
+                return vr.posibles_valores_form.valor_referencia || 'N/A';
             case 'Criterio':
-                return param.valoresReferencia.texto_criterio || 'N/A';
+                return vr.texto_criterio || 'N/A';
             default:
                 return 'N/A';
         }

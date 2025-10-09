@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -13,7 +14,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from "next/navigation";
 import { getEstudioById, updateEstudio, getStudies as getAllStudies, Estudio } from "@/services/estudiosServicio";
-import type { ParametroEstudioForm, IntegratedEstudioRef, MuestraEstudio } from '@/types/study';
+import { ParametroEstudioForm, IntegratedEstudioRef, MuestraEstudio } from '@/types/study';
 import { getCategories, Category } from "@/services/categoriasServicio";
 import { getProveedores, Proveedor } from "@/services/proveedoresServicio";
 import Link from "next/link";
@@ -26,7 +27,7 @@ const initialNewParam: ParametroEstudioForm = {
     factor_conversion: '',
     unidad_medida: '',
     unidad_internacional: '',
-    valoresReferencia: [{
+    valoresReferencia: {
         tipo_referencia: 'Sin_referencia',
         sexo: 'Ambos',
         edad_inicio: 0,
@@ -41,7 +42,7 @@ const initialNewParam: ParametroEstudioForm = {
             valor_referencia: '',
         },
         texto_reporte_resultados: '',
-    }]
+    }
 };
 
 
@@ -53,52 +54,33 @@ function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (par
         setParam(initialData);
     }, [initialData]);
     
-    // Función para manejar el cambio en una regla de valor de referencia específica
-    const handleVrChange = (vrIndex: number, field: string, value: any) => {
-        const updatedVrs = [...(param.valoresReferencia as any[])];
-        updatedVrs[vrIndex] = { ...updatedVrs[vrIndex], [field]: value };
-        setParam({ ...param, valoresReferencia: updatedVrs });
-    };
-
-    const handleAddVr = () => {
-        const newVr = {
-            tipo_referencia: 'Sin_referencia',
-            sexo: 'Ambos',
-            edad_inicio: 0,
-            edad_fin: 99,
-            unidad_edad: 'Anos',
-            valor_inicio: '',
-            valor_fin: '',
-            texto_criterio: '',
-            posibles_valores_form: { valores_opciones: [], valor_predeterminado: '_NULL_', valor_referencia: '' },
-            texto_reporte_resultados: '',
-        };
-        setParam(prev => ({ ...prev, valoresReferencia: [...(prev.valoresReferencia as any[]), newVr] }));
-    };
-
-    const handleRemoveVr = (vrIndex: number) => {
-        const updatedVrs = (param.valoresReferencia as any[]).filter((_, index) => index !== vrIndex);
-        setParam({ ...param, valoresReferencia: updatedVrs });
-    };
-
-
-    const handleAddPossibleValue = (vrIndex: number) => {
-        if (newPossibleValue.trim()) {
-            const updatedVrs = [...(param.valoresReferencia as any[])];
-            const vr = updatedVrs[vrIndex];
-            if (!vr.posibles_valores_form.valores_opciones.includes(newPossibleValue.trim())) {
-                vr.posibles_valores_form.valores_opciones.push(newPossibleValue.trim());
-                setParam({ ...param, valoresReferencia: updatedVrs });
-                setNewPossibleValue('');
-            }
+    const handleAddPossibleValue = () => {
+        if (newPossibleValue.trim() && !param.valoresReferencia.posibles_valores_form.valores_opciones.includes(newPossibleValue.trim())) {
+            setParam(prev => ({
+                ...prev,
+                valoresReferencia: {
+                    ...prev.valoresReferencia,
+                    posibles_valores_form: {
+                        ...prev.valoresReferencia.posibles_valores_form,
+                        valores_opciones: [...prev.valoresReferencia.posibles_valores_form.valores_opciones, newPossibleValue.trim()]
+                    }
+                }
+            }));
+            setNewPossibleValue('');
         }
     };
     
-    const handleRemovePossibleValue = (vrIndex: number, valueToRemove: string) => {
-        const updatedVrs = [...(param.valoresReferencia as any[])];
-        const vr = updatedVrs[vrIndex];
-        vr.posibles_valores_form.valores_opciones = vr.posibles_valores_form.valores_opciones.filter((v: string) => v !== valueToRemove);
-        setParam({ ...param, valoresReferencia: updatedVrs });
+    const handleRemovePossibleValue = (valueToRemove: string) => {
+        setParam(prev => ({
+            ...prev,
+            valoresReferencia: {
+                ...prev.valoresReferencia,
+                posibles_valores_form: {
+                    ...prev.valoresReferencia.posibles_valores_form,
+                    valores_opciones: prev.valoresReferencia.posibles_valores_form.valores_opciones.filter(v => v !== valueToRemove)
+                }
+            }
+        }));
     };
 
     const handleSave = () => {
@@ -112,84 +94,76 @@ function ParameterForm({ onSave, initialData = initialNewParam }: { onSave: (par
                 <div className="space-y-1"><Label>Unidad de Medida</Label><Input placeholder="ej. mg/dL" value={param.unidad_medida} onChange={(e) => setParam({...param, unidad_medida: e.target.value})}/></div>
                 <div className="space-y-1"><Label>Costo</Label><Input type="number" placeholder="0.00" value={param.costo} onChange={(e) => setParam({...param, costo: parseFloat(e.target.value) || 0})}/></div>
                 <div className="space-y-1"><Label>Factor Conv.</Label><Input placeholder="FC" value={param.factor_conversion} onChange={(e) => setParam({...param, factor_conversion: e.target.value})}/></div>
+                 <div className="space-y-1"><Label>Unidad Internacional</Label><Input placeholder="UI" value={param.unidad_internacional} onChange={(e) => setParam({...param, unidad_internacional: e.target.value})}/></div>
              </div>
 
-            {(param.valoresReferencia as any[]).map((vr, vrIndex) => (
-                <div key={vrIndex} className="p-4 border rounded-lg space-y-4 relative">
-                    <h4 className="font-semibold text-primary">Regla de Referencia #{vrIndex + 1}</h4>
-                     { (param.valoresReferencia as any[]).length > 1 && (
-                        <Button type="button" variant="destructive" size="icon" className="absolute top-2 right-2 h-6 w-6" onClick={() => handleRemoveVr(vrIndex)}><Trash2 className="h-4 w-4"/></Button>
-                     )}
-                     <div className="col-span-full"><Label>Tipo de Valor de Referencia</Label><RadioGroup value={vr.tipo_referencia} onValueChange={(v) => handleVrChange(vrIndex, 'tipo_referencia', v)} className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
-                            <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo" id={`ref-intervalo-edit-${vrIndex}`} /><Label htmlFor={`ref-intervalo-edit-${vrIndex}`}>Intervalo</Label></div>
-                            <div className="flex items-center space-x-2"><RadioGroupItem value="Mixto" id={`ref-mixto-edit-${vrIndex}`} /><Label htmlFor={`ref-mixto-edit-${vrIndex}`}>Mixto</Label></div>
-                            <div className="flex items-center space-x-2"><RadioGroupItem value="Criterio" id={`ref-criterio-edit-${vrIndex}`} /><Label htmlFor={`ref-criterio-edit-${vrIndex}`}>Criterio</Label></div>
-                            <div className="flex items-center space-x-2"><RadioGroupItem value="Sin_referencia" id={`ref-sin-valor-edit-${vrIndex}`} /><Label htmlFor={`ref-sin-valor-edit-${vrIndex}`}>Sin referencia</Label></div>
-                        </RadioGroup></div>
+             <div className="col-span-full"><Label>Tipo de Valor de Referencia</Label><RadioGroup value={param.valoresReferencia.tipo_referencia} onValueChange={(v) => setParam(prev => ({ ...prev, valoresReferencia: {...prev.valoresReferencia, tipo_referencia: v as any}}))} className="flex flex-wrap gap-x-4 gap-y-2 pt-2">
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="Intervalo" id="ref-intervalo-edit" /><Label htmlFor="ref-intervalo-edit">Intervalo</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="Mixto" id="ref-mixto-edit" /><Label htmlFor="ref-mixto-edit">Mixto</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="Criterio" id="ref-criterio-edit" /><Label htmlFor="ref-criterio-edit">Criterio</Label></div>
+                    <div className="flex items-center space-x-2"><RadioGroupItem value="Sin_referencia" id="ref-sin-valor-edit" /><Label htmlFor="ref-sin-valor-edit">Sin referencia</Label></div>
+                </RadioGroup></div>
 
-                    {vr.tipo_referencia === 'Intervalo' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-md">
-                            <div className="space-y-2"><Label>Género</Label><RadioGroup value={vr.sexo} onValueChange={(v) => handleVrChange(vrIndex, 'sexo', v)} className="flex pt-2 gap-4"><div className="flex items-center space-x-2"><RadioGroupItem value="Masculino" id={`gender-h-edit-${vrIndex}`}/><Label htmlFor={`gender-h-edit-${vrIndex}`}>Hombre</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Femenino" id={`gender-m-edit-${vrIndex}`}/><Label htmlFor={`gender-m-edit-${vrIndex}`}>Mujer</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Ambos" id={`gender-a-edit-${vrIndex}`}/><Label htmlFor={`gender-a-edit-${vrIndex}`}>Ambos</Label></div></RadioGroup></div>
-                            <div className="space-y-2"><Label>Edad</Label><div className="flex items-center gap-2"><Input placeholder="De" type="number" value={vr.edad_inicio} onChange={(e) => handleVrChange(vrIndex, 'edad_inicio', Number(e.target.value))}/><span>a</span><Input placeholder="A" type="number" value={vr.edad_fin} onChange={(e) => handleVrChange(vrIndex, 'edad_fin', Number(e.target.value))}/><Select value={vr.unidad_edad} onValueChange={(v) => handleVrChange(vrIndex, 'unidad_edad', v)}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="Dias">Días</SelectItem><SelectItem value="Meses">Meses</SelectItem><SelectItem value="Anos">Años</SelectItem></SelectContent></Select></div></div>
-                            <div className="md:col-span-2 space-y-2"><Label>Intervalo de Referencia</Label><div className="flex items-center gap-2"><Input placeholder="Valor Mínimo" value={vr.valor_inicio} onChange={(e) => handleVrChange(vrIndex, 'valor_inicio', e.target.value)}/><span>-</span><Input placeholder="Valor Máximo" value={vr.valor_fin} onChange={(e) => handleVrChange(vrIndex, 'valor_fin', e.target.value)}/></div></div>
-                        </div>
-                    )}
-                     {vr.tipo_referencia === 'Mixto' && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-md">
-                            <div className="space-y-2">
-                                <Label>Valores Posibles</Label>
-                                <div className="flex items-center gap-2">
-                                    <Input placeholder="Añadir valor posible" value={newPossibleValue} onChange={(e) => setNewPossibleValue(e.target.value)} />
-                                    <Button type="button" size="sm" onClick={() => handleAddPossibleValue(vrIndex)}>Agregar</Button>
-                                </div>
-                                <div className="border rounded-md p-2 min-h-[100px] space-y-1">
-                                    {vr.posibles_valores_form.valores_opciones.map((val: string, i: number) => (
-                                        <div key={i} className="flex justify-between items-center p-1 hover:bg-background rounded-md">
-                                            <span>{val}</span>
-                                            <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemovePossibleValue(vrIndex, val)}><Trash2 className="h-4 w-4 text-red-500"/></Button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label>Valor Predeterminado (Opcional)</Label>
-                                     <Select value={vr.posibles_valores_form.valor_predeterminado} onValueChange={(v) => handleVrChange(vrIndex, 'posibles_valores_form', {...vr.posibles_valores_form, valor_predeterminado: v })}>
-                                        <SelectTrigger><SelectValue placeholder="Seleccione un valor predeterminado"/></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="_NULL_">Ninguno</SelectItem>
-                                            {vr.posibles_valores_form.valores_opciones.map((v: string) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                    <div className="space-y-2">
-                                    <Label>Valor de Referencia</Label>
-                                    <Select value={vr.posibles_valores_form.valor_referencia} onValueChange={(v) => handleVrChange(vrIndex, 'posibles_valores_form', {...vr.posibles_valores_form, valor_referencia: v })}>
-                                        <SelectTrigger><SelectValue placeholder="Seleccione el valor de referencia"/></SelectTrigger>
-                                        <SelectContent>
-                                            {vr.posibles_valores_form.valores_opciones.map((v: string) => <SelectItem key={v} value={v}>{v}</SelectItem>)}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    {vr.tipo_referencia === 'Criterio' && (
-                        <div className="p-4 bg-muted/50 rounded-md">
-                            <div className="space-y-2">
-                                <Label htmlFor={`referenceText-edit-${vrIndex}`}>Texto de Referencia (Criterio)</Label>
-                                <Textarea
-                                    id={`referenceText-edit-${vrIndex}`}
-                                    placeholder="Ej: Menor de 1.0 ng/mL"
-                                    value={vr.texto_criterio}
-                                    onChange={(e) => handleVrChange(vrIndex, 'texto_criterio', e.target.value)}
-                                />
-                            </div>
-                        </div>
-                    )}
+            {param.valoresReferencia.tipo_referencia === 'Intervalo' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-md">
+                    <div className="space-y-2"><Label>Género</Label><RadioGroup value={param.valoresReferencia.sexo} onValueChange={(v) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, sexo: v as any}}))} className="flex pt-2 gap-4"><div className="flex items-center space-x-2"><RadioGroupItem value="Masculino" id="gender-h-edit"/><Label htmlFor="gender-h-edit">Hombre</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Femenino" id="gender-m-edit"/><Label htmlFor="gender-m-edit">Mujer</Label></div><div className="flex items-center space-x-2"><RadioGroupItem value="Ambos" id="gender-a-edit"/><Label htmlFor="gender-a-edit">Ambos</Label></div></RadioGroup></div>
+                    <div className="space-y-2"><Label>Edad</Label><div className="flex items-center gap-2"><Input placeholder="De" type="number" value={param.valoresReferencia.edad_inicio} onChange={(e) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, edad_inicio: Number(e.target.value)}}))}/><span>a</span><Input placeholder="A" type="number" value={param.valoresReferencia.edad_fin} onChange={(e) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, edad_fin: Number(e.target.value)}}))}/><Select value={param.valoresReferencia.unidad_edad} onValueChange={(v) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, unidad_edad: v as any}}))}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="Dias">Días</SelectItem><SelectItem value="Meses">Meses</SelectItem><SelectItem value="Anos">Años</SelectItem></SelectContent></Select></div></div>
+                    <div className="md:col-span-2 space-y-2"><Label>Intervalo de Referencia</Label><div className="flex items-center gap-2"><Input placeholder="Valor Mínimo" value={param.valoresReferencia.valor_inicio} onChange={(e) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, valor_inicio: e.target.value}}))}/><span>-</span><Input placeholder="Valor Máximo" value={param.valoresReferencia.valor_fin} onChange={(e) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, valor_fin: e.target.value}}))}/></div></div>
                 </div>
-            ))}
-            <Button type="button" variant="outline" size="sm" onClick={handleAddVr}><Plus className="mr-2 h-4 w-4"/>Añadir Regla de Referencia</Button>
+            )}
+             {param.valoresReferencia.tipo_referencia === 'Mixto' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-muted/50 rounded-md">
+                    <div className="space-y-2">
+                        <Label>Valores Posibles</Label>
+                        <div className="flex items-center gap-2">
+                            <Input placeholder="Añadir valor posible" value={newPossibleValue} onChange={(e) => setNewPossibleValue(e.target.value)} />
+                            <Button type="button" size="sm" onClick={handleAddPossibleValue}>Agregar</Button>
+                        </div>
+                        <div className="border rounded-md p-2 min-h-[100px] space-y-1">
+                            {param.valoresReferencia.posibles_valores_form.valores_opciones.map((val, i) => (
+                                <div key={i} className="flex justify-between items-center p-1 hover:bg-background rounded-md">
+                                    <span>{val}</span>
+                                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemovePossibleValue(val)}><Trash2 className="h-4 w-4 text-red-500"/></Button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="space-y-4">
+                        <div className="space-y-2">
+                            <Label>Valor Predeterminado (Opcional)</Label>
+                            <Select value={param.valoresReferencia.posibles_valores_form.valor_predeterminado} onValueChange={(v) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, posibles_valores_form: {...prev.valoresReferencia.posibles_valores_form, valor_predeterminado: v}}}))}>
+                                <SelectTrigger><SelectValue placeholder="Seleccione un valor predeterminado"/></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="_NULL_">Ninguno</SelectItem>
+                                    {param.valoresReferencia.posibles_valores_form.valores_opciones.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                            <div className="space-y-2">
+                            <Label>Valor de Referencia</Label>
+                            <Select value={param.valoresReferencia.posibles_valores_form.valor_referencia} onValueChange={(v) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, posibles_valores_form: {...prev.valoresReferencia.posibles_valores_form, valor_referencia: v}}}))}>
+                                <SelectTrigger><SelectValue placeholder="Seleccione el valor de referencia"/></SelectTrigger>
+                                <SelectContent>
+                                    {param.valoresReferencia.posibles_valores_form.valores_opciones.map(v => <SelectItem key={v} value={v}>{v}</SelectItem>)}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {param.valoresReferencia.tipo_referencia === 'Criterio' && (
+                <div className="p-4 bg-muted/50 rounded-md">
+                    <div className="space-y-2">
+                        <Label htmlFor="referenceText-edit">Texto de Referencia (Criterio)</Label>
+                        <Textarea
+                            id="referenceText-edit"
+                            placeholder="Ej: Menor de 1.0 ng/mL"
+                            value={param.valoresReferencia.texto_criterio}
+                            onChange={(e) => setParam(prev => ({...prev, valoresReferencia: {...prev.valoresReferencia, texto_criterio: e.target.value}}))}
+                        />
+                    </div>
+                </div>
+            )}
             <DialogFooter>
                 <Button type="button" onClick={handleSave}>Guardar Parámetro</Button>
             </DialogFooter>
@@ -307,7 +281,6 @@ export default function EditEstudioPage() {
         }));
     };
 
-    // --- Integrated Studies Logic ---
     const filteredStudies = allStudies.filter(study =>
         (study.nombre.toLowerCase().includes(studySearchTerm.toLowerCase()) ||
          (study.codigo || '').toLowerCase().includes(studySearchTerm.toLowerCase())) &&
@@ -332,7 +305,6 @@ export default function EditEstudioPage() {
         setSelectedIntegratedEstudio(null);
     };
 
-    // --- Synonyms Logic ---
     const handleSynonymChange = (index: number, value: string) => {
         const newSynonyms = [...(formData.sinonimo || [])];
         newSynonyms[index] = value;
@@ -347,7 +319,6 @@ export default function EditEstudioPage() {
         setFormData(prev => ({ ...prev, sinonimo: (prev.sinonimo || []).filter((_, i) => i !== index) }));
     };
 
-    // --- Samples Logic ---
     const handleAddSample = () => {
         if (!newSample.type) {
             toast({ title: "Error", description: "El tipo de muestra no puede estar vacío.", variant: "destructive" });
@@ -381,27 +352,24 @@ export default function EditEstudioPage() {
     };
     
     const getParameterDisplayReference = (param: ParametroEstudioForm) => {
-        const firstVr = (param.valoresReferencia as any[])?.[0];
-        if (!firstVr) return 'N/A';
+        const vr = param.valoresReferencia;
+        if (!vr) return 'N/A';
     
         let display = '';
-        switch (firstVr.tipo_referencia) {
+        switch (vr.tipo_referencia) {
             case 'Intervalo':
-                display = `(${firstVr.sexo}) ${firstVr.valor_inicio} - ${firstVr.valor_fin}`;
+                display = `(${vr.sexo}) ${vr.valor_inicio} - ${vr.valor_fin}`;
                 break;
             case 'Mixto':
-                display = firstVr.posibles_valores_form?.valor_referencia || 'N/A';
+                display = vr.posibles_valores_form?.valor_referencia || 'N/A';
                 break;
             case 'Criterio':
-                display = firstVr.texto_criterio || 'N/A';
+                display = vr.texto_criterio || 'N/A';
                 break;
             default:
                 display = 'N/A';
         }
         
-        if (Array.isArray(param.valoresReferencia) && param.valoresReferencia.length > 1) {
-            display += ` (+${param.valoresReferencia.length - 1} más)`;
-        }
         return display;
     };
     

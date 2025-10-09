@@ -1,4 +1,5 @@
 
+
 export interface ParametroEstudio {
     id: number;
     estudio_id: number;
@@ -10,9 +11,9 @@ export interface ParametroEstudio {
 }
 
 export interface ValoresReferencia {
-    id: number;
-    parametro_id: number;
-    estudio_id: number;
+    id?: number;
+    parametro_id?: number;
+    estudio_id?: number;
     tipo_referencia: 'Intervalo' | 'Mixto' | 'Criterio' | 'Sin_referencia';
     sexo: 'Ambos' | 'Masculino' | 'Femenino';
     edad_inicio: number;
@@ -21,12 +22,11 @@ export interface ValoresReferencia {
     valor_inicio: string;
     valor_fin: string;
     texto_criterio: string;
-    // Este campo almacenará el JSON como un string
-    posibles_valores: string; 
+    posibles_valores?: string; // JSON string
     texto_reporte_resultados: string;
+    posibles_valores_form: PosiblesValoresForm;
 }
 
-// Interfaz para el estado del formulario en el frontend
 export interface PosiblesValoresForm {
     valores_opciones: string[];
     valor_predeterminado: string;
@@ -46,12 +46,8 @@ export interface MuestraEstudio {
     cost: number;
 }
 
-// Representa el estado del parámetro en el formulario del frontend
 export type ParametroEstudioForm = Omit<ParametroEstudio, 'id' | 'estudio_id'> & {
-    valoresReferencia: Omit<ValoresReferencia, 'id' | 'parametro_id' | 'estudio_id' | 'posibles_valores'> & {
-        // Usamos la interfaz del formulario para manejar los posibles valores
-        posibles_valores_form: PosiblesValoresForm; 
-    };
+    valoresReferencia: Omit<ValoresReferencia, 'id' | 'parametro_id' | 'estudio_id' | 'posibles_valores'>;
 };
 
 
@@ -77,7 +73,6 @@ export interface Estudio {
     descripcionCientifica: string;
     claveServicioSat: string;
     claveUnidadSat: string;
-    // Se utiliza la interfaz de formulario para los parámetros
     parameters: ParametroEstudioForm[];
     configuracion: {
         showInRequest: boolean;
