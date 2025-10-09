@@ -28,7 +28,7 @@ export async function getStudies(): Promise<Estudio[]> {
     }
 }
 
-async function getParametersForStudy(estudioId: number): Promise<ParametroEstudioForm[]> {
+async function getParametersForStudy(Id: number): Promise<ParametroEstudioForm[]> {
     const query = `
         SELECT 
             p.id as parametro_id, p.nombre_parametro, p.unidad_medida, p.costo, p.factor_conversion, p.unidad_internacional,
@@ -38,7 +38,7 @@ async function getParametersForStudy(estudioId: number): Promise<ParametroEstudi
         JOIN valores_referencia vr ON p.id = vr.parametro_id
         WHERE p.estudio_id = ?
     `;
-    const results = await executeQuery(query, [estudioId]) as any[];
+    const results = await executeQuery(query, [Id]) as any[];
 
     // Agrupar valores de referencia por parámetro
     const paramsMap = new Map<number, ParametroEstudioForm>();
