@@ -41,6 +41,7 @@ import {
   ListTree,
   Boxes,
   ShoppingCart,
+  Monitor,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
@@ -72,6 +73,7 @@ const menuGroups = [
     {
         items: [
             { icon: LayoutGrid, label: 'Dashboard', href: '/dashboard' },
+            { icon: Monitor, label: 'POS - Punto de Venta', href: '/pos' },
         ]
     },
     {

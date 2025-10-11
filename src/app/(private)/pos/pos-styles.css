@@ -1,0 +1,150 @@
+/* Touch-optimized POS styles */
+.pos-touch-button {
+  @apply transition-all duration-150 ease-out;
+  @apply hover:scale-105 active:scale-95;
+  @apply touch-manipulation;
+}
+
+.pos-product-card {
+  @apply cursor-pointer transition-all duration-200;
+  @apply hover:shadow-lg hover:shadow-primary/20;
+  @apply active:scale-95;
+  @apply touch-manipulation;
+  @apply select-none;
+}
+
+.pos-cart-item {
+  @apply transition-all duration-200;
+  @apply hover:bg-accent/50;
+}
+
+.pos-quantity-button {
+  @apply transition-all duration-150;
+  @apply hover:scale-110 active:scale-90;
+  @apply touch-manipulation;
+  @apply select-none;
+}
+
+.pos-search-input {
+  @apply text-lg;
+  @apply focus:ring-2 focus:ring-primary/20;
+  @apply transition-all duration-200;
+}
+
+.pos-category-select {
+  @apply text-lg;
+  @apply focus:ring-2 focus:ring-primary/20;
+}
+
+.pos-customer-button {
+  @apply transition-all duration-200;
+  @apply hover:bg-accent active:scale-95;
+  @apply touch-manipulation;
+}
+
+.pos-checkout-button {
+  @apply transition-all duration-200;
+  @apply hover:scale-105 active:scale-95;
+  @apply touch-manipulation;
+  @apply shadow-lg hover:shadow-xl;
+}
+
+.pos-payment-button {
+  @apply transition-all duration-200;
+  @apply hover:scale-105 active:scale-95;
+  @apply touch-manipulation;
+}
+
+/* Tablet optimizations */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .pos-product-grid {
+    @apply grid-cols-3 gap-6;
+  }
+  
+  .pos-product-card {
+    @apply p-6;
+  }
+  
+  .pos-header-title {
+    @apply text-4xl;
+  }
+  
+  .pos-cart-panel {
+    @apply w-80;
+  }
+}
+
+/* Mobile touch optimizations */
+@media (max-width: 767px) {
+  .pos-product-grid {
+    @apply grid-cols-2 gap-4;
+  }
+  
+  .pos-layout {
+    @apply flex-col;
+  }
+  
+  .pos-cart-panel {
+    @apply w-full;
+  }
+  
+  .pos-header {
+    @apply flex-col items-start gap-2;
+  }
+  
+  .pos-header-badges {
+    @apply flex gap-2;
+  }
+}
+
+/* Print styles for receipts */
+@media print {
+  .pos-receipt-only {
+    @apply block;
+  }
+  
+  body * {
+    visibility: hidden;
+  }
+  
+  .pos-receipt,
+  .pos-receipt * {
+    visibility: visible;
+  }
+  
+  .pos-receipt {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
+
+/* Enhanced touch targets */
+.pos-touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  @apply touch-manipulation;
+}
+
+/* Smooth scrolling for touch devices */
+.pos-scroll-area {
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.pos-scroll-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.pos-scroll-area::-webkit-scrollbar-track {
+  @apply bg-muted;
+}
+
+.pos-scroll-area::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/30 rounded-full;
+}
+
+.pos-scroll-area::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/50;
+}
